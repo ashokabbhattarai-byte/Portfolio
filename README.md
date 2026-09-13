@@ -79,9 +79,5 @@ Use a host supporting Next.js server/image routes. The site is not configured fo
 
 Local browser screenshots, reference recordings, and audit results are stored in `output/playwright/` and excluded from version control. They are not part of the public site.
 
-# Portfolio
 
-# Portfolio
 
-# Portfolio
-# Portfolio
