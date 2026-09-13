@@ -1,8 +1,9 @@
 // Content model for the portfolio CMS. Mirrors packages/types, which is what
 // the web app compiles against; keep the two in step when either changes.
 generator client {
-  provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
+  provider        = "prisma-client-js"
+  output          = "../node_modules/.prisma/client"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {

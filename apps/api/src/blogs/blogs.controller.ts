@@ -1,4 +1,4 @@
-import { actorFrom, PublisherRequest } from '../publishing/common';
+import { actorFrom, type PublisherRequest } from '../publishing/common';
 import { PageQuery } from '../publishing/query.dto';
 import {
   Body,
@@ -62,9 +62,7 @@ export class BlogsController {
     const authed = await this.isAuthenticated(request);
     res.setHeader(
       'Cache-Control',
-      authed
-        ? 'private, max-age=0, must-revalidate'
-        : 'no-store',
+      authed ? 'private, max-age=0, must-revalidate' : 'no-store',
     );
     return this.blogs.list(authed);
   }
@@ -76,23 +74,43 @@ export class BlogsController {
   }
 
   @Get('admin/search')
-  @Roles('ADMIN','EDITOR')
-  search(@Query() query: PageQuery) { return this.blogs.search(query); }
+  @Roles('ADMIN', 'EDITOR')
+  search(@Query() query: PageQuery) {
+    return this.blogs.search(query);
+  }
 
   @Public()
-  @Header('Cache-Control','private, no-store')
-  @Header('X-Robots-Tag','noindex, nofollow')
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Robots-Tag', 'noindex, nofollow')
   @Get('preview/:token')
-  previewContent(@Param('token') token:string) {return this.blogs.readPreview(token);}
+  previewContent(@Param('token') token: string) {
+    return this.blogs.readPreview(token);
+  }
 
-  @Post(':id/preview') @Roles('ADMIN','EDITOR')
-  preview(@Param('id') id:string,@Req() req:PublisherRequest) {return this.blogs.preview(id,actorFrom(req));}
-  @Post(':id/duplicate') @Roles('ADMIN','EDITOR')
-  duplicate(@Param('id') id:string,@Req() req:PublisherRequest) {return this.blogs.duplicate(id,actorFrom(req));}
-  @Get(':id/revisions') @Roles('ADMIN','EDITOR')
-  revisions(@Param('id') id:string) {return this.blogs.revisions(id);}
-  @Post(':id/revisions/:revisionId/restore') @Roles('ADMIN','EDITOR')
-  restore(@Param('id') id:string,@Param('revisionId') revisionId:string,@Req() req:PublisherRequest) {return this.blogs.restore(id,revisionId,actorFrom(req));}
+  @Post(':id/preview')
+  @Roles('ADMIN', 'EDITOR')
+  preview(@Param('id') id: string, @Req() req: PublisherRequest) {
+    return this.blogs.preview(id, actorFrom(req));
+  }
+  @Post(':id/duplicate')
+  @Roles('ADMIN', 'EDITOR')
+  duplicate(@Param('id') id: string, @Req() req: PublisherRequest) {
+    return this.blogs.duplicate(id, actorFrom(req));
+  }
+  @Get(':id/revisions')
+  @Roles('ADMIN', 'EDITOR')
+  revisions(@Param('id') id: string) {
+    return this.blogs.revisions(id);
+  }
+  @Post(':id/revisions/:revisionId/restore')
+  @Roles('ADMIN', 'EDITOR')
+  restore(
+    @Param('id') id: string,
+    @Param('revisionId') revisionId: string,
+    @Req() req: PublisherRequest,
+  ) {
+    return this.blogs.restore(id, revisionId, actorFrom(req));
+  }
 
   @Public()
   @Get(':idOrSlug')
@@ -104,9 +122,7 @@ export class BlogsController {
     const authed = await this.isAuthenticated(request);
     res.setHeader(
       'Cache-Control',
-      authed
-        ? 'private, max-age=0, must-revalidate'
-        : 'no-store',
+      authed ? 'private, max-age=0, must-revalidate' : 'no-store',
     );
     try {
       return await this.blogs.getBySlug(idOrSlug, authed);
@@ -118,19 +134,26 @@ export class BlogsController {
   @Post()
   @Roles('ADMIN', 'EDITOR')
   create(@Body() dto: CreateBlogDto, @Req() req: PublisherRequest) {
-    return this.blogs.create(dto,actorFrom(req));
+    return this.blogs.create(dto, actorFrom(req));
   }
 
   @Patch(':id')
   @Roles('ADMIN', 'EDITOR')
-  update(@Param('id') id: string, @Body() dto: UpdateBlogDto, @Req() req: PublisherRequest) {
-    return this.blogs.update(id, dto,actorFrom(req));
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateBlogDto,
+    @Req() req: PublisherRequest,
+  ) {
+    return this.blogs.update(id, dto, actorFrom(req));
   }
 
   @Delete(':id')
   @Roles('ADMIN', 'EDITOR')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string, @Req() req: PublisherRequest): Promise<void> {
-    await this.blogs.remove(id,actorFrom(req));
+  async remove(
+    @Param('id') id: string,
+    @Req() req: PublisherRequest,
+  ): Promise<void> {
+    await this.blogs.remove(id, actorFrom(req));
   }
 }

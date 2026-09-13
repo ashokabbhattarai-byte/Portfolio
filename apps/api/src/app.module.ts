@@ -19,6 +19,8 @@ import { EducationModule } from './education/education.module';
 import { CertificationsModule } from './certifications/certifications.module';
 import { ContentModule } from './content/content.module';
 import { StorageModule } from './storage/storage.module';
+import { MediaModule } from './media/media.module';
+import { PublishingModule } from './publishing/publishing.module';
 
 @Module({
   imports: [
@@ -40,9 +42,11 @@ import { StorageModule } from './storage/storage.module';
     AuthModule,
     ContentModule,
     StorageModule,
+    MediaModule,
     AnalyticsModule,
     ProjectsModule,
     BlogsModule,
+    PublishingModule,
     ProfileModule,
     ExperienceModule,
     SkillsModule,

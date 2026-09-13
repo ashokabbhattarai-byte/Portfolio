@@ -40,13 +40,16 @@ export class BlogImageDto {
 }
 
 export class CreateBlogDto {
+  /* Optional so an agent can send a title alone; BlogsService.create derives
+     the slug from the title when this is absent. */
+  @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(120)
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
     message: 'slug must be lower-case letters, numbers and hyphens',
   })
-  slug!: string;
+  slug?: string;
 
   @IsString()
   @MinLength(2)
@@ -71,11 +74,12 @@ export class CreateBlogDto {
   @MaxLength(500)
   gallery?: string | null;
 
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(20)
-  @MaxLength(60, {each:true})
-  tags!: string[];
+  @MaxLength(60, { each: true })
+  tags?: string[];
 
   @IsOptional()
   @IsBoolean()
@@ -89,8 +93,16 @@ export class CreateBlogDto {
   position?: number;
 
   @IsOptional()
-  @IsIn(['DRAFT', 'REVIEW', 'PUBLISHED', 'SCHEDULED', 'UNPUBLISHED', 'ARCHIVED'])
-  status?: 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'SCHEDULED' | 'UNPUBLISHED' | 'ARCHIVED';
+  @IsIn([
+    'DRAFT',
+    'REVIEW',
+    'PUBLISHED',
+    'SCHEDULED',
+    'UNPUBLISHED',
+    'ARCHIVED',
+  ])
+  status?:
+    'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'SCHEDULED' | 'UNPUBLISHED' | 'ARCHIVED';
 
   @IsOptional()
   @IsDateString()
@@ -123,10 +135,17 @@ export class CreateBlogDto {
 
   @IsOptional() @IsString() @MaxLength(100) featuredImageId?: string | null;
   @IsOptional() @IsString() @MaxLength(100) ogImageId?: string | null;
-  @IsOptional() @IsArray() @ArrayMaxSize(50) @IsString({each:true}) inlineMediaIds?: string[];
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @IsString({ each: true })
+  inlineMediaIds?: string[];
   @IsOptional() @IsString() @MaxLength(200) seoTitle?: string | null;
   @IsOptional() @IsString() @MaxLength(400) seoDescription?: string | null;
-  @IsOptional() @IsUrl({protocols:['http','https'],require_protocol:true}) @MaxLength(500) canonicalUrl?: string | null;
+  @IsOptional()
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true })
+  @MaxLength(500)
+  canonicalUrl?: string | null;
   @IsOptional() @IsString() @MaxLength(200) ogTitle?: string | null;
   @IsOptional() @IsString() @MaxLength(400) ogDescription?: string | null;
   @IsOptional() @IsString() @MaxLength(200) twitterTitle?: string | null;

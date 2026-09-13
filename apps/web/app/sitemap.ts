@@ -45,11 +45,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly' as const,
       priority: project.featured ? 0.85 : 0.75,
     })),
-    ...blogs.map((b) => ({
-      url: `${siteUrl}/blog/${b.slug}`,
-      lastModified: b.updatedAt ? new Date(b.updatedAt) : now,
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    })),
+    /* getBlogs already drops drafts and not-yet-due scheduled posts; noIndex
+       articles are dropped here too, since listing a page we ask Google not
+       to index is a contradictory signal. */
+    ...blogs
+      .filter((b) => !b.noIndex)
+      .map((b) => ({
+        url: `${siteUrl}/blog/${b.slug}`,
+        lastModified: b.updatedAt ? new Date(b.updatedAt) : now,
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      })),
   ];
 }

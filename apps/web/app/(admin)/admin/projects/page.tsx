@@ -1,22 +1,18 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import {
-  getProjects,
-  getSignedInUser,
-  redirectIfSignedOut,
-} from '@/lib/admin-server';
-import { loginUrl } from '@/lib/auth';
+import { getProjects, loadAdminPage } from '@/lib/admin-server';
 import { AdminShell } from '../admin-shell';
 import { ProjectsClient } from './projects-client';
 
 export default async function AdminProjectsPage() {
-  const me = await getSignedInUser();
-  if (!me.ok) redirect(loginUrl('/admin/projects'));
-  const projects = await getProjects();
-  redirectIfSignedOut(projects, '/admin/projects');
+  /* Both round trips at once: the auth check and the data no longer
+     wait on each other. */
+  const { user: me, data: projects } = await loadAdminPage(
+    '/admin/projects',
+    () => getProjects(),
+  );
 
   return (
-    <AdminShell user={me.data} current="/admin/projects">
+    <AdminShell user={me} current="/admin/projects">
       <div className="adm-head">
         <div>
           <span className="adm-eyebrow">CMS · projects</span>

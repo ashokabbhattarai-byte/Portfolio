@@ -11,6 +11,11 @@ const supabaseHost = (() => {
 })();
 
 const nextConfig: NextConfig = {
+  /* Both dev overlays default to the bottom-left corner, so Next's route badge
+     landed on top of the React Query devtools button — the stack read as one
+     widget permanently saying "Rendering…", which looks like a hung page. They
+     get a corner each. Dev only; neither ships to production. */
+  devIndicators: { position: 'bottom-right' },
   images: {
     // Supabase Storage is the CMS media CDN – edge-cached, WebP, 60d immutable
     remotePatterns: [

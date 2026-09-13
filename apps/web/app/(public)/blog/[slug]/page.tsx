@@ -40,16 +40,34 @@ export async function generateMetadata({
   const url = `${siteUrl ?? 'http://localhost:3000'}/blog/${b.slug}`;
   const keywords = getBlogKeywords(b, profile);
   return {
-    title: b.title,
+    title: b.seoTitle || b.title,
     description: getBlogDescription(b),
     keywords,
     authors: profile
       ? [{ name: profile.name, url: profile.github }]
       : undefined,
-    alternates: siteUrl ? { canonical: `/blog/${b.slug}` } : undefined,
+    /* An explicit canonicalUrl means the article was first published
+       elsewhere, so it points there rather than at us. */
+    alternates: b.canonicalUrl
+      ? { canonical: b.canonicalUrl }
+      : siteUrl
+        ? { canonical: `/blog/${b.slug}` }
+        : undefined,
+    /* The per-article switches the editor exposes. Without this the SEO panel
+       would record a preference nothing acts on. */
+    robots: {
+      index: siteUrl ? !b.noIndex : false,
+      follow: !b.noFollow,
+      googleBot: {
+        index: siteUrl ? !b.noIndex : false,
+        follow: !b.noFollow,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
-      title: b.title,
-      description: b.excerpt,
+      title: b.ogTitle || b.seoTitle || b.title,
+      description: b.ogDescription || b.excerpt,
       type: 'article',
       url,
       siteName: profile?.name ?? 'Portfolio',

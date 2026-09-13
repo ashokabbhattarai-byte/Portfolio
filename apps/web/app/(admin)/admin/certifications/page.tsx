@@ -1,20 +1,16 @@
-import { redirect } from 'next/navigation';
-import {
-  getCertifications,
-  getSignedInUser,
-  redirectIfSignedOut,
-} from '@/lib/admin-server';
-import { loginUrl } from '@/lib/auth';
+import { getCertifications, loadAdminPage } from '@/lib/admin-server';
 import { AdminShell } from '../admin-shell';
 import { CertificationsClient } from './certifications-client';
 
 export default async function Page() {
-  const me = await getSignedInUser();
-  if (!me.ok) redirect(loginUrl('/admin/certifications'));
-  const data = await getCertifications();
-  redirectIfSignedOut(data, '/admin/certifications');
+  /* Both round trips at once: the auth check and the data no longer
+     wait on each other. */
+  const { user: me, data: data } = await loadAdminPage(
+    '/admin/certifications',
+    () => getCertifications(),
+  );
   return (
-    <AdminShell user={me.data} current="/admin/certifications">
+    <AdminShell user={me} current="/admin/certifications">
       <div className="adm-head">
         <div>
           <span className="adm-eyebrow">CMS · certifications</span>

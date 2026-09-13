@@ -84,7 +84,8 @@ export type Certification = {
   position: number;
 };
 
-export type BlogStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'SCHEDULED' | 'UNPUBLISHED' | 'ARCHIVED';
+export type BlogStatus =
+  'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'SCHEDULED' | 'UNPUBLISHED' | 'ARCHIVED';
 export type BlogImagePlacement =
   'COVER' | 'HERO' | 'INLINE' | 'GALLERY' | 'THUMBNAIL';
 
@@ -135,13 +136,12 @@ export type Blog = {
   noIndex?: boolean;
   noFollow?: boolean;
   authorId?: string | null;
-  author?: {id:string;name:string} | null;
+  author?: { id: string; name: string } | null;
   createdByAI?: boolean;
   aiProvider?: string | null;
   aiModel?: string | null;
   timezone?: string;
   version?: number;
-
 };
 
 export type Role = 'ADMIN' | 'EDITOR';
@@ -281,10 +281,135 @@ export type BlogLike = {
 };
 export type SetBlogLike = { path: string; visitorId: string; liked: boolean };
 
-export type MediaAsset = { id:string; filename:string; originalFilename:string; mimeType:string; width:number; height:number; size:number; provider:string; objectKey:string; url:string; alt:string; caption:string; source:string; uploadedBy:string; generatedByAI:boolean; aiProvider?:string|null; aiModel?:string|null; prompt?:string|null; purpose?:string|null; createdAt:string; used?:boolean };
-export type PageResult<T> = {items:T[];total:number;page:number;limit:number};
-export const publisherScopes = ['blog:read','blog:create','blog:update','blog:publish','blog:schedule','blog:unpublish','blog:delete','media:read','media:upload','media:generate','media:delete','content:generate'] as const;
-export type PublisherScope = typeof publisherScopes[number];
-export type PublisherKey = {id:string;name:string;prefix:string;scopes:PublisherScope[];expiresAt:string|null;revokedAt:string|null;lastUsedAt:string|null;createdAt:string};
-export type AuditEvent = {id:string;actorType:string;actorId:string;apiKeyId:string|null;action:string;resourceType:string;resourceId:string|null;correlationId:string;success:boolean;createdAt:string;metadata?:Record<string,unknown>|null};
-export type BlogRevision = {id:string;version:number;actorType:string;actorId:string;createdAt:string};
+export type MediaAsset = {
+  id: string;
+  filename: string;
+  originalFilename: string;
+  mimeType: string;
+  width: number;
+  height: number;
+  size: number;
+  provider: string;
+  objectKey: string;
+  url: string;
+  alt: string;
+  caption: string;
+  /** ADMIN_UPLOAD | AI_UPLOAD | URL_IMPORT | AI_GENERATED */
+  source: string;
+  uploadedBy: string;
+  generatedByAI: boolean;
+  aiProvider?: string | null;
+  aiModel?: string | null;
+  /** The generation prompt, or the origin URL for an imported image. */
+  prompt?: string | null;
+  purpose?: string | null;
+  createdAt: string;
+  /** Present on list responses: whether any article references this asset. */
+  used?: boolean;
+  usageCount?: number;
+};
+
+export type PageResult<T> = {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+/** Must stay identical to SCOPES in apps/api/src/publishing/scopes.ts — the
+ *  guard compares against that list, so anything extra here is unenforceable. */
+export const publisherScopes = [
+  'blog:read',
+  'blog:create',
+  'blog:update',
+  'blog:publish',
+  'blog:schedule',
+  'blog:unpublish',
+  'media:read',
+  'media:upload',
+  'media:generate',
+  'media:delete',
+] as const;
+export type PublisherScope = (typeof publisherScopes)[number];
+
+export type PublisherKey = {
+  id: string;
+  name: string;
+  /** The public half of the key, safe to display. */
+  prefix: string;
+  scopes: PublisherScope[];
+  expiresAt: string | null;
+  revokedAt: string | null;
+  lastUsedAt: string | null;
+  createdAt: string;
+  status: 'active' | 'revoked' | 'expired';
+};
+
+/** Returned by create and rotate only. `key` is never retrievable again. */
+export type IssuedPublisherKey = PublisherKey & { key: string };
+
+export type PublisherScopeInfo = {
+  scope: PublisherScope;
+  description: string;
+};
+
+export type AuditEvent = {
+  id: string;
+  actorType: 'ADMIN' | 'AI_API_KEY' | 'SYSTEM';
+  actorId: string;
+  apiKeyId: string | null;
+  action: string;
+  resourceType: string;
+  resourceId: string | null;
+  correlationId: string;
+  success: boolean;
+  createdAt: string;
+  metadata?: Record<string, unknown> | null;
+  /** Resolved by the activity endpoint so the feed can name the key. */
+  apiKey?: { id: string; name: string; prefix: string } | null;
+};
+
+export type BlogRevision = {
+  id: string;
+  version: number;
+  actorType: string;
+  actorId: string;
+  createdAt: string;
+};
+
+/** An image as it is *sent* to the API: the server owns `id` and `blogId`. */
+export type BlogImageInput = Omit<BlogImage, 'id' | 'blogId'>;
+
+/** What a client may write to a blog. Narrower than `Blog`, which also carries
+ *  server-owned fields (id, timestamps, resolved relations) that a write must
+ *  not try to set. */
+export type BlogInput = Partial<
+  Omit<
+    Blog,
+    | 'id'
+    | 'images'
+    | 'featuredImage'
+    | 'ogImage'
+    | 'author'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'publishedAt'
+    | 'viewCount'
+    | 'version'
+  >
+> & { images?: BlogImageInput[] };
+
+/** Row shape returned by the paginated admin blog search. */
+export type BlogSummary = Pick<
+  Blog,
+  'id' | 'title' | 'slug' | 'excerpt' | 'tags' | 'status' | 'coverImage'
+> & {
+  createdAt: string;
+  updatedAt: string;
+  scheduledAt: string | null;
+  publishedAt: string | null;
+  createdByAI: boolean;
+  version: number;
+  featuredImage?: { id: string; url: string; alt: string } | null;
+  author?: { name: string } | null;
+};

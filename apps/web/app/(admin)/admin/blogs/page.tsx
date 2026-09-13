@@ -1,22 +1,17 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import {
-  getBlogs,
-  getSignedInUser,
-  redirectIfSignedOut,
-} from '@/lib/admin-server';
-import { loginUrl } from '@/lib/auth';
+import { getBlogs, loadAdminPage } from '@/lib/admin-server';
 import { AdminShell } from '../admin-shell';
 import { BlogsClient } from './blogs-client';
 
 export default async function AdminBlogsPage() {
-  const me = await getSignedInUser();
-  if (!me.ok) redirect(loginUrl('/admin/blogs'));
-  const blogs = await getBlogs();
-  redirectIfSignedOut(blogs, '/admin/blogs');
+  /* Both round trips at once: the auth check and the data no longer
+     wait on each other. */
+  const { user: me, data: blogs } = await loadAdminPage('/admin/blogs', () =>
+    getBlogs(),
+  );
 
   return (
-    <AdminShell user={me.data} current="/admin/blogs">
+    <AdminShell user={me} current="/admin/blogs">
       <div className="adm-head">
         <div>
           <span className="adm-eyebrow">CMS · blogs</span>

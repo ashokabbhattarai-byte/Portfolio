@@ -1,20 +1,16 @@
-import { redirect } from 'next/navigation';
-import {
-  getExperience,
-  getSignedInUser,
-  redirectIfSignedOut,
-} from '@/lib/admin-server';
-import { loginUrl } from '@/lib/auth';
+import { getExperience, loadAdminPage } from '@/lib/admin-server';
 import { AdminShell } from '../admin-shell';
 import { ExperienceClient } from './experience-client';
 
 export default async function AdminExperiencePage() {
-  const me = await getSignedInUser();
-  if (!me.ok) redirect(loginUrl('/admin/experience'));
-  const data = await getExperience();
-  redirectIfSignedOut(data, '/admin/experience');
+  /* Both round trips at once: the auth check and the data no longer
+     wait on each other. */
+  const { user: me, data: data } = await loadAdminPage(
+    '/admin/experience',
+    () => getExperience(),
+  );
   return (
-    <AdminShell user={me.data} current="/admin/experience">
+    <AdminShell user={me} current="/admin/experience">
       <div className="adm-head">
         <div>
           <span className="adm-eyebrow">CMS · experience</span>

@@ -11,6 +11,8 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={client}>
       {children}
+      {/* Keeps the bottom-left corner to itself; Next's route badge is pinned
+          bottom-right in next.config.ts so the two no longer overlap. */}
       {process.env.NODE_ENV === 'development' ? (
         <ReactQueryDevtools
           initialIsOpen={false}

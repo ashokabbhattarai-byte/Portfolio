@@ -11,7 +11,18 @@ apps/api    NestJS + Prisma. Owns the database and all authentication.
 packages/types
             The wire contract between the two. Hand-written on purpose:
             the web app must not depend on the Prisma client.
+packages/mcp
+            Local stdio MCP server. Exposes the publishing tools to Claude,
+            Codex and friends by calling /api/v1/ai — it holds no business
+            logic of its own. See docs/ai-publishing.md.
 ```
+
+The AI publishing surface (`apps/api/src/publishing/`) reuses `BlogsService`
+and `MediaService` rather than reimplementing them; only the authentication
+differs (a `pf_live_` key plus a scope check, instead of the admin cookie).
+`publisherScopes` in `packages/types` must stay identical to `SCOPES` in
+`apps/api/src/publishing/scopes.ts` — the guard compares against the latter, so
+anything listed only in the former is unenforceable.
 
 Run scripts with `bun run --filter='@portfolio/web' <script>` (note the
 position of `run` — `bun --filter X run Y` does not match anything here).

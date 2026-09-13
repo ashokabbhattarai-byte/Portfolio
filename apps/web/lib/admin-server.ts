@@ -100,3 +100,22 @@ export function redirectIfSignedOut(
 ): void {
   if (!result.ok && result.status === 401) redirect(loginUrl(currentPath));
 }
+
+/**
+ * Loads the signed-in user and the page's data concurrently.
+ *
+ * Awaiting the auth check first and the data second costs two serial round
+ * trips — noticeable when the API and database are a long way off. Issuing
+ * both at once is safe because the API authenticates every request on its own:
+ * a data fetch made without a valid cookie just 401s, and the result is thrown
+ * away when we redirect.
+ */
+export async function loadAdminPage<T>(
+  currentPath: string,
+  fetcher: () => Promise<Fetched<T>>,
+): Promise<{ user: AuthUser; data: Fetched<T> }> {
+  const [me, data] = await Promise.all([getSignedInUser(), fetcher()]);
+  if (!me.ok) redirect(loginUrl(currentPath));
+  redirectIfSignedOut(data, currentPath);
+  return { user: me.data, data };
+}

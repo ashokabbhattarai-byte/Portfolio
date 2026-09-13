@@ -1,20 +1,15 @@
-import { redirect } from 'next/navigation';
-import {
-  getSignedInUser,
-  getSkills,
-  redirectIfSignedOut,
-} from '@/lib/admin-server';
-import { loginUrl } from '@/lib/auth';
+import { getSkills, loadAdminPage } from '@/lib/admin-server';
 import { AdminShell } from '../admin-shell';
 import { SkillsClient } from './skills-client';
 
 export default async function Page() {
-  const me = await getSignedInUser();
-  if (!me.ok) redirect(loginUrl('/admin/skills'));
-  const data = await getSkills();
-  redirectIfSignedOut(data, '/admin/skills');
+  /* Both round trips at once: the auth check and the data no longer
+     wait on each other. */
+  const { user: me, data: data } = await loadAdminPage('/admin/skills', () =>
+    getSkills(),
+  );
   return (
-    <AdminShell user={me.data} current="/admin/skills">
+    <AdminShell user={me} current="/admin/skills">
       <div className="adm-head">
         <div>
           <span className="adm-eyebrow">CMS · skills</span>

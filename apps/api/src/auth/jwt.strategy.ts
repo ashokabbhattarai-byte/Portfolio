@@ -29,9 +29,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   /* Re-reads the user on every request so a disable or a role change takes
      effect without waiting for the access token to expire. */
   async validate(payload: AccessPayload): Promise<AuthUser> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
-    });
+    /* One retry: a dropped pooler connection should not sign the admin out. */
+    const user = await this.prisma.withRetry(
+      () => this.prisma.user.findUnique({ where: { id: payload.sub } }),
+      'auth.validate',
+    );
     if (!user || user.disabledAt)
       throw new UnauthorizedException('Session is no longer valid.');
     return { id: user.id, email: user.email, name: user.name, role: user.role };

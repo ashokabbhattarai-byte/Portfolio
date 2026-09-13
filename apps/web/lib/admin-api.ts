@@ -10,12 +10,22 @@
  * incoming cookie header and cannot refresh (a render may not set cookies).
  */
 import type {
+  AuditEvent,
   Blog,
+  BlogInput,
+  BlogRevision,
+  BlogSummary,
   Certification,
   Education,
   Experience,
+  IssuedPublisherKey,
+  MediaAsset,
+  PageResult,
   Profile,
   Project,
+  PublisherKey,
+  PublisherScope,
+  PublisherScopeInfo,
   Skill,
 } from '@portfolio/types';
 import { LOGIN_PATH, loginUrl } from './auth';
@@ -152,6 +162,50 @@ async function request<T>(
   return payload as T;
 }
 
+/** Multipart sibling of `request`. FormData must not be JSON-encoded and must
+ *  not carry an explicit content-type — the browser sets the boundary. */
+async function upload<T>(
+  path: string,
+  form: FormData,
+  retried = false,
+): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`/api${path}`, {
+      method: 'POST',
+      headers: { accept: 'application/json' },
+      credentials: 'include',
+      cache: 'no-store',
+      body: form,
+    });
+  } catch {
+    throw new ApiError('Could not reach the API. Check that it is running.', 0);
+  }
+  if (response.status === 401 && !retried) {
+    if (await refreshSession()) return upload<T>(path, form, true);
+    bounceToLogin();
+    throw new ApiError('Your session has expired. Sign in again.', 401);
+  }
+  const payload = await readBody(response);
+  if (!response.ok) {
+    throw new ApiError(
+      messageFrom(payload, `Upload failed (${response.status}).`),
+      response.status,
+      fieldsFrom(payload),
+    );
+  }
+  return payload as T;
+}
+
+function query(params: Record<string, string | number | undefined>): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== '') search.set(key, String(value));
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : '';
+}
+
 /** Ordered, positioned records: everything the CMS lists and reorders. */
 export type Ordered = { id: string; position: number };
 
@@ -194,9 +248,128 @@ function resource<T extends Ordered>(base: string): AdminResource<T> {
   };
 }
 
+export type BlogSearchParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  tag?: string;
+  sort?: string;
+};
+
+export type ActivityParams = {
+  page?: number;
+  limit?: number;
+  action?: string;
+  actorType?: string;
+  success?: string;
+};
+
 export const adminApi = {
   projects: resource<Project>('/projects'),
-  blogs: resource<Blog>('/blogs'),
+
+  /* Reads return a full Blog; writes take the narrower BlogInput, because the
+     server owns ids, timestamps and resolved relations. */
+  blogs: {
+    ...resource<Blog>('/blogs'),
+    create: (input: BlogInput) =>
+      request<Blog>('/blogs', { method: 'POST', body: input }),
+    update: (id: string, input: BlogInput) =>
+      request<Blog>(`/blogs/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: input,
+      }),
+  },
+
+  /** Blog operations beyond plain CRUD. */
+  blogOps: {
+    search: (params: BlogSearchParams = {}) =>
+      request<PageResult<BlogSummary>>(`/blogs/admin/search${query(params)}`),
+    preview: (id: string) =>
+      request<{ token: string; expiresAt: string; url: string }>(
+        `/blogs/${encodeURIComponent(id)}/preview`,
+        { method: 'POST' },
+      ),
+    duplicate: (id: string) =>
+      request<Blog>(`/blogs/${encodeURIComponent(id)}/duplicate`, {
+        method: 'POST',
+      }),
+    revisions: (id: string) =>
+      request<BlogRevision[]>(`/blogs/${encodeURIComponent(id)}/revisions`),
+    restore: (id: string, revisionId: string) =>
+      request<Blog>(
+        `/blogs/${encodeURIComponent(id)}/revisions/${encodeURIComponent(
+          revisionId,
+        )}/restore`,
+        { method: 'POST' },
+      ),
+  },
+
+  media: {
+    list: (params: { page?: number; limit?: number; search?: string } = {}) =>
+      request<PageResult<MediaAsset>>(`/media${query(params)}`),
+    get: (id: string) =>
+      request<MediaAsset>(`/media/${encodeURIComponent(id)}`),
+    capabilities: () =>
+      request<{
+        generation: { enabled: boolean; provider?: string; model?: string };
+      }>('/media/capabilities'),
+    upload: (file: File, meta: { alt?: string; caption?: string } = {}) => {
+      const form = new FormData();
+      form.append('file', file);
+      if (meta.alt) form.append('alt', meta.alt);
+      if (meta.caption) form.append('caption', meta.caption);
+      return upload<MediaAsset>('/media/upload', form);
+    },
+    importUrl: (body: {
+      url: string;
+      alt?: string;
+      caption?: string;
+      filename?: string;
+    }) => request<MediaAsset>('/media/import', { method: 'POST', body }),
+    generate: (body: {
+      prompt: string;
+      purpose: string;
+      alt?: string;
+      caption?: string;
+    }) => request<MediaAsset>('/media/generate', { method: 'POST', body }),
+    update: (id: string, body: { alt?: string; caption?: string }) =>
+      request<MediaAsset>(`/media/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body,
+      }),
+    remove: (id: string) =>
+      request<{ deleted: boolean }>(`/media/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      }),
+  },
+
+  publisherKeys: {
+    list: () => request<PublisherKey[]>('/publisher-keys'),
+    scopes: () => request<PublisherScopeInfo[]>('/publisher-keys/scopes'),
+    /** The response is the only time the plaintext key exists. */
+    create: (body: {
+      name: string;
+      scopes: PublisherScope[];
+      expiresAt?: string | null;
+    }) =>
+      request<IssuedPublisherKey>('/publisher-keys', { method: 'POST', body }),
+    rotate: (id: string, body: { expiresAt?: string | null } = {}) =>
+      request<IssuedPublisherKey>(
+        `/publisher-keys/${encodeURIComponent(id)}/rotate`,
+        { method: 'POST', body },
+      ),
+    revoke: (id: string) =>
+      request<PublisherKey>(`/publisher-keys/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      }),
+  },
+
+  activity: {
+    list: (params: ActivityParams = {}) =>
+      request<PageResult<AuditEvent>>(`/publisher-activity${query(params)}`),
+    actions: () => request<string[]>('/publisher-activity/actions'),
+  },
   experience: resource<Experience>('/experience'),
   skills: resource<Skill>('/skills'),
   education: resource<Education>('/education'),

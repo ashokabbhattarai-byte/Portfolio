@@ -9,14 +9,17 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "test": "jest --passWithNoTests",
+    "test": "bun test ./test/blog-lifecycle.checks.ts ./test/publisher-keys.checks.ts ./test/scheduler.checks.ts ./test/analytics.checks.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
+    "key:create": "bun --env-file=.env scripts/create-key.ts",
     "test:blogs": "bun test ./test/blog-lifecycle.checks.ts",
-    "test:analytics": "bun test ./test/analytics.checks.ts"
+    "test:analytics": "bun test ./test/analytics.checks.ts",
+    "test:keys": "bun test ./test/publisher-keys.checks.ts",
+    "test:ai": "bun test --timeout 45000 ./test/ai-publishing.e2e.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

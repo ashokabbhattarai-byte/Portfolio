@@ -1,20 +1,15 @@
-import { redirect } from 'next/navigation';
-import {
-  getEducation,
-  getSignedInUser,
-  redirectIfSignedOut,
-} from '@/lib/admin-server';
-import { loginUrl } from '@/lib/auth';
+import { getEducation, loadAdminPage } from '@/lib/admin-server';
 import { AdminShell } from '../admin-shell';
 import { EducationClient } from './education-client';
 
 export default async function Page() {
-  const me = await getSignedInUser();
-  if (!me.ok) redirect(loginUrl('/admin/education'));
-  const data = await getEducation();
-  redirectIfSignedOut(data, '/admin/education');
+  /* Both round trips at once: the auth check and the data no longer
+     wait on each other. */
+  const { user: me, data: data } = await loadAdminPage('/admin/education', () =>
+    getEducation(),
+  );
   return (
-    <AdminShell user={me.data} current="/admin/education">
+    <AdminShell user={me} current="/admin/education">
       <div className="adm-head">
         <div>
           <span className="adm-eyebrow">CMS · education</span>
