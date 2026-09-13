@@ -1,91 +1,85 @@
 import type { Profile } from '@portfolio/types';
 import { TransitionLink } from '@/components/motion/transition-link';
-import { Magnetic } from '@/components/motion/magnetic';
-import { Reveal } from '@/components/motion/reveal';
-/* The three stages carry the left column. Previously it held a heading and a
-   single micro line, which left most of the section empty at desktop widths —
-   the hairline rows borrow the project list's row language so the page reads
-   as one system from here down. */
+import styles from './intro.module.css';
+
 const stages = [
   {
-    step: '01',
-    title: 'Define',
+    title: 'Understand the problem',
     detail:
-      'Start at the constraint, not the stack. Scope the problem, the people it affects and the edge cases, then agree what “done” actually means.',
+      'Define who the software serves, what it needs to do, and the constraints that shape it. Agree on a clear scope before development begins.',
   },
   {
-    step: '02',
-    title: 'Build',
+    title: 'Build the complete experience',
     detail:
-      'Typed, accessible full-stack delivery in slices that ship — data model, API and interface moving together rather than in sequence.',
+      'Connect responsive interfaces, APIs, and data into a cohesive application. Make accessibility and maintainable code part of everyday development.',
   },
   {
-    step: '03',
-    title: 'Assure',
+    title: 'Test, release, and improve',
     detail:
-      'Quality assurance inside the build, not after it. Manual and automated checks on every release so performance and correctness hold in production.',
+      'Check important user journeys, performance, and edge cases. Use feedback from real use to guide the next improvement.',
   },
 ];
+
 export function Intro({ profile }: { profile: Profile }) {
-  const firstName = profile.name.split(' ')[0];
   return (
-    <section className="intro section-shell" aria-labelledby="approach-title">
-      <Reveal className="intro-main">
-        <p className="section-label">Approach</p>
-        <h2 id="approach-title">
-          Engineered with intent,
-          <br />
-          <span className="intro-accent">shipped with proof.</span>
-        </h2>
-        <p className="intro-lead">
-          I build software that has to survive contact with real users — public
-          products, internal tools and AI features that stay fast because
-          quality is part of the work rather than a phase at the end.
-        </p>
-        <ol className="intro-ladder">
-          {stages.map((stage) => (
-            <li className="intro-step" key={stage.step}>
-              <span className="intro-step-index" aria-hidden="true">
-                {stage.step}
+    <section
+      id="approach"
+      className={`section-shell ${styles.section}`}
+      aria-labelledby="approach-title"
+    >
+      <div className={styles.overview}>
+        <div className={styles.introduction}>
+          <p className={styles.label}>My approach</p>
+          <h2 id="approach-title">
+            Thoughtful software.
+            <br />
+            From idea to everyday use.
+          </h2>
+          <p className={styles.lead}>
+            I build web applications, internal tools, and practical AI features
+            with attention to the details that matter: usability, performance,
+            and reliable delivery.
+          </p>
+          <TransitionLink href="/projects" className={styles.link}>
+            Explore my development projects <span aria-hidden="true">↗</span>
+          </TransitionLink>
+        </div>
+        <aside className={styles.profile} aria-label={`About ${profile.name}`}>
+          <h3>{profile.name}</h3>
+          <p className={styles.role}>{profile.role}</p>
+          <p className={styles.bio}>{profile.description}</p>
+          <dl className={styles.facts}>
+            <div>
+              <dt>Based in</dt>
+              <dd>{profile.location}</dd>
+            </div>
+            {profile.languages ? (
+              <div>
+                <dt>Languages</dt>
+                <dd>{profile.languages}</dd>
+              </div>
+            ) : null}
+          </dl>
+          <TransitionLink href="/about" className={styles.link}>
+            More about {profile.name.split(' ')[0]}{' '}
+            <span aria-hidden="true">↗</span>
+          </TransitionLink>
+        </aside>
+      </div>
+      <div className={styles.process}>
+        <h3 className={styles.processTitle}>How I work</h3>
+        <ol className={styles.stages}>
+          {stages.map((stage, index) => (
+            <li className={styles.stage} key={stage.title}>
+              <span className={styles.number} aria-hidden="true">
+                0{index + 1}
               </span>
-              <h3>{stage.title}</h3>
+              <h4>{stage.title}</h4>
               <p>{stage.detail}</p>
             </li>
           ))}
         </ol>
-      </Reveal>
-      <Reveal className="intro-aside">
-        <p className="intro-bio">{profile.description}</p>
-        <dl className="intro-meta">
-          <div>
-            <dt>Role</dt>
-            <dd>{profile.role}</dd>
-          </div>
-          <div>
-            <dt>Based in</dt>
-            <dd>{profile.location}</dd>
-          </div>
-          {profile.languages ? (
-            <div>
-              <dt>Languages</dt>
-              <dd>{profile.languages}</dd>
-            </div>
-          ) : null}
-          <div>
-            <dt>Availability</dt>
-            <dd>Open to new projects</dd>
-          </div>
-        </dl>
-        <Magnetic>
-          <TransitionLink
-            href="/about"
-            className="round-button"
-            aria-label={`Read more about ${profile.name}, ${profile.role}`}
-          >
-            About {firstName} <span aria-hidden="true">↗</span>
-          </TransitionLink>
-        </Magnetic>
-      </Reveal>
+      </div>
     </section>
   );
 }

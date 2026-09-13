@@ -1,3 +1,4 @@
+import { cache } from 'react';
 /**
  * Server-side reads for the CMS.
  *
@@ -45,17 +46,22 @@ async function cookieHeader(): Promise<string> {
 }
 
 export async function serverGet<T>(path: string): Promise<Fetched<T>> {
+  // Keep Next's request-context access outside network-error handling so its
+  // dynamic-rendering signal is never mistaken for a database/API outage.
+  const cookie = await cookieHeader();
   let response: Response;
   try {
     response = await fetch(`${API_ORIGIN}/api${path}`, {
-      headers: { accept: 'application/json', cookie: await cookieHeader() },
+      headers: { accept: 'application/json', cookie },
       cache: 'no-store',
+      signal: AbortSignal.timeout(12000),
     });
   } catch {
     return {
       ok: false,
       status: 0,
-      message: `Could not reach the API at ${API_ORIGIN}.`,
+      message:
+        'The Admin service is temporarily unavailable. Please retry shortly.',
     };
   }
   if (!response.ok) {
@@ -75,12 +81,23 @@ export async function serverGet<T>(path: string): Promise<Fetched<T>> {
   return { ok: true, data: (await response.json()) as T };
 }
 
-export const getSignedInUser = () => serverGet<AuthUser>('/auth/me');
+export const getSignedInUser = cache(async () => {
+  const result = await serverGet<AuthUser>('/auth/me');
+  if (!result.ok && result.status !== 401) {
+    // Only invalid authentication redirects to login. All other failures are
+    // caught by the Admin error boundary, without clearing session cookies.
+    throw new Error(
+      'The Admin service is temporarily unavailable. Please retry shortly.',
+    );
+  }
+  return result;
+});
 export const getProjects = () =>
-  serverGet<(Project & Timestamped)[]>('/projects');
+  serverGet<(Project & Timestamped)[]>('/projects/admin/list');
 export const getProject = (id: string) =>
   serverGet<Project>(`/projects/${encodeURIComponent(id)}`);
-export const getBlogs = () => serverGet<(Blog & Timestamped)[]>('/blogs');
+export const getBlogs = () =>
+  serverGet<(Blog & Timestamped)[]>('/blogs/admin/list');
 export const getBlog = (id: string) =>
   serverGet<Blog>(`/blogs/${encodeURIComponent(id)}`);
 export const getProfile = () => serverGet<Profile & Timestamped>('/profile');

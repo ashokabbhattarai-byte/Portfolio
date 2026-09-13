@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "test": "bun test ./test/blog-lifecycle.checks.ts ./test/publisher-keys.checks.ts ./test/scheduler.checks.ts ./test/analytics.checks.ts",
+    "test": "bun test ./test/blog-lifecycle.checks.ts ./test/publisher-keys.checks.ts ./test/scheduler.checks.ts ./test/analytics.checks.ts ./test/database-resilience.checks.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
@@ -19,7 +19,9 @@
     "test:blogs": "bun test ./test/blog-lifecycle.checks.ts",
     "test:analytics": "bun test ./test/analytics.checks.ts",
     "test:keys": "bun test ./test/publisher-keys.checks.ts",
-    "test:ai": "bun test --timeout 45000 ./test/ai-publishing.e2e.ts"
+    "test:ai": "bun test --timeout 45000 ./test/ai-publishing.e2e.ts",
+    "test:database": "bun test ./test/database-resilience.checks.ts",
+    "db:check": "bun --env-file=.env scripts/check-database.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

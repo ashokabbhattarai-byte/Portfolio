@@ -102,6 +102,7 @@ export default function RootLayout({
       lang="en"
       className={geist.variable}
       data-motion="intro"
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body>

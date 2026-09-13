@@ -39,18 +39,17 @@ export class BlogsController {
     const token =
       (request.cookies?.[ACCESS_COOKIE] as string | undefined) ?? null;
     if (!token) return false;
+    let payload: { sub: string };
     try {
-      const payload = this.jwt.verify<{ sub: string }>(token, {
+      payload = this.jwt.verify<{ sub: string }>(token, {
         secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
       });
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
-        select: { id: true, disabledAt: true },
-      });
-      return !!user && !user.disabledAt;
     } catch {
       return false;
     }
+    // A database failure is not evidence of an anonymous request.
+    const user = await this.prisma.authUser(payload.sub);
+    return !!user && !user.disabledAt;
   }
 
   @Public()

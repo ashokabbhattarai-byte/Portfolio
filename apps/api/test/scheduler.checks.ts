@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, test, spyOn } from 'bun:test';
 import { BlogScheduler } from '../src/blogs/blog-scheduler.service';
 import { BlogsService } from '../src/blogs/blogs.service';
 
@@ -25,6 +25,8 @@ function database(due: { id: string; status: string }[]) {
 
   const client = {
     blog: {
+      findFirst: async () =>
+        [...rows.values()].find((row) => row.status === 'SCHEDULED') ?? null,
       findUniqueOrThrow: async ({ where }: { where: { id: string } }) => ({
         id: where.id,
         slug: where.id,
@@ -144,7 +146,7 @@ describe('scheduled publication', () => {
     expect(calls).toBe(1);
   });
 
-  test('a failing sweep is swallowed so the next tick still runs', async () => {
+  test('a failing sweep resumes after backoff', async () => {
     let attempts = 0;
     const blogs = {
       publishDue: async () => {
@@ -160,8 +162,53 @@ describe('scheduled publication', () => {
       { record: async () => undefined } as never,
     );
 
-    await scheduler.tick(); // throws internally, must not reject
-    await scheduler.tick();
-    expect(attempts).toBe(2);
+    const clock = spyOn(Date, 'now').mockReturnValue(100000);
+    try {
+      await scheduler.tick();
+      await scheduler.tick();
+      expect(attempts).toBe(1);
+      clock.mockReturnValue(130001);
+      await scheduler.tick();
+      expect(attempts).toBe(2);
+    } finally {
+      clock.mockRestore();
+    }
   });
+});
+
+test('idle scheduler checks do not acquire a transaction', async () => {
+  const blogs = new BlogsService(
+    {
+      blog: { findFirst: async () => null },
+      $transaction: async () => {
+        throw new Error('An idle check must not open a transaction');
+      },
+    } as never,
+    { trigger() {} } as never,
+  );
+  expect(await blogs.publishDue()).toBe(0);
+});
+
+test('failure audit contains safe diagnostics without the exception message', async () => {
+  const { Prisma } = await import('../src/prisma/prisma-client');
+  let metadata: unknown;
+  const scheduler = new BlogScheduler(
+    {
+      publishDue: async () => {
+        throw new Prisma.PrismaClientKnownRequestError(
+          'private SQL and credentials',
+          { code: 'P2028', clientVersion: '6' },
+        );
+      },
+    } as never,
+    { get: () => undefined } as never,
+    {
+      record: async (...args: unknown[]) => {
+        metadata = args[5];
+      },
+    } as never,
+  );
+  await scheduler.tick();
+  expect(metadata).toMatchObject({ code: 'P2028', attempt: 1 });
+  expect(JSON.stringify(metadata)).not.toContain('private');
 });

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { createHash, randomBytes } from 'node:crypto';
 import type { Blog } from '@portfolio/types';
 import { Prisma, BlogStatus } from '../prisma/prisma-client';
@@ -72,8 +72,16 @@ const fields = [
 const digest = (value: string) =>
   createHash('sha256').update(value).digest('hex');
 
+/* Bounded so one sweep cannot monopolise a connection; the next tick, fifteen
+   seconds later, drains the rest. */
+const MAX_PUBLISH_PER_SWEEP = 10;
+/* Generous for five statements at ~200ms each, tight enough that a wedged
+   transaction releases its connection rather than pinning it. */
+const PUBLISH_TXN_TIMEOUT_MS = 10_000;
+
 @Injectable()
 export class BlogsService {
+  private readonly logger = new Logger(BlogsService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly revalidate: RevalidateService,
@@ -626,46 +634,121 @@ export class BlogsService {
       fail('PREVIEW_EXPIRED', 'Preview is invalid or expired.', 404);
     return this.getById(preview.blogId, true);
   }
-  async publishDue(now = new Date()) {
-    const count = await this.prisma.$transaction(
+  /**
+   * Publishes articles whose time has come.
+   *
+   * One short transaction per article, not one long transaction for the batch.
+   * The previous shape claimed up to 50 rows and ran four statements for each
+   * inside a single transaction — ~200 sequential round trips holding one
+   * pooled connection. Measured against this pooler that is 49–90 seconds, so
+   * every concurrent request queued behind it until `pool_timeout` expired and
+   * the whole API started reporting P2024. Per-article transactions finish in
+   * about a second and release the connection between each one.
+   *
+   * Publishing stays exactly-once: each transaction re-claims its row with
+   * FOR UPDATE SKIP LOCKED and re-checks the status inside the lock, so two
+   * replicas sweeping together take disjoint rows and neither repeats work.
+   */
+  async publishDue(now = new Date(), limit = MAX_PUBLISH_PER_SWEEP) {
+    // Most sweeps are idle. Checking first avoids reserving a pooled backend
+    // for a transaction that would find nothing.
+    const candidate = await this.prisma.blog.findFirst({
+      where: {
+        status: 'SCHEDULED',
+        scheduledAt: { lte: now },
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+    if (!candidate) return 0;
+
+    let published = 0;
+    for (let taken = 0; taken < limit; taken += 1) {
+      const result = await this.publishOneDue(now);
+      if (result === 'none') break;
+      if (result === 'published') published += 1;
+    }
+    if (published) this.revalidate.trigger('blogs');
+    return published;
+  }
+
+  /** Claims and publishes a single due article. Returns what it did so the
+   *  caller can keep draining without mistaking a skip for an empty queue. */
+  private async publishOneDue(
+    now: Date,
+  ): Promise<'published' | 'skipped' | 'none'> {
+    return this.prisma.$transaction(
       async (tx) => {
-        const rows = await tx.$queryRaw<{ id: string }[]>(
-          Prisma.sql`SELECT id FROM blogs WHERE status='SCHEDULED' AND "scheduledAt"<=${now} AND "deletedAt" IS NULL ORDER BY "scheduledAt" LIMIT 50 FOR UPDATE SKIP LOCKED`,
+        const [claimed] = await tx.$queryRaw<{ id: string }[]>(
+          Prisma.sql`SELECT id FROM blogs
+                     WHERE status='SCHEDULED' AND "scheduledAt" <= ${now} AND "deletedAt" IS NULL
+                     ORDER BY "scheduledAt" LIMIT 1 FOR UPDATE SKIP LOCKED`,
         );
-        for (const { id } of rows) {
-          const row = await tx.blog.findUniqueOrThrow({
-            where: { id },
-            include: blogInclude,
-          });
+        if (!claimed) return 'none' as const;
+
+        const row = await tx.blog.findUniqueOrThrow({
+          where: { id: claimed.id },
+          include: blogInclude,
+        });
+
+        /* An article that cannot pass the publish checks would otherwise abort
+           this transaction on every sweep, blocking every other scheduled post
+           behind it forever. Return it to a draft and record why, so the queue
+           drains and the author can see what happened in the activity log. */
+        try {
           this.validatePublish(row.title, row.excerpt, row.content);
-          await tx.blogRevision.create({
-            data: {
-              blogId: id,
-              version: row.version,
-              snapshot: JSON.parse(JSON.stringify(blogWire(row))),
-              actorType: 'SYSTEM',
-              actorId: 'scheduler',
-            },
-          });
+        } catch (error) {
           await tx.blog.update({
-            where: { id },
-            data: {
-              status: 'PUBLISHED',
-              published: true,
-              publishedAt: row.publishedAt ?? row.scheduledAt ?? now,
-              scheduledAt: null,
-              version: { increment: 1 },
-            },
+            where: { id: row.id },
+            data: { status: 'DRAFT', published: false, scheduledAt: null },
           });
           await tx.auditEvent.create({
-            data: auditData(systemActor(), 'BLOG_PUBLISHED', 'BLOG', id),
+            data: auditData(
+              systemActor(),
+              'BLOG_PUBLISH_FAILED',
+              'BLOG',
+              row.id,
+              false,
+              {
+                reason:
+                  error instanceof Error
+                    ? error.message
+                    : 'Article incomplete.',
+              },
+            ),
           });
+          this.logger.warn(
+            `Scheduled article ${row.id} is incomplete; returned to draft.`,
+          );
+          return 'skipped' as const;
         }
-        return rows.length;
+
+        await tx.blogRevision.create({
+          data: {
+            blogId: row.id,
+            version: row.version,
+            snapshot: JSON.parse(JSON.stringify(blogWire(row))),
+            actorType: 'SYSTEM',
+            actorId: 'scheduler',
+          },
+        });
+        await tx.blog.update({
+          where: { id: row.id },
+          data: {
+            status: 'PUBLISHED',
+            published: true,
+            /* The time that was promised, not the moment the sweep noticed. */
+            publishedAt: row.publishedAt ?? row.scheduledAt ?? now,
+            scheduledAt: null,
+            version: { increment: 1 },
+          },
+        });
+        await tx.auditEvent.create({
+          data: auditData(systemActor(), 'BLOG_PUBLISHED', 'BLOG', row.id),
+        });
+        return 'published' as const;
       },
-      { timeout: 20000 },
+      { timeout: PUBLISH_TXN_TIMEOUT_MS },
     );
-    if (count) this.revalidate.trigger('blogs');
-    return count;
   }
 }

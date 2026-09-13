@@ -1,4 +1,8 @@
 import {
+  databaseErrorCode,
+  isDatabaseUnavailable,
+} from '../prisma/database-errors';
+import {
   Injectable,
   Logger,
   OnModuleDestroy,
@@ -12,6 +16,8 @@ import { systemActor } from '../publishing/common';
 export class BlogScheduler implements OnModuleInit, OnModuleDestroy {
   private timer?: ReturnType<typeof setInterval>;
   private running = false;
+  private nextAttemptAt = 0;
+  private failures = 0;
   private readonly logger = new Logger(BlogScheduler.name);
   constructor(
     private readonly blogs: BlogsService,
@@ -32,17 +38,33 @@ export class BlogScheduler implements OnModuleInit, OnModuleDestroy {
     void this.tick();
   }
   async tick() {
-    if (this.running) return;
+    if (this.running || Date.now() < this.nextAttemptAt) return;
     this.running = true;
+    const startedAt = Date.now();
     try {
       const count = await this.blogs.publishDue();
+      if (this.failures)
+        this.logger.log('Scheduled publishing checks recovered.');
+      this.failures = 0;
+      this.nextAttemptAt = 0;
       if (count) this.logger.log(`Published ${count} scheduled article(s).`);
-    } catch {
+    } catch (error) {
+      this.failures = Math.min(this.failures + 1, 5);
+      this.nextAttemptAt =
+        Date.now() + Math.min(300000, 15000 * 2 ** this.failures);
+      const actor = systemActor();
+      const metadata = {
+        code: databaseErrorCode(error) ?? 'SCHEDULER_CHECK_FAILED',
+        elapsedMs: Date.now() - startedAt,
+        attempt: this.failures,
+        retryAt: new Date(this.nextAttemptAt).toISOString(),
+      };
       this.logger.error(
-        'Scheduled publishing failed; the next tick will retry.',
+        `Scheduled publishing check failed code=${metadata.code} elapsedMs=${metadata.elapsedMs} retryAt=${metadata.retryAt} correlation=${actor.correlationId}. Due articles remain queued.`,
       );
+      if (isDatabaseUnavailable(error)) return;
       await this.audit
-        .record(systemActor(), 'SCHEDULER_FAILED', 'BLOG', undefined, false)
+        .record(actor, 'SCHEDULER_FAILED', 'BLOG', undefined, false, metadata)
         .catch(() => this.logger.error('Scheduler failure audit unavailable.'));
     } finally {
       this.running = false;

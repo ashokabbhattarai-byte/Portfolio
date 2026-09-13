@@ -97,9 +97,23 @@ function refreshSession(): Promise<boolean> {
     method: 'POST',
     credentials: 'include',
     headers: { accept: 'application/json' },
+    signal: AbortSignal.timeout(12000),
   })
-    .then((response) => response.ok)
-    .catch(() => false)
+    .then((response) => {
+      if (response.ok) return true;
+      if (response.status === 401 || response.status === 403) return false;
+      throw new ApiError(
+        'Your session could not be checked right now. Your changes are still here; please retry.',
+        response.status,
+      );
+    })
+    .catch((error: unknown) => {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(
+        'The Admin service is temporarily unavailable. Please retry.',
+        0,
+      );
+    })
     .finally(() => {
       inFlightRefresh = null;
     });

@@ -38,19 +38,18 @@ export class AnalyticsController {
       return { ok: true, skipped: 'privacy' };
     const token = req.cookies?.access_token;
     if (typeof token === 'string') {
+      let payload: { sub: string } | undefined;
       try {
-        const payload = await new JwtService().verifyAsync<{ sub: string }>(
-          token,
-          { secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET') },
-        );
-        const user = await this.prisma.user.findUnique({
-          where: { id: payload.sub },
-          select: { disabledAt: true, role: true },
+        payload = await new JwtService().verifyAsync<{ sub: string }>(token, {
+          secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
         });
+      } catch {
+        /* Invalid or expired cookies are anonymous. */
+      }
+      if (payload) {
+        const user = await this.prisma.authUser(payload.sub);
         if (user && !user.disabledAt && ['ADMIN', 'EDITOR'].includes(user.role))
           return { ok: true, skipped: 'admin' };
-      } catch {
-        /* An expired cookie is not an authenticated editor. */
       }
     }
     return this.analytics.track({ ...dto, userAgent: req.get('user-agent') });

@@ -1,5 +1,6 @@
 import {
   Body,
+  UnauthorizedException,
   Controller,
   Get,
   HttpCode,
@@ -66,9 +67,9 @@ export class AuthController {
       this.issue(response, result);
       return result.user;
     } catch (error) {
-      /* A rejected refresh always ends with the browser holding nothing, so a
-         replayed or expired token cannot be retried. */
-      clearAuthCookies(response, this.config);
+      // Invalid credentials end a session; a database/network outage does not.
+      if (error instanceof UnauthorizedException)
+        clearAuthCookies(response, this.config);
       throw error;
     }
   }

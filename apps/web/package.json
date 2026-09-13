@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "bun test ./components/admin/markdown-toolbar.checks.ts ./components/admin/schedule-picker.checks.ts"
+    "test": "bun test ./components/admin/markdown-toolbar.checks.ts ./components/admin/schedule-picker.checks.ts ./lib/admin-session.checks.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
