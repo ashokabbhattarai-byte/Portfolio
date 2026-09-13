@@ -1,0 +1,12 @@
+.next
+.turbo
+dist
+node_modules
+Data
+output
+.playwright-cli
+bun.lock
+apps/web/public/assets
+apps/web/public/fonts
+apps/api/node_modules
+Premium Next.js Portfolio — Phase-Wise Master Build Prompt.md

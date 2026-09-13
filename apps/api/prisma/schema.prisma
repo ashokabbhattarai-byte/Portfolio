@@ -1,0 +1,405 @@
+// Content model for the portfolio CMS. Mirrors packages/types, which is what
+// the web app compiles against; keep the two in step when either changes.
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+enum Category {
+  AI
+  FULL_STACK
+  BLOCKCHAIN
+}
+
+enum BlogStatus {
+  UNPUBLISHED
+  REVIEW
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+enum BlogImagePlacement {
+  COVER
+  HERO
+  INLINE
+  GALLERY
+  THUMBNAIL
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  role         Role      @default(EDITOR)
+  // Set when an admin disables an account without deleting its audit trail.
+  disabledAt   DateTime?
+  lastLoginAt  DateTime?
+  // Counted per failed password attempt and cleared on success, so the login
+  // route can lock an account out without a shared rate-limit store.
+  failedLogins Int       @default(0)
+  lockedUntil  DateTime?
+  sessions     Session[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  blogs Blog[]
+  @@map("users")
+}
+
+// One row per issued refresh token. Storing a hash (never the token) lets us
+// rotate on every use and detect replay of an already-rotated token.
+model Session {
+  id            String    @id @default(cuid())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  refreshHash   String    @unique
+  userAgent     String?
+  ip            String?
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  // Set when this token is rotated; a hit on a rotated token means replay.
+  replacedById  String?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Project {
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  title        String
+  category     Category
+  role         String
+  context      String
+  summary      String
+  // Presentation tokens carried through to ProjectArt.
+  color        String
+  ink          String
+  symbol       String
+  live         String?
+  image        String?
+  gallery      String?
+  overview     String
+  challenge    String
+  contribution String
+  outcome      String
+  focus        String[]
+  features     String[]
+  // Drafts stay out of every public query; order drives the listing.
+  published    Boolean   @default(true)
+  featured     Boolean   @default(false)
+  position     Int       @default(0)
+  viewCount    Int       @default(0)
+  pageViews    PageView[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([published, position])
+  @@map("projects")
+}
+
+// Exactly one row, pinned to id = "profile", so reads never have to guess.
+model Profile {
+  id          String   @id @default("profile")
+  name        String
+  role        String
+  location    String
+  email       String
+  github      String
+  linkedin    String?
+  resume      String
+  description String
+  // Free text rather than a relation: it is one line on one page.
+  languages   String   @default("")
+  updatedAt   DateTime @updatedAt
+
+  @@map("profile")
+}
+
+// "Further learning" on the about page: short, dated, externally issued.
+model Certification {
+  id        String   @id @default(cuid())
+  title     String
+  issuer    String
+  date      String
+  url       String?
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([position])
+  @@map("certifications")
+}
+
+model Experience {
+  id        String   @id @default(cuid())
+  role      String
+  company   String
+  dates     String
+  detail    String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([position])
+  @@map("experience")
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String
+  items     String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([position])
+  @@map("skills")
+}
+
+model Education {
+  id        String   @id @default(cuid())
+  school    String
+  award     String
+  dates     String
+  notes     String[]
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([position])
+  @@map("education")
+}
+
+model Blog {
+  id             String     @id @default(cuid())
+  slug           String     @unique
+  title          String
+  excerpt        String
+  content        String
+  coverImage     String?    // legacy – prefer images with placement COVER
+  gallery        String?    // legacy – prefer images with placement GALLERY
+  tags           String[]
+  published      Boolean    @default(true)
+  featured       Boolean    @default(false)
+  position       Int        @default(0)
+  status         BlogStatus @default(DRAFT)
+  scheduledAt    DateTime?
+  publishedAt    DateTime?
+  linkedinUrl    String?
+  linkedinPostId String?
+  linkedinStatus String?    @default("idle")
+  viewCount      Int        @default(0)
+  images         BlogImage[]
+  pageViews      PageView[]
+  likes          BlogLike[]
+  featuredImageId String?
+  featuredImage MediaAsset? @relation("FeaturedMedia", fields: [featuredImageId], references: [id], onDelete: Restrict)
+  ogImageId String?
+  ogImage MediaAsset? @relation("OgMedia", fields: [ogImageId], references: [id], onDelete: Restrict)
+  inlineMedia MediaAsset[] @relation("InlineMedia")
+  tagRecords Tag[]
+  seoTitle String?
+  seoDescription String?
+  canonicalUrl String?
+  ogTitle String?
+  ogDescription String?
+  twitterTitle String?
+  twitterDescription String?
+  noIndex Boolean @default(false)
+  noFollow Boolean @default(false)
+  authorId String?
+  author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  createdByAI Boolean @default(false)
+  aiProvider String?
+  aiModel String?
+  timezone String @default("Asia/Kathmandu")
+  version Int @default(1)
+  deletedAt DateTime?
+  revisions BlogRevision[]
+  previews BlogPreview[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([deletedAt, status, publishedAt])
+  @@index([createdAt])
+  @@index([featuredImageId])
+  @@index([ogImageId])
+  @@index([authorId])
+  @@index([published, position])
+  @@index([status, scheduledAt])
+  @@map("blogs")
+}
+
+model BlogImage {
+  id        String             @id @default(cuid())
+  blogId    String
+  blog      Blog               @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  caption   String?
+  placement BlogImagePlacement @default(INLINE)
+  position  Int                @default(0)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([blogId, placement, position])
+  @@index([blogId, position])
+  @@map("blog_images")
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  blogId    String?
+  blog      Blog?    @relation(fields: [blogId], references: [id], onDelete: SetNull)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  referer   String?
+  userAgent String?
+  /// Legacy IP hashes; new events store a v2-prefixed anonymous browser hash, never a raw IP.
+  ipHash    String?
+  country   String?
+  createdAt DateTime @default(now())
+
+  @@index([ipHash, createdAt])
+  @@index([createdAt])
+  @@index([path, createdAt])
+  @@index([blogId, createdAt])
+  @@index([projectId, createdAt])
+  @@map("page_views")
+}
+
+model BlogLike {
+  blogId String
+  visitorHash String
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([blogId, visitorHash])
+  @@index([createdAt])
+  @@map("blog_likes")
+}
+
+model MediaAsset {
+  id String @id @default(cuid())
+  filename String
+  originalFilename String
+  mimeType String
+  width Int
+  height Int
+  size Int
+  provider String
+  objectKey String @unique
+  url String @unique
+  alt String @default("")
+  caption String @default("")
+  source String
+  uploadedBy String
+  generatedByAI Boolean @default(false)
+  aiProvider String?
+  aiModel String?
+  prompt String?
+  purpose String?
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  featuredBlogs Blog[] @relation("FeaturedMedia")
+  ogBlogs Blog[] @relation("OgMedia")
+  inlineBlogs Blog[] @relation("InlineMedia")
+  @@index([deletedAt, createdAt])
+  @@map("media_assets")
+}
+model Tag {
+  id String @id @default(cuid())
+  name String @unique
+  slug String @unique
+  description String?
+  blogs Blog[]
+  @@map("tags")
+}
+model BlogRevision {
+  id String @id @default(cuid())
+  blogId String
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  version Int
+  snapshot Json
+  actorType String
+  actorId String
+  createdAt DateTime @default(now())
+  @@unique([blogId, version])
+  @@map("blog_revisions")
+}
+model BlogPreview {
+  id String @id @default(cuid())
+  blogId String
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  tokenHash String @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([blogId])
+  @@map("blog_previews")
+}
+model PublisherKey {
+  id String @id @default(cuid())
+  name String
+  prefix String
+  secretHash String @unique
+  scopes String[]
+  expiresAt DateTime?
+  revokedAt DateTime?
+  lastUsedAt DateTime?
+  createdAt DateTime @default(now())
+  createdBy String
+  @@index([revokedAt, expiresAt])
+  @@map("publisher_keys")
+}
+model PublisherRate {
+  id String @id
+  count Int @default(1)
+  expiresAt DateTime
+  @@index([expiresAt])
+  @@map("publisher_rates")
+}
+model PublishingRequest {
+  id String @id @default(cuid())
+  actorId String
+  key String
+  fingerprint String
+  blogId String
+  createdAt DateTime @default(now())
+  @@unique([actorId, key])
+  @@map("publishing_requests")
+}
+model AuditEvent {
+  id String @id @default(cuid())
+  actorType String
+  actorId String
+  apiKeyId String?
+  action String
+  resourceType String
+  resourceId String?
+  correlationId String
+  success Boolean
+  metadata Json?
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+  @@index([actorType, action, createdAt])
+  @@index([apiKeyId, createdAt])
+  @@map("audit_events")
+}
