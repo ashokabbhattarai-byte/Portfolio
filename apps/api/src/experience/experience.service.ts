@@ -1,3 +1,4 @@
+import { AdminPageQuery, pageOrder } from '../common/admin-page.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Experience } from '@portfolio/types';
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,6 +23,34 @@ export class ExperienceService {
     private readonly prisma: PrismaService,
     private readonly revalidate: RevalidateService,
   ) {}
+
+  async search(q: AdminPageQuery) {
+    const where = q.search
+      ? {
+          OR: [
+            { role: { contains: q.search, mode: 'insensitive' as const } },
+            { company: { contains: q.search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+    const [rows, total] = await Promise.all([
+      this.prisma.experience.findMany({
+        where,
+        orderBy: pageOrder(q),
+        skip: (q.page - 1) * q.limit,
+        take: q.limit,
+      }),
+      this.prisma.experience.count({ where }),
+    ]);
+    return {
+      items: rows.map((row) =>
+        toWire(row as unknown as Record<string, unknown>),
+      ),
+      total,
+      page: q.page,
+      limit: q.limit,
+    };
+  }
 
   async list(): Promise<Experience[]> {
     const rows = await this.prisma.experience.findMany({

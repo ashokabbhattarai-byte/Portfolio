@@ -1,4 +1,6 @@
 'use client';
+import type { PageResult } from '@portfolio/types';
+import { ListControls, usePagedList } from '@/components/admin/paged-list';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Skill } from '@portfolio/types';
@@ -7,31 +9,47 @@ import { TextAreaField, TextField } from '@/components/admin/fields';
 import { useAdminForm } from '@/components/admin/use-admin-form';
 type Row = Skill & { updatedAt?: string };
 const empty: Omit<Skill, 'id'> = { name: '', items: '', position: 0 };
-export function SkillsClient({ initial }: { initial: Row[] }) {
+export function SkillsClient({ initial }: { initial: PageResult<Row> }) {
   const router = useRouter();
-  const [rows, setRows] = useState(initial);
+  const list = usePagedList('skills', initial, adminApi.skills.search);
+  const rows = list.rows;
+  const [actionError, setActionError] = useState('');
   const [editing, setEditing] = useState<Row | null>(null);
   const [creating, setCreating] = useState(false);
   async function reload() {
-    const f = await adminApi.skills.list();
-    setRows(f as Row[]);
+    await list.refetch();
     router.refresh();
   }
   async function remove(id: string) {
-    if (!confirm('Delete?')) return;
-    await adminApi.skills.remove(id);
-    await reload();
+    if (!confirm('Delete this entry? This cannot be undone.')) return;
+    try {
+      await adminApi.skills.remove(id);
+      await reload();
+      setActionError('');
+    } catch (error) {
+      setActionError(
+        error instanceof Error ? error.message : 'Delete failed. Please retry.',
+      );
+    }
   }
   async function move(id: string, dir: -1 | 1) {
-    const idx = rows.findIndex((r) => r.id === id);
-    const t = idx + dir;
-    if (t < 0 || t >= rows.length) return;
+    if (!list.canReorder) return;
+    const index = rows.findIndex((row) => row.id === id);
+    const target = index + dir;
+    if (target < 0 || target >= rows.length) return;
     const next = [...rows];
-    const [m] = next.splice(idx, 1);
-    next.splice(t, 0, m);
-    setRows(next);
-    await adminApi.skills.reorder(next.map((r) => r.id));
-    await reload();
+    [next[index], next[target]] = [next[target], next[index]];
+    try {
+      await adminApi.skills.reorder(next.map((row) => row.id));
+      await reload();
+      setActionError('');
+    } catch (error) {
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : 'Reordering failed. Please retry.',
+      );
+    }
   }
   const form = useAdminForm<Omit<Skill, 'id'>>({
     initial: editing
@@ -55,6 +73,18 @@ export function SkillsClient({ initial }: { initial: Row[] }) {
   const key = editing ? editing.id : creating ? 'new' : 'none';
   return (
     <>
+      <ListControls list={list} label="skills" />
+      {actionError && (
+        <p role="alert" className="adm-alert">
+          {actionError}
+        </p>
+      )}
+      {!list.canReorder && (
+        <p className="adm-hint">
+          To reorder, clear search and select Display order with all entries on
+          one page. You can also edit an entry’s position.
+        </p>
+      )}
       <div className="adm-rows">
         {rows.length === 0 ? <div className="adm-row">No skills.</div> : null}
         {rows.map((r, i) => (
@@ -63,14 +93,14 @@ export function SkillsClient({ initial }: { initial: Row[] }) {
               <button
                 className="adm-move"
                 onClick={() => move(r.id, -1)}
-                disabled={i === 0}
+                disabled={!list.canReorder || i === 0}
               >
                 ↑
               </button>
               <button
                 className="adm-move"
                 onClick={() => move(r.id, 1)}
-                disabled={i === rows.length - 1}
+                disabled={!list.canReorder || i === rows.length - 1}
               >
                 ↓
               </button>

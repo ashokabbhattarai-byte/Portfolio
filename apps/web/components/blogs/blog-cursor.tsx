@@ -5,12 +5,17 @@ import type { Blog } from '@portfolio/types';
 import { travels, watchFlow } from '@/components/motion/flow';
 import Image from 'next/image';
 
-export function BlogCursor({ blogs }: { blogs: Blog[] }) {
+export function BlogCursor({
+  blogs,
+}: {
+  blogs: Pick<Blog, 'slug' | 'title' | 'tags' | 'coverImage' | 'images'>[];
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const media = gsap.matchMedia();
     const arm = () => {
       media.revert();
+      if (!travels()) return;
       media.add('(hover: hover) and (pointer: fine)', () => {
         const node = ref.current;
         if (!node) return;

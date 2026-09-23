@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { SectionCurve } from '@/components/motion/section-curve';
+import { CircuitBackdrop } from '@/components/motion/circuit-backdrop';
 import { TransitionLink } from '@/components/motion/transition-link';
 import { getProfile } from '@/lib/content';
 import { Magnetic } from '@/components/motion/magnetic';
@@ -8,6 +9,9 @@ export async function ContactFooter() {
   return (
     <footer className="contact-footer">
       <SectionCurve />
+      {/* Calmer than the hero: this sits under the closing copy, not over a
+          first impression. */}
+      <CircuitBackdrop density={0.55} seed={81724} />
       <div className="section-shell">
         <div className="contact-heading">
           <h2>
@@ -52,9 +56,10 @@ export async function ContactFooter() {
           <a
             className="pill"
             href={profile.resume}
-            download="Ashok-Bhattarai-Resume.pdf"
+            target="_blank"
+            rel="noreferrer"
           >
-            Download résumé <span aria-hidden="true">↓</span>
+            View résumé <span aria-hidden="true">↗</span>
           </a>
         </div>
         {/* A crawlable link to every top-level route from the bottom of every

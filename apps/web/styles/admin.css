@@ -2003,3 +2003,67 @@ a.adm-stat:hover {
 .blog-row-when {
   color: var(--accent);
 }
+
+/* Shared collection controls keep growing lists bounded and navigable. */
+.adm-list-controls {
+  margin-block: 20px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.adm-list-filters {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.adm-list-filters > label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  flex: 1 1 140px;
+}
+.adm-list-filters > label:first-child {
+  flex: 2 1 240px;
+}
+.adm-list-filters input,
+.adm-list-filters select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.adm-list-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+.adm-list-pagination p {
+  font-size: 14px;
+  color: var(--muted);
+}
+.adm-list-pagination nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.adm-list-pagination button {
+  min-height: 38px;
+}
+@media (max-width: 600px) {
+  .adm-list-controls {
+    padding: 14px;
+  }
+  .adm-list-pagination nav {
+    width: 100%;
+  }
+}

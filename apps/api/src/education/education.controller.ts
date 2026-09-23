@@ -1,3 +1,5 @@
+import { Query } from '@nestjs/common';
+import { AdminPageQuery } from '../common/admin-page.dto';
 import {
   Body,
   Controller,
@@ -19,6 +21,12 @@ import { EducationService } from './education.service';
 @Controller('education')
 export class EducationController {
   constructor(private readonly education: EducationService) {}
+
+  @Get('admin/search')
+  @Roles('ADMIN', 'EDITOR')
+  search(@Query() query: AdminPageQuery) {
+    return this.education.search(query);
+  }
 
   @Public()
   @Get()

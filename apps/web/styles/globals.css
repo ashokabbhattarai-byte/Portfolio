@@ -10,8 +10,29 @@
   --stamp: #ff3b30;
   --white: #fff;
   --hero: #2f3530;
+  /* The dark surfaces — hero and contact footer — that carry the circuit
+     backdrop. Deep enough that the glowing traces read as light. */
+  --deep: #03102a;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --gutter: clamp(24px, 6vw, 112px);
+  /* Type scale. Page-level headings use --text-display (the global h1/h2);
+     headings *inside* a page step down to --text-h2 so a section never
+     competes with the title above it. Everything else picks one of four
+     body steps — nothing on the site should invent its own px value. */
+  --text-display: clamp(38px, 4.2vw, 80px);
+  --text-h2: clamp(32px, 3vw, 56px);
+  --text-h3: clamp(20px, 1.6vw, 26px);
+  --text-lead: clamp(18px, 1.3vw, 21px);
+  --text-body: 17px;
+  --text-sm: 15px;
+  --text-label: 13px;
+  /* 8px spacing scale, for the same reason. */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 48px;
+  --radius: 16px;
   --z-header: 20;
   --z-cursor: 30;
   --z-transition: 40;
@@ -21,8 +42,14 @@
   box-sizing: border-box;
 }
 html {
-  scroll-behavior: smooth;
+  /* Native smooth scrolling fights Lenis, which is doing the interpolation
+     itself — the two run different curves against the same scrollTop and the
+     result stutters on anchor jumps. Restored only when Lenis is off. */
+  scroll-behavior: auto;
   scroll-padding-top: 40px;
+}
+html:not(.lenis) {
+  scroll-behavior: smooth;
 }
 body {
   margin: 0;
@@ -75,7 +102,7 @@ h1 {
   font-size: clamp(58px, 7.8vw, 150px);
 }
 h2 {
-  font-size: clamp(38px, 4.2vw, 80px);
+  font-size: var(--text-display);
 }
 p {
   max-width: 70ch;
@@ -137,12 +164,13 @@ sup {
 }
 .utility,
 .section-label {
-  font-size: 13px;
-  letter-spacing: 0.015em;
+  font-size: var(--text-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 .section-label {
-  margin-bottom: 35px;
+  margin-bottom: var(--space-4);
 }
 .magnetic {
   display: inline-flex;
@@ -348,7 +376,7 @@ sup {
   z-index: var(--z-transition);
   pointer-events: auto;
   touch-action: none;
-  visibility: visible;
+  visibility: hidden;
   display: grid;
   place-items: center;
   color: var(--paper);
@@ -826,9 +854,12 @@ sup {
 }
 /* Contact rhythm */
 .contact-footer {
-  background: var(--ink);
+  background: var(--deep);
   color: var(--paper);
   position: relative;
+  /* No overflow clip here — .section-curve deliberately sits above the box.
+     The backdrop clips its own canvases instead. */
+  isolation: isolate;
   padding-top: 80px;
 }
 .section-curve {
@@ -837,7 +868,7 @@ sup {
   left: 0;
   width: 100%;
   height: 70px;
-  fill: var(--ink);
+  fill: var(--deep);
 }
 .contact-heading {
   display: flex;
@@ -2665,14 +2696,16 @@ body {
   }
 }
 .stat {
-  padding: 28px 24px;
+  padding: var(--space-4) var(--space-3);
   display: grid;
-  gap: 6px;
+  gap: var(--space-1);
   border-right: 1px solid var(--line);
 }
 .stat:last-child {
   border-right: 0;
 }
+/* Every figure is ink and every unit is a muted label: the numbers are
+   comparable at a glance instead of one of them shouting in red. */
 .stat-value {
   font-size: clamp(28px, 2.8vw, 42px);
   font-weight: 600;
@@ -2680,23 +2713,24 @@ body {
   line-height: 1;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: var(--space-1);
 }
 .stat-value em {
   font-style: normal;
-  font-size: 14px;
+  font-size: var(--text-label);
   font-weight: 400;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--muted);
 }
 .stat-label {
-  font-size: 13px;
+  font-size: var(--text-label);
   color: var(--muted);
   line-height: 1.5;
 }
-.stat.live .stat-value {
-  color: var(--accent-2);
+/* The single accent in the ribbon, and it marks a state rather than a value. */
+.stat.live .stat-value em {
+  color: var(--accent);
 }
 @media (max-width: 800px) {
   .stats-ribbon {

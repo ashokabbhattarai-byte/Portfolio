@@ -1,5 +1,6 @@
+import { blogInclude, blogWire, publicBlogWhere } from '../blogs/blogs.service';
 import { Injectable } from '@nestjs/common';
-import type { BlogImagePlacement, SiteContent } from '@portfolio/types';
+import type { SiteContent } from '@portfolio/types';
 import { PrismaService } from '../prisma/prisma.service';
 
 function toWireCategory(
@@ -14,9 +15,9 @@ function toWireCategory(
 export class ContentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // In-memory 5s coalesce – 10 concurrent SSR hits become 1 Prisma query.
-  private cache: { at: number; data: SiteContent } | null = null;
-  private readonly TTL_MS = 5_000;
+  // Share only in-flight reads. A completed result must not survive a CMS
+  // mutation and re-populate Next's freshly invalidated cache with stale data.
+  private pending: Promise<SiteContent> | null = null;
 
   async getMeta(): Promise<{
     updatedAt: string | null;
@@ -38,11 +39,13 @@ export class ContentService {
   }
 
   async getSiteContent(only?: string): Promise<SiteContent> {
-    const now = Date.now();
-    if (this.cache && now - this.cache.at < this.TTL_MS && !only)
-      return this.cache.data;
-    const full = await this.fetchAll();
-    if (!only) this.cache = { at: now, data: full };
+    const pending = this.pending ?? (this.pending = this.fetchAll());
+    let full: SiteContent;
+    try {
+      full = await pending;
+    } finally {
+      if (this.pending === pending) this.pending = null;
+    }
     if (!only) return full;
     const keys = new Set(
       only
@@ -83,14 +86,9 @@ export class ContentService {
         orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
       }),
       this.prisma.blog.findMany({
-        where: {
-          OR: [
-            { published: true, status: 'PUBLISHED' },
-            { status: 'SCHEDULED', scheduledAt: { lte: new Date() } },
-          ],
-        },
+        where: publicBlogWhere,
         orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
-        include: { images: { orderBy: { position: 'asc' } } },
+        include: blogInclude,
       }),
       this.prisma.experience.findMany({
         orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
@@ -146,56 +144,7 @@ export class ContentService {
         featured: r.featured,
         position: r.position,
       })),
-      blogs: blogs
-        .filter((r) => {
-          if (r.status === 'SCHEDULED' && r.scheduledAt)
-            return new Date(r.scheduledAt as Date) <= new Date();
-          if (r.status === 'SCHEDULED' && !r.scheduledAt) return false;
-          return r.status === 'PUBLISHED';
-        })
-        .map((r) => ({
-          id: r.id,
-          slug: r.slug,
-          title: r.title,
-          excerpt: r.excerpt,
-          content: r.content,
-          coverImage: r.coverImage,
-          gallery: r.gallery,
-          tags: r.tags,
-          published: r.published,
-          featured: r.featured,
-          position: r.position,
-          status: r.status as never,
-          scheduledAt: r.scheduledAt
-            ? (r.scheduledAt as Date).toISOString()
-            : null,
-          publishedAt: r.publishedAt
-            ? (r.publishedAt as Date).toISOString()
-            : null,
-          linkedinUrl: r.linkedinUrl,
-          linkedinPostId: r.linkedinPostId,
-          linkedinStatus: r.linkedinStatus,
-          images: ((r as never as { images: unknown[] }).images ?? []).map(
-            (img) => {
-              const im = img as Record<string, unknown>;
-              return {
-                id: im.id as string,
-                blogId: im.blogId as string,
-                url: im.url as string,
-                alt: (im.alt as string | null) ?? null,
-                caption: (im.caption as string | null) ?? null,
-                placement: (im.placement as BlogImagePlacement) ?? 'INLINE',
-                position: im.position as number,
-              };
-            },
-          ),
-          createdAt: r.createdAt
-            ? (r.createdAt as Date).toISOString()
-            : undefined,
-          updatedAt: r.updatedAt
-            ? (r.updatedAt as Date).toISOString()
-            : undefined,
-        })),
+      blogs: blogs.map(blogWire),
       experience: experience.map((r) => ({
         id: r.id,
         role: r.role,

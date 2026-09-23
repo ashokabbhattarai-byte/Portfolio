@@ -5,7 +5,10 @@ export function ProjectArt({
   project,
   compact = false,
 }: {
-  project: Project;
+  project: Pick<
+    Project,
+    'image' | 'title' | 'slug' | 'color' | 'ink' | 'symbol' | 'focus'
+  >;
   compact?: boolean;
 }) {
   if (project.image)
@@ -15,7 +18,7 @@ export function ProjectArt({
       >
         <Image
           src={project.image}
-          alt={`${project.title} public homepage: searchable government notices in Nepal`}
+          alt={`${project.title} application screenshot`}
           fill
           sizes={compact ? '350px' : '(max-width: 700px) 100vw, 70vw'}
         />

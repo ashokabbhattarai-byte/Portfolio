@@ -27,11 +27,11 @@ export default async function AdminDashboard() {
     ]);
 
   const counts: Record<string, number | string> = {
-    Projects: projects.ok ? projects.data.length : '—',
-    Experience: experience.ok ? experience.data.length : '—',
-    Skills: skills.ok ? skills.data.length : '—',
-    Education: education.ok ? education.data.length : '—',
-    Certifications: certifications.ok ? certifications.data.length : '—',
+    Projects: projects.ok ? projects.data.total : '—',
+    Experience: experience.ok ? experience.data.total : '—',
+    Skills: skills.ok ? skills.data.total : '—',
+    Education: education.ok ? education.data.total : '—',
+    Certifications: certifications.ok ? certifications.data.total : '—',
   };
 
   return (

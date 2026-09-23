@@ -81,9 +81,6 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       images: siteUrl ? [`${siteUrl}/opengraph-image`] : undefined,
-      creator: profile.github
-        ? `@${profile.github.split('/').pop()}`
-        : undefined,
     },
   };
 }
@@ -101,7 +98,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={geist.variable}
-      data-motion="intro"
+      data-motion="ready"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >

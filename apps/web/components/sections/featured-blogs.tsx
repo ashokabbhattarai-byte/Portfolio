@@ -111,6 +111,8 @@ export async function FeaturedBlogs() {
                 {cover ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
+                    loading="lazy"
+                    decoding="async"
                     src={cover}
                     alt={alt}
                     style={{

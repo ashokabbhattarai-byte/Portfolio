@@ -225,6 +225,7 @@ export type Ordered = { id: string; position: number };
 
 export type AdminResource<T extends Ordered> = {
   list(): Promise<T[]>;
+  search(params?: BlogSearchParams): Promise<PageResult<T>>;
   get(id: string): Promise<T>;
   create(input: Omit<T, 'id'>): Promise<T>;
   update(id: string, input: Partial<Omit<T, 'id'>>): Promise<T>;
@@ -237,6 +238,8 @@ export type AdminResource<T extends Ordered> = {
 function resource<T extends Ordered>(base: string): AdminResource<T> {
   return {
     list: () => request<T[]>(base),
+    search: (params = {}) =>
+      request<PageResult<T>>(`${base}/admin/search${query(params)}`),
     get: (id) => request<T>(`${base}/${encodeURIComponent(id)}`),
     create: (input) => request<T>(base, { method: 'POST', body: input }),
     update: (id, input) =>
@@ -360,6 +363,10 @@ export const adminApi = {
 
   publisherKeys: {
     list: () => request<PublisherKey[]>('/publisher-keys'),
+    search: (params: BlogSearchParams = {}) =>
+      request<PageResult<PublisherKey>>(
+        `/publisher-keys/search${query(params)}`,
+      ),
     scopes: () => request<PublisherScopeInfo[]>('/publisher-keys/scopes'),
     /** The response is the only time the plaintext key exists. */
     create: (body: {

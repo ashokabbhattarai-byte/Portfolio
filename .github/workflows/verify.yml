@@ -1,0 +1,30 @@
+name: Verify portfolio
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/portfolio
+      DIRECT_URL: postgresql://ci:ci@127.0.0.1:5432/portfolio
+      API_URL: http://127.0.0.1:4999
+      NEXT_PUBLIC_SITE_URL: https://portfolio.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+      - run: bun install --frozen-lockfile
+      - run: bun run db:generate
+      - run: bun run format:check
+      - run: bun run lint
+      - run: bun run typecheck
+      - run: bun run test
+      # Also proves that the public build works without a running API.
+      - run: bun run build
+      - run: bun audit --audit-level=high

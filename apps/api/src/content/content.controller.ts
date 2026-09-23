@@ -11,7 +11,7 @@ export class ContentController {
   /** Grouped fetch: one round trip for the whole public site. Sends ETag + Cache-Control */
   @Public()
   @Get()
-  @Header('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+  @Header('Cache-Control', 'no-store')
   async get(
     @Query('only') only: string | undefined,
     @Req() req: Request,

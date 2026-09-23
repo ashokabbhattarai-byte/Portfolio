@@ -138,7 +138,7 @@ export class BlogsService {
     const [items, total] = await Promise.all([
       this.prisma.blog.findMany({
         where,
-        orderBy,
+        orderBy: [orderBy, { id: 'asc' }],
         skip: (q.page - 1) * q.limit,
         take: q.limit,
         select: {

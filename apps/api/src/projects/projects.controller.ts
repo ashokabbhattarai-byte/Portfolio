@@ -1,3 +1,5 @@
+import { Query } from '@nestjs/common';
+import { AdminPageQuery } from '../common/admin-page.dto';
 import {
   Body,
   Controller,
@@ -45,6 +47,12 @@ export class ProjectsController {
     }
     const user = await this.prisma.authUser(payload.sub);
     return !!user && !user.disabledAt;
+  }
+
+  @Get('admin/search')
+  @Roles('ADMIN', 'EDITOR')
+  search(@Query() query: AdminPageQuery) {
+    return this.projects.search(query);
   }
 
   @Public()

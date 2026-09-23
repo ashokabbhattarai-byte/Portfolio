@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -12,6 +13,7 @@ import { actorFrom, type PublisherRequest } from './common';
 import { CreateKeyDto, RotateKeyDto } from './publisher-keys.dto';
 import { PublisherKeysService } from './publisher-keys.service';
 import { SCOPES, SCOPE_DESCRIPTIONS } from './scopes';
+import { AdminPageQuery } from '../common/admin-page.dto';
 
 /** Admin-only. Issuing a key is an ADMIN action specifically — an EDITOR who
  *  could mint a key could grant themselves publish rights they do not have. */
@@ -31,6 +33,11 @@ export class PublisherKeysController {
   @Get()
   list() {
     return this.keys.list();
+  }
+
+  @Get('search')
+  search(@Query() query: AdminPageQuery) {
+    return this.keys.search(query);
   }
 
   /** The only response that ever contains a usable key. */

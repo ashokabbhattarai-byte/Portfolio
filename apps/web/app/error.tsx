@@ -1,6 +1,8 @@
 'use client';
 import Link from 'next/link';
-export default function ErrorPage({ reset }: { reset: () => void }) {
+import { useTransition } from 'react';
+export default function ErrorPage({ retry }: { retry: () => void }) {
+  const [pending, startTransition] = useTransition();
   return (
     <main
       id="main"
@@ -17,8 +19,12 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
         A temporary error interrupted the request. Trying again usually resolves
         it.
       </p>
-      <button className="pill" onClick={reset}>
-        Try again <span aria-hidden="true">↗</span>
+      <button
+        className="pill"
+        disabled={pending}
+        onClick={() => startTransition(retry)}
+      >
+        {pending ? 'Retrying…' : 'Try again'} <span aria-hidden="true">↗</span>
       </button>
       <Link className="text-link" href="/">
         Back to home

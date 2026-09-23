@@ -5,6 +5,7 @@ import { auditData } from './audit.service';
 import { type Actor, fail } from './common';
 import { CreateKeyDto, RotateKeyDto } from './publisher-keys.dto';
 import type { Scope } from './scopes';
+import { AdminPageQuery, pageOrder } from '../common/admin-page.dto';
 
 /* Key format: pf_live_<prefix><secret>.
    The prefix is stored in the clear so the admin UI and audit log can name a
@@ -147,6 +148,27 @@ export class PublisherKeysService {
       orderBy: { createdAt: 'desc' },
     });
     return rows.map((row) => this.present(row));
+  }
+
+  async search(q: AdminPageQuery) {
+    const where = q.search
+      ? { name: { contains: q.search, mode: 'insensitive' as const } }
+      : {};
+    const [rows, total] = await Promise.all([
+      this.prisma.publisherKey.findMany({
+        where,
+        orderBy: pageOrder(q),
+        skip: (q.page - 1) * q.limit,
+        take: q.limit,
+      }),
+      this.prisma.publisherKey.count({ where }),
+    ]);
+    return {
+      items: rows.map((row) => this.present(row)),
+      total,
+      page: q.page,
+      limit: q.limit,
+    };
   }
 
   /** Strips `secretHash` on the way out. Every read path goes through here so

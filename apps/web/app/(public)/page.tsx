@@ -1,4 +1,8 @@
+import Image from 'next/image';
+import styles from './landing.module.css';
+import { TransitionLink } from '@/components/motion/transition-link';
 import { Hero } from '@/components/sections/hero';
+import { LandingScroll } from '@/components/motion/landing-scroll';
 import { Intro } from '@/components/sections/intro';
 import { StatsRibbon } from '@/components/sections/stats-ribbon';
 import { FeaturedProjects } from '@/components/sections/featured-projects';
@@ -67,17 +71,45 @@ export default async function Home() {
   return (
     <>
       <TrackView path="/" />
+      <LandingScroll />
       {schema ? (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}
         />
       ) : null}
-      <main id="main" tabIndex={-1}>
+      <main id="main" tabIndex={-1} className={styles.landing}>
         <Hero profile={profile} experience={experience} />
         <Intro profile={profile} />
         <StatsRibbon />
         <FeaturedProjects />
+        <section className={styles.interlude} aria-labelledby="personal-title">
+          <div className={styles.portraitStrip} data-portrait-window>
+            <Image
+              src="/assets/hero-portrait.webp"
+              alt={`${profile.name} in the office`}
+              width={890}
+              height={1010}
+              sizes="(max-width: 760px) 100vw, 46vw"
+              data-portrait-drift
+            />
+          </div>
+          <div className={styles.personalCopy} data-landing-reveal>
+            <p>A person behind every project.</p>
+            <h2 id="personal-title">
+              Curiosity first.
+              <br />
+              Craft, always.
+            </h2>
+            <p>
+              From the first question to the final detail, I care about how
+              software feels to the people who use it.
+            </p>
+            <TransitionLink href="/about">
+              Get to know me <span aria-hidden="true">↗</span>
+            </TransitionLink>
+          </div>
+        </section>
         <FeaturedBlogs />
       </main>
       <ContactFooter />

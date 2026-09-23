@@ -1,3 +1,4 @@
+import { AdminPageQuery, pageOrder } from '../common/admin-page.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Certification } from '@portfolio/types';
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,6 +23,34 @@ export class CertificationsService {
     private readonly prisma: PrismaService,
     private readonly revalidate: RevalidateService,
   ) {}
+
+  async search(q: AdminPageQuery) {
+    const where = q.search
+      ? {
+          OR: [
+            { name: { contains: q.search, mode: 'insensitive' as const } },
+            { issuer: { contains: q.search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+    const [rows, total] = await Promise.all([
+      this.prisma.certification.findMany({
+        where,
+        orderBy: pageOrder(q),
+        skip: (q.page - 1) * q.limit,
+        take: q.limit,
+      }),
+      this.prisma.certification.count({ where }),
+    ]);
+    return {
+      items: rows.map((row) =>
+        toWire(row as unknown as Record<string, unknown>),
+      ),
+      total,
+      page: q.page,
+      limit: q.limit,
+    };
+  }
 
   async list(): Promise<Certification[]> {
     const rows = await this.prisma.certification.findMany({

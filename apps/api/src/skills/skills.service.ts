@@ -1,3 +1,4 @@
+import { AdminPageQuery, pageOrder } from '../common/admin-page.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Skill } from '@portfolio/types';
 import { PrismaService } from '../prisma/prisma.service';
@@ -20,6 +21,34 @@ export class SkillsService {
     private readonly prisma: PrismaService,
     private readonly revalidate: RevalidateService,
   ) {}
+
+  async search(q: AdminPageQuery) {
+    const where = q.search
+      ? {
+          OR: [
+            { name: { contains: q.search, mode: 'insensitive' as const } },
+            { items: { contains: q.search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+    const [rows, total] = await Promise.all([
+      this.prisma.skill.findMany({
+        where,
+        orderBy: pageOrder(q),
+        skip: (q.page - 1) * q.limit,
+        take: q.limit,
+      }),
+      this.prisma.skill.count({ where }),
+    ]);
+    return {
+      items: rows.map((row) =>
+        toWire(row as unknown as Record<string, unknown>),
+      ),
+      total,
+      page: q.page,
+      limit: q.limit,
+    };
+  }
 
   async list(): Promise<Skill[]> {
     const rows = await this.prisma.skill.findMany({

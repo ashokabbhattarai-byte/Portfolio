@@ -1,0 +1,73 @@
+/* Sits behind the section's content. The canvases inside are positioned by
+   the engine; everything here is the surface they sit on. */
+/* Negative, so it clears the section's own background but stays behind every
+   child no matter how that child is positioned. The host section isolates. */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  /* The lit centre of the board, held in CSS so it costs no frame time. */
+  background:
+    radial-gradient(
+      120% 90% at 50% 45%,
+      #0d3f86 0%,
+      #071f47 45%,
+      transparent 100%
+    ),
+    radial-gradient(90% 70% at 15% 100%, #06294f, transparent 70%);
+}
+/* Fades the field out where the copy sits so the traces never fight the
+   text they sit behind. */
+.backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    100deg,
+    #03102a 0%,
+    #03102ad9 26%,
+    #03102a4d 58%,
+    #03102a00 100%
+  );
+}
+.backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    260px circle at var(--warm-x, 50%) var(--warm-y, 50%),
+    #35b7ff1f,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+.backdrop[data-warm='true']::after {
+  opacity: 1;
+}
+@media (max-width: 760px), (pointer: coarse) {
+  /* A narrow column is nearly all copy, so the veil runs top-to-bottom
+     instead of left-to-right — heavy enough behind the headline, light
+     enough further down that the board is still legibly a board. */
+  .backdrop::before {
+    background: linear-gradient(
+      180deg,
+      #03102ab3 0%,
+      #03102a73 45%,
+      #03102a26 100%
+    );
+  }
+  .backdrop::after {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .backdrop::after {
+    display: none;
+    transition: none;
+  }
+}

@@ -3,40 +3,41 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Blog } from '@portfolio/types';
+import { useQueryClient } from '@tanstack/react-query';
+import { ListControls, usePagedList } from '@/components/admin/paged-list';
+import type { BlogSummary, PageResult } from '@portfolio/types';
 import { adminApi } from '@/lib/admin-api';
 import { qk } from '@/lib/query/keys';
-import { SelectField, TextField } from '@/components/admin/fields';
-import { estimateReadingTime, formatBlogDate } from '@/lib/blog-utils';
+import { SelectField } from '@/components/admin/fields';
+import { formatBlogDate } from '@/lib/blog-utils';
 import { describeSchedule } from '@/components/admin/schedule-picker';
 
 const statuses = [
   'DRAFT',
+  'REVIEW',
   'PUBLISHED',
   'SCHEDULED',
   'UNPUBLISHED',
   'ARCHIVED',
 ] as const;
-export function BlogsClient({ initial }: { initial: Blog[] }) {
+export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
   const router = useRouter();
   const qc = useQueryClient();
-  const { data: blogs = initial } = useQuery({
-    queryKey: qk.blogs(),
-    queryFn: () => adminApi.blogs.list(),
-    initialData: initial,
-  });
-  const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('ALL');
+  const [tag, setTag] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
-  const visible = blogs.filter(
-    (b) =>
-      (filter === 'ALL' || b.status === filter) &&
-      `${b.title} ${b.slug} ${b.tags.join(' ')}`
-        .toLowerCase()
-        .includes(search.toLowerCase()),
+  const list = usePagedList(
+    'blogs',
+    initial,
+    adminApi.blogOps.search,
+    { status: filter === 'ALL' ? undefined : filter, tag: tag || undefined },
+    'newest',
   );
+  const blogs = list.rows;
+  const visible = blogs;
+  const search = list.search;
+  const setSearch = list.setSearch;
   async function refresh() {
     await Promise.all([
       qc.invalidateQueries({ queryKey: qk.blogs() }),
@@ -44,7 +45,7 @@ export function BlogsClient({ initial }: { initial: Blog[] }) {
     ]);
     router.refresh();
   }
-  async function remove(post: Blog) {
+  async function remove(post: BlogSummary) {
     if (!confirm(`Delete “${post.title}”? This cannot be undone.`)) return;
     setBusy(true);
     try {
@@ -59,91 +60,57 @@ export function BlogsClient({ initial }: { initial: Blog[] }) {
       setBusy(false);
     }
   }
-  async function move(id: string, direction: number) {
-    const next = [...blogs];
-    const index = next.findIndex((b) => b.id === id);
-    const target = index + direction;
-    if (target < 0 || target >= next.length) return;
-    [next[index], next[target]] = [next[target], next[index]];
-    setBusy(true);
-    try {
-      await adminApi.blogs.reorder(next.map((b) => b.id));
-      await refresh();
-    } catch {
-      setMessage('Could not change the order. Please try again.');
-    } finally {
-      setBusy(false);
-    }
-  }
   return (
     <div className="blog-manager">
       <div className="blog-manager-toolbar">
         <div>
           <h2>Your articles</h2>
-          <p>
-            {blogs.length} total ·{' '}
-            {blogs.filter((b) => b.status === 'PUBLISHED').length} published ·{' '}
-            {blogs.filter((b) => b.status === 'DRAFT').length} drafts
-          </p>
+          <p>Manage drafts, scheduled releases, and published articles.</p>
         </div>
         <Link className="adm-btn primary" href="/admin/blogs/new">
           + New article
         </Link>
       </div>
-      <div className="blog-manager-filters">
-        <TextField
-          id="blog-search"
-          label="Search articles"
-          value={search}
-          onChange={setSearch}
-          placeholder="Search title, slug or tag…"
-        />
+      <ListControls
+        list={list}
+        label="articles"
+        sortOptions={['newest', 'oldest', 'updated', 'title']}
+      >
         <SelectField
           id="blog-filter"
           label="Publication status"
           value={filter}
-          onChange={setFilter}
+          onChange={(value) => {
+            setFilter(value);
+            list.setPage(1);
+          }}
           options={['ALL', ...statuses]}
         />
-      </div>
+        <label>
+          Tag
+          <input
+            value={tag}
+            onChange={(e) => {
+              setTag(e.target.value);
+              list.setPage(1);
+            }}
+            placeholder="Exact tag"
+          />
+        </label>
+      </ListControls>
       <p role="status" className="adm-hint">
         {message ||
           `${visible.length} ${visible.length === 1 ? 'article' : 'articles'} shown`}
       </p>
       <div className="adm-rows">
         {visible.map((post) => {
-          const index = blogs.findIndex((b) => b.id === post.id);
           return (
             <div key={post.id} className="adm-row blog-manager-row">
-              <div className="adm-move-group">
-                <button
-                  className="adm-move"
-                  disabled={busy || index === 0 || !!search || filter !== 'ALL'}
-                  onClick={() => move(post.id, -1)}
-                  aria-label={`Move ${post.title} up`}
-                >
-                  ↑
-                </button>
-                <button
-                  className="adm-move"
-                  disabled={
-                    busy ||
-                    index === blogs.length - 1 ||
-                    !!search ||
-                    filter !== 'ALL'
-                  }
-                  onClick={() => move(post.id, 1)}
-                  aria-label={`Move ${post.title} down`}
-                >
-                  ↓
-                </button>
-              </div>
               <div className="adm-row-main">
                 <div className="blog-row-meta">
                   <span className="blog-status" data-status={post.status}>
                     {post.status.toLowerCase()}
                   </span>
-                  {post.featured && <span>Featured</span>}
                   {post.createdByAI && (
                     <span title="Drafted by an AI agent">AI</span>
                   )}
@@ -154,7 +121,6 @@ export function BlogsClient({ initial }: { initial: Blog[] }) {
                       Goes out {describeSchedule(post.scheduledAt)}
                     </span>
                   )}
-                  <span>{estimateReadingTime(post.content).text}</span>
                 </div>
                 <Link
                   className="blog-row-title"
@@ -205,24 +171,25 @@ export function BlogsClient({ initial }: { initial: Blog[] }) {
             </div>
           );
         })}
-        {!visible.length && (
+        {!list.isFetching && !list.error && !visible.length && (
           <div className="blog-empty">
             <h3>
-              {blogs.length
+              {search || filter !== 'ALL' || tag
                 ? 'No matching articles'
                 : 'Your next idea starts here.'}
             </h3>
             <p>
-              {blogs.length
+              {search || filter !== 'ALL' || tag
                 ? 'Try another search or publication status.'
                 : 'Create a private draft, shape your story, then preview it before publishing.'}
             </p>
-            {blogs.length > 0 && (
+            {(search || filter !== 'ALL' || tag) && (
               <button
                 className="adm-btn"
                 onClick={() => {
                   setSearch('');
                   setFilter('ALL');
+                  setTag('');
                 }}
               >
                 Clear filters

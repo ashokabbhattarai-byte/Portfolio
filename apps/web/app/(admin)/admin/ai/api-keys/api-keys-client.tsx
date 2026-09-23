@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type {
   IssuedPublisherKey,
   PublisherKey,
@@ -8,6 +8,7 @@ import type {
   PublisherScopeInfo,
 } from '@portfolio/types';
 import { adminApi, ApiError } from '@/lib/admin-api';
+import { ListControls, usePagedList } from '@/components/admin/paged-list';
 
 /** Scopes that let a key change what the public site shows. Grouped so the
  *  form makes the blast radius of each choice obvious. */
@@ -42,15 +43,22 @@ export function ApiKeysClient() {
   const [error, setError] = useState('');
   const [issued, setIssued] = useState<IssuedPublisherKey | null>(null);
   const [creating, setCreating] = useState(false);
+  const list = usePagedList(
+    'publisher-keys',
+    undefined,
+    adminApi.publisherKeys.search,
+    {},
+    'newest',
+  );
+  const refetchKeys = list.refetch;
 
-  async function refresh() {
+  const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [list, available] = await Promise.all([
-        adminApi.publisherKeys.list(),
+      const [available] = await Promise.all([
         adminApi.publisherKeys.scopes(),
+        refetchKeys(),
       ]);
-      setKeys(list);
       setScopes(available);
       setError('');
     } catch (caught) {
@@ -62,11 +70,15 @@ export function ApiKeysClient() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [refetchKeys]);
 
   useEffect(() => {
     void refresh();
-  }, []);
+  }, [refresh]);
+
+  useEffect(() => {
+    setKeys(list.rows);
+  }, [list.rows]);
 
   async function revoke(key: PublisherKey) {
     if (
@@ -115,6 +127,11 @@ export function ApiKeysClient() {
       )}
 
       <div className="adm-panel">
+        <ListControls
+          list={list}
+          label="API keys"
+          sortOptions={['newest', 'oldest']}
+        />
         <div className="adm-head-actions" style={{ marginBottom: 16 }}>
           <button
             type="button"

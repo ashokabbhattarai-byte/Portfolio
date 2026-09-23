@@ -35,10 +35,6 @@ const greetings = [
   'Hallo',
   'Namaste',
 ];
-/* Phase 5 budgets the loader at 1.8–2.8s end to end and forbids padding a page
-   that is already ready. The greeting phase is sized to leave room for the
-   one-second lift; the cadence is fixed and the word count is what flexes, so
-   a slow phone spends the budget loading rather than waiting behind the sheet. */
 const cadence = 190;
 const introBudget = 1500;
 const minimumHold = 570;
@@ -193,6 +189,7 @@ export function MotionProvider({
       lenis.current = smooth;
       smooth.on('scroll', ScrollTrigger.update);
       gsap.ticker.add(tick);
+      gsap.ticker.lagSmoothing(0);
     };
     build();
     const stop = watchFlow(build);
@@ -204,7 +201,6 @@ export function MotionProvider({
     };
   }, []);
   useEffect(() => {
-    /* Stands the stylesheet's failsafe down: from here the curtain is ours. */
     document.documentElement.classList.add('motion-ready');
     busy.current = true;
     stage('intro');
@@ -215,11 +211,8 @@ export function MotionProvider({
       opacity: 1,
     });
     gsap.set([front.current, trailShape.current], { morphSVG: covered });
-    /* The curtain has been up since the first paint, so only the remainder of
-       the budget is still owed — never less than one readable beat. */
     const remaining = Math.max(minimumHold, introBudget - performance.now());
     if (!travels()) {
-      /* One steady greeting rather than seven: cycling text is its own motion. */
       const hold = setTimeout(reveal, Math.min(remaining, calmHold));
       return () => {
         clearTimeout(hold);

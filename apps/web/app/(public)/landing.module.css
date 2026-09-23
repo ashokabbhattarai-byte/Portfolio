@@ -1,0 +1,180 @@
+.landing {
+  --paper: #eef1f5;
+  --ink: #15263c;
+  --muted: #556479;
+  --line: #c8d1df;
+  background: var(--paper);
+  overflow: clip;
+}
+.landing :global(.section-label) {
+  text-transform: none;
+  letter-spacing: 0;
+}
+.landing :global(.stats-ribbon) {
+  background: #dbe4f0;
+  margin-inline: var(--gutter);
+  border-radius: 24px;
+  border: 0;
+}
+.landing :global(.featured) {
+  padding-block: 100px;
+}
+.landing :global(.section-heading h2) {
+  font-size: clamp(42px, 6vw, 88px);
+}
+.landing :global(.project-collection) {
+  margin-top: 48px;
+}
+.landing :global(.project-collection.list) {
+  position: relative;
+}
+.landing :global(.project-collection.list .project-entry) {
+  min-height: 142px;
+  transform-style: preserve-3d;
+}
+.landing :global(.project-collection.list .project-title h3) {
+  transition:
+    letter-spacing 0.5s var(--ease),
+    color 0.35s ease;
+}
+.landing
+  :global(.project-collection.list .project-entry:hover .project-title h3) {
+  letter-spacing: -0.045em;
+}
+.landing
+  :global(.project-collection.list .project-entry:hover .project-context) {
+  color: currentColor;
+}
+.landing :global(.project-entry) {
+  padding-block: 32px;
+}
+.landing :global(.project-title h3) {
+  font-size: clamp(30px, 4vw, 60px);
+}
+.landing :global(.blog-card) {
+  background: #fff;
+  border: 0;
+  border-radius: 18px;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.6s var(--ease),
+    box-shadow 0.6s var(--ease);
+}
+.landing :global(.blog-card:hover) {
+  transform: perspective(900px) rotateX(2deg) rotateY(-2deg) translateY(-10px);
+  box-shadow: 0 24px 55px rgba(21, 38, 60, 0.16);
+}
+.interlude {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  min-height: 580px;
+  background: #cad8eb;
+}
+.portraitStrip {
+  overflow: hidden;
+  position: relative;
+  min-height: 580px;
+}
+.portraitStrip img {
+  width: 100%;
+  height: 120%;
+  position: absolute;
+  top: -10%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  filter: grayscale(1);
+}
+.personalCopy {
+  padding: 80px clamp(32px, 6vw, 100px);
+  align-self: center;
+}
+.personalCopy h2 {
+  font-size: clamp(42px, 5.5vw, 84px);
+  margin: 28px 0;
+}
+.personalCopy p {
+  max-width: 35ch;
+  color: #354c68;
+  font-size: 18px;
+  line-height: 1.7;
+}
+.personalCopy a {
+  display: inline-flex;
+  gap: 40px;
+  border-bottom: 1px solid;
+  padding: 10px 0;
+  margin-top: 24px;
+}
+@media (max-width: 760px) {
+  .landing :global(.featured) {
+    padding-block: 64px;
+  }
+  .interlude {
+    grid-template-columns: 1fr;
+  }
+  .portraitStrip {
+    min-height: 380px;
+  }
+  .portraitStrip img {
+    object-position: 50% 25%;
+  }
+  .personalCopy {
+    padding: 48px 24px;
+  }
+}
+.landing :global(.grid.project-collection) {
+  grid-template-columns: 1fr 1fr;
+  gap: 56px 32px;
+}
+.landing :global(.grid .project-entry) {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: start;
+  transition:
+    transform 0.6s var(--ease),
+    color 0.35s ease;
+}
+.landing :global(.grid .project-entry:hover) {
+  transform: translateY(-8px);
+  color: #315ee8;
+}
+.landing :global(.grid .project-art) {
+  transition:
+    transform 0.8s var(--ease),
+    filter 0.8s var(--ease);
+}
+.landing :global(.grid .project-entry:hover .project-art) {
+  transform: scale(1.045) rotate(0.6deg);
+  filter: saturate(1.12) contrast(1.04);
+}
+.landing :global(.grid .project-arrow) {
+  transition: transform 0.6s var(--ease);
+}
+.landing :global(.grid .project-entry:hover .project-arrow) {
+  transform: translate(8px, -8px) rotate(45deg);
+}
+.landing :global(.grid .project-entry:first-of-type) {
+  grid-column: 1 / -1;
+}
+.landing :global(.grid .project-entry:hover) {
+  padding-inline: 0;
+}
+.landing :global(.grid .project-thumbnail) {
+  border-radius: 18px;
+  margin-bottom: 24px;
+}
+.landing :global(.grid .project-category) {
+  grid-column: 1;
+  grid-row: auto;
+  margin-top: 12px;
+}
+.landing :global(.grid .project-title h3) {
+  font-size: clamp(28px, 3.5vw, 52px);
+}
+@media (max-width: 760px) {
+  .landing :global(.grid.project-collection) {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}

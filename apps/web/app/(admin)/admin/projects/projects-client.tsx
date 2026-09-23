@@ -2,8 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Project } from '@portfolio/types';
+import { useQueryClient } from '@tanstack/react-query';
+import { ListControls, usePagedList } from '@/components/admin/paged-list';
+import type { PageResult, Project } from '@portfolio/types';
 import { adminApi } from '@/lib/admin-api';
 import { qk } from '@/lib/query/keys';
 import {
@@ -56,19 +57,16 @@ function validate(values: Omit<Project, 'id'>) {
   return e;
 }
 
-export function ProjectsClient({ initial }: { initial: Timestamped[] }) {
+export function ProjectsClient({
+  initial,
+}: {
+  initial: PageResult<Timestamped>;
+}) {
   const router = useRouter();
   const qc = useQueryClient();
 
-  // TanStack cache – server data hydrates the cache instantly, then stays fresh 5m
-  const { data: projects = initial } = useQuery({
-    queryKey: qk.projects(),
-    queryFn: () => adminApi.projects.list() as Promise<Timestamped[]>,
-    initialData: initial,
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
-  });
-
+  const list = usePagedList('projects', initial, adminApi.projects.search);
+  const projects = list.rows;
   const [editing, setEditing] = useState<Timestamped | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -97,6 +95,7 @@ export function ProjectsClient({ initial }: { initial: Timestamped[] }) {
   }
 
   async function move(id: string, dir: -1 | 1) {
+    if (!list.canReorder) return;
     const idx = projects.findIndex((p) => p.id === id);
     const target = idx + dir;
     if (target < 0 || target >= projects.length) return;
@@ -184,6 +183,12 @@ export function ProjectsClient({ initial }: { initial: Timestamped[] }) {
 
   return (
     <>
+      <ListControls list={list} label="projects" />
+      {!list.canReorder && (
+        <p className="adm-hint">
+          Use the Position field when editing to set display order across pages.
+        </p>
+      )}
       <div className="adm-rows">
         {projects.length === 0 ? (
           <div className="adm-row">No projects yet.</div>
@@ -194,7 +199,7 @@ export function ProjectsClient({ initial }: { initial: Timestamped[] }) {
               <button
                 className="adm-move"
                 onClick={() => move(p.id, -1)}
-                disabled={i === 0}
+                disabled={!list.canReorder || i === 0}
                 aria-label="Move up"
               >
                 ↑
@@ -202,7 +207,7 @@ export function ProjectsClient({ initial }: { initial: Timestamped[] }) {
               <button
                 className="adm-move"
                 onClick={() => move(p.id, 1)}
-                disabled={i === projects.length - 1}
+                disabled={!list.canReorder || i === projects.length - 1}
                 aria-label="Move down"
               >
                 ↓

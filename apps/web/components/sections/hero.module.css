@@ -1,0 +1,374 @@
+/* Isolated so the circuit backdrop can sit at z-index -1: above this
+   background, behind every child, whatever the children's positioning. */
+.hero {
+  background: var(--deep);
+  color: #f4f3ee;
+  padding: clamp(120px, 12vh, 150px) var(--gutter) 64px;
+  min-height: min(850px, 100svh);
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 90px);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.content {
+  min-width: 0;
+}
+.role {
+  margin: 22px 0 0;
+  font-size: clamp(16px, 1.4vw, 20px);
+  color: #a8c3e2;
+}
+.name {
+  margin: 0;
+  font-size: clamp(60px, 7.1vw, 132px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.065em;
+}
+.name span {
+  display: block;
+}
+.nameMask {
+  overflow: hidden;
+  padding: 0.09em 0;
+  margin: -0.09em 0;
+}
+.intro {
+  max-width: 30ch;
+  margin: 16px 0 30px;
+  font-size: clamp(18px, 1.6vw, 23px);
+  line-height: 1.6;
+  color: #a8c3e2;
+}
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 36px;
+  min-height: 56px;
+  padding: 14px 24px;
+  border-radius: 32px;
+  background: #f4f3ee;
+  color: var(--deep);
+  font-size: 16px;
+  transition: background 180ms ease;
+}
+.action span {
+  transition: transform 180ms ease;
+}
+.action:hover {
+  background: #cfe2fb;
+}
+.action:hover span {
+  transform: translate(2px, -2px);
+}
+.action:focus-visible {
+  outline: 2px solid #f4f3ee;
+  outline-offset: 5px;
+}
+.portrait {
+  position: relative;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 620px;
+  margin: 0;
+  justify-self: end;
+}
+.shutter {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--deep);
+  transform: scaleX(0);
+  transform-origin: right center;
+  border-radius: inherit;
+}
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 20px 20px 0 0;
+}
+.location {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  background: #07182d;
+  border: 1px solid #a8c3e225;
+  border-top: 0;
+  border-radius: 0 0 20px 20px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #a8c3e2;
+}
+.location > span {
+  display: grid;
+  gap: 5px;
+}
+.location strong {
+  color: #f4f3ee;
+  font-size: 14px;
+  font-weight: 500;
+}
+.experience {
+  text-align: right;
+  max-width: 50%;
+}
+.availability {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  min-height: 44px;
+  border: 1px solid #94d8bd55;
+  border-radius: 30px;
+  background: #102b32;
+  color: #cff3df;
+  font-size: 14px;
+  margin-bottom: 30px;
+  transition: background 180ms ease;
+}
+.availability:hover {
+  background: #19403e;
+}
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8ee9b1;
+  box-shadow: 0 0 0 4px #8ee9b115;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.resume {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 44px;
+  color: #d8e7f9;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-color: #a8c3e255;
+}
+.resume:hover {
+  text-decoration-color: currentColor;
+}
+.availability:focus-visible,
+.resume:focus-visible {
+  outline: 2px solid #f4f3ee;
+  outline-offset: 5px;
+}
+@media (max-width: 760px) {
+  .hero {
+    padding: 112px 20px 40px;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  .role {
+    margin: 18px 0 0;
+  }
+  .name {
+    font-size: clamp(48px, 13.5vw, 92px);
+  }
+  .intro {
+    margin: 12px 0 24px;
+    max-width: 30ch;
+  }
+  .portrait {
+    justify-self: center;
+  }
+  .availability {
+    margin-bottom: 24px;
+  }
+  .location {
+    padding: 18px 16px;
+    gap: 12px;
+  }
+  .actions {
+    gap: 12px 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .action,
+  .action span,
+  .availability {
+    transition: none;
+  }
+}
+/* A full-height photographic cover, with the name bridging both columns. */
+.hero {
+  min-height: 900px;
+  min-height: max(800px, 100svh);
+  padding-top: 150px;
+  padding-bottom: 120px;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 0;
+  background: #0c213c;
+}
+.content {
+  position: relative;
+  z-index: 3;
+}
+.name {
+  font-size: clamp(76px, 9.4vw, 170px);
+  line-height: 0.94;
+  letter-spacing: -0.075em;
+}
+.role {
+  margin-top: 32px;
+  color: #d2dfef;
+}
+.intro {
+  max-width: 28ch;
+  color: #aebfd5;
+}
+.portrait {
+  width: 110%;
+  max-width: none;
+  border-radius: 48% 48% 4px 4px;
+  overflow: hidden;
+  align-self: center;
+  transform: rotate(3deg);
+  z-index: 2;
+}
+.image {
+  height: min(64vw, 650px);
+  width: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  border-radius: 0;
+}
+.location {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 44px 26px 24px;
+  background: linear-gradient(transparent, #08192dec);
+  border: 0;
+  border-radius: 0;
+}
+.shutter {
+  background: #0c213c;
+}
+.availability {
+  background: transparent;
+  border-color: #8ba4c455;
+  color: #d6e7f5;
+}
+.backdropWord {
+  position: absolute;
+  font-size: clamp(150px, 24vw, 450px);
+  line-height: 1;
+  letter-spacing: -0.08em;
+  bottom: 15px;
+  left: -2%;
+  color: #ffffff05;
+  pointer-events: none;
+}
+.heroBottom {
+  position: absolute;
+  bottom: 32px;
+  left: var(--gutter);
+  right: var(--gutter);
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #ffffff26;
+  font-size: 13px;
+  color: #aebfd5;
+}
+.heroOrb {
+  position: absolute;
+  width: clamp(180px, 24vw, 360px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #83d9ff66, #315ee800 68%);
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: 0;
+}
+.heroGrid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  pointer-events: none;
+  background-image:
+    linear-gradient(#9fc5e91c 1px, transparent 1px),
+    linear-gradient(90deg, #9fc5e91c 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse at 80% 50%, #000, transparent 72%);
+  z-index: 0;
+}
+.heroScan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -30%;
+  height: 20%;
+  background: linear-gradient(transparent, #8ee9b122, transparent);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 4;
+}
+.scrollProgress {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: 0;
+  height: 2px;
+  background: #ffffff22;
+  overflow: hidden;
+}
+.scrollProgress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #9be1ff;
+  transform: scaleX(0);
+}
+.kinetic-copy span {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+@media (max-width: 760px) {
+  .hero {
+    min-height: 0;
+    padding: 120px 24px 115px;
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+  .name {
+    font-size: clamp(64px, 15vw, 112px);
+  }
+  .portrait {
+    width: 88%;
+    max-width: 460px;
+    transform: rotate(2deg);
+  }
+  .image {
+    height: 470px;
+  }
+  .heroBottom {
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+    font-size: 12px;
+  }
+  .heroBottom > span:nth-child(2) {
+    display: none;
+  }
+  .experience {
+    display: none;
+  }
+}

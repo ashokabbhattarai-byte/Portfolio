@@ -71,11 +71,7 @@ export const getSiteContent = cache(async (): Promise<SiteContent> => {
       (project) => project.published,
     ),
     blogs: ordered(list(data.blogs, committed.blogs)).filter(
-      (b) =>
-        (b.published && b.status === 'PUBLISHED') ||
-        (b.status === 'SCHEDULED' &&
-          b.scheduledAt &&
-          new Date(b.scheduledAt) <= new Date()),
+      (b) => b.published && b.status === 'PUBLISHED',
     ),
     experience: ordered(list(data.experience, committed.experience)),
     skills: ordered(list(data.skills, committed.skills)),

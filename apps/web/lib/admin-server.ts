@@ -1,3 +1,4 @@
+import type { PageResult, BlogSummary } from '@portfolio/types';
 import { cache } from 'react';
 /**
  * Server-side reads for the CMS.
@@ -93,21 +94,24 @@ export const getSignedInUser = cache(async () => {
   return result;
 });
 export const getProjects = () =>
-  serverGet<(Project & Timestamped)[]>('/projects/admin/list');
+  serverGet<PageResult<Project & Timestamped>>('/projects/admin/search');
 export const getProject = (id: string) =>
   serverGet<Project>(`/projects/${encodeURIComponent(id)}`);
 export const getBlogs = () =>
-  serverGet<(Blog & Timestamped)[]>('/blogs/admin/list');
+  serverGet<PageResult<BlogSummary>>('/blogs/admin/search');
 export const getBlog = (id: string) =>
   serverGet<Blog>(`/blogs/${encodeURIComponent(id)}`);
 export const getProfile = () => serverGet<Profile & Timestamped>('/profile');
 export const getExperience = () =>
-  serverGet<(Experience & Timestamped)[]>('/experience');
-export const getSkills = () => serverGet<(Skill & Timestamped)[]>('/skills');
+  serverGet<PageResult<Experience & Timestamped>>('/experience/admin/search');
+export const getSkills = () =>
+  serverGet<PageResult<Skill & Timestamped>>('/skills/admin/search');
 export const getEducation = () =>
-  serverGet<(Education & Timestamped)[]>('/education');
+  serverGet<PageResult<Education & Timestamped>>('/education/admin/search');
 export const getCertifications = () =>
-  serverGet<(Certification & Timestamped)[]>('/certifications');
+  serverGet<PageResult<Certification & Timestamped>>(
+    '/certifications/admin/search',
+  );
 
 /** A 401 here means the cookie died between the proxy's check and this fetch,
  *  or the account was disabled. Either way the only cure is signing in again. */

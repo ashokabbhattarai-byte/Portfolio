@@ -4,13 +4,29 @@ import gsap from 'gsap';
 import type { Project } from '@portfolio/types';
 import { travels, watchFlow } from '@/components/motion/flow';
 import { ProjectArt } from './project-art';
-export function ProjectCursor({ projects }: { projects: Project[] }) {
+export function ProjectCursor({
+  projects,
+}: {
+  projects: Pick<
+    Project,
+    | 'image'
+    | 'title'
+    | 'slug'
+    | 'color'
+    | 'ink'
+    | 'symbol'
+    | 'focus'
+    | 'category'
+    | 'context'
+  >[];
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const media = gsap.matchMedia();
     const arm = () => {
       media.revert();
+      if (!travels()) return;
       // Hover preview is essential UX — keep it even in calm, just softer
       media.add('(hover: hover) and (pointer: fine)', () => {
         const node = ref.current;

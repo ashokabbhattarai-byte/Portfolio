@@ -8,7 +8,7 @@
 export const qk = {
   siteContent: (only?: string[]) =>
     only && only.length
-      ? (['siteContent', ...only.sort()] as const)
+      ? (['siteContent', ...[...only].sort()] as const)
       : (['siteContent'] as const),
   projects: () => ['projects'] as const,
   project: (id: string) => ['projects', id] as const,

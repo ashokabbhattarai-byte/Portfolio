@@ -137,8 +137,8 @@ export function ProfileClient({ initial }: { initial: Profile }) {
                     {form.values.resume}
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--muted)' }}>
-                    Current resume — will be used for “Download résumé” and
-                    “View résumé” links site-wide.
+                    Current resume — will be used for “View résumé” and
+                    “Download PDF” links site-wide.
                   </div>
                 </div>
                 <a

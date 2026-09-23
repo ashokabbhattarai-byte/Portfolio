@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import type { Profile } from '@portfolio/types';
 import { TransitionLink } from '@/components/motion/transition-link';
 import styles from './intro.module.css';
@@ -29,7 +30,7 @@ export function Intro({ profile }: { profile: Profile }) {
     >
       <div className={styles.overview}>
         <div className={styles.introduction}>
-          <p className={styles.label}>My approach</p>
+          <p className="section-label">My approach</p>
           <h2 id="approach-title">
             Thoughtful software.
             <br />
@@ -45,6 +46,17 @@ export function Intro({ profile }: { profile: Profile }) {
           </TransitionLink>
         </div>
         <aside className={styles.profile} aria-label={`About ${profile.name}`}>
+          <div className={styles.photoWindow} data-portrait-window>
+            <Image
+              src="/assets/hero-portrait.webp"
+              alt={profile.name}
+              width={890}
+              height={1010}
+              sizes="(max-width: 900px) 80vw, 32vw"
+              data-portrait-drift
+            />
+            <span>Behind the code</span>
+          </div>
           <h3>{profile.name}</h3>
           <p className={styles.role}>{profile.role}</p>
           <p className={styles.bio}>{profile.description}</p>
@@ -67,7 +79,7 @@ export function Intro({ profile }: { profile: Profile }) {
         </aside>
       </div>
       <div className={styles.process}>
-        <h3 className={styles.processTitle}>How I work</h3>
+        <h3 className="section-label">How I work</h3>
         <ol className={styles.stages}>
           {stages.map((stage, index) => (
             <li className={styles.stage} key={stage.title}>

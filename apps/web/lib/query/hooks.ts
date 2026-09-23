@@ -56,7 +56,7 @@ export function useSiteContent(
 
 export function usePublicProjects() {
   return useQuery({
-    queryKey: qk.projects(),
+    queryKey: ['public', ...qk.projects()],
     queryFn: () => fetchSiteContent(['projects']).then((c) => c.projects),
     staleTime: 1000 * 60 * 5,
   });
@@ -64,7 +64,7 @@ export function usePublicProjects() {
 
 export function usePublicBlogs() {
   return useQuery({
-    queryKey: qk.blogs(),
+    queryKey: ['public', ...qk.blogs()],
     queryFn: () => fetchSiteContent(['blogs']).then((c) => c.blogs),
     staleTime: 1000 * 60 * 5,
   });

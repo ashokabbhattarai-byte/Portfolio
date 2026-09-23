@@ -115,8 +115,40 @@ export default async function PublicLayout({
         />
         <PageEntrance />
         {children}
-        <ProjectCursor projects={projects} />
-        <BlogCursor blogs={blogs} />
+        <ProjectCursor
+          projects={projects.map(
+            ({
+              image,
+              title,
+              slug,
+              color,
+              ink,
+              symbol,
+              focus,
+              category,
+              context,
+            }) => ({
+              image,
+              title,
+              slug,
+              color,
+              ink,
+              symbol,
+              focus,
+              category,
+              context,
+            }),
+          )}
+        />
+        <BlogCursor
+          blogs={blogs.map(({ slug, title, tags, coverImage, images }) => ({
+            slug,
+            title,
+            tags,
+            coverImage,
+            images,
+          }))}
+        />
       </MotionProvider>
     </>
   );

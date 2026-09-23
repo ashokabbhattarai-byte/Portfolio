@@ -1,3 +1,5 @@
+import { Query } from '@nestjs/common';
+import { AdminPageQuery } from '../common/admin-page.dto';
 import {
   Body,
   Controller,
@@ -19,6 +21,12 @@ import { ExperienceService } from './experience.service';
 @Controller('experience')
 export class ExperienceController {
   constructor(private readonly experience: ExperienceService) {}
+
+  @Get('admin/search')
+  @Roles('ADMIN', 'EDITOR')
+  search(@Query() query: AdminPageQuery) {
+    return this.experience.search(query);
+  }
 
   @Public()
   @Get()
