@@ -18,6 +18,8 @@ import {
 } from '@/lib/blog-utils';
 import { TableOfContents } from '@/components/blogs/table-of-contents';
 import { BlogContent } from '@/components/blogs/blog-content';
+import { ReadingProgress } from '@/components/blogs/reading-progress';
+import { Reveal } from '@/components/motion/reveal';
 import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
@@ -137,7 +139,23 @@ export default async function BlogPost({
   return (
     <>
       <TrackView path={`/blog/${post.slug}`} blogId={post.id} />
+      <ReadingProgress />
       <main id="main" tabIndex={-1} className="article-page">
+        <style>{`.article-tags span{min-height:44px;display:inline-flex;align-items:center;transition:border-color 0.3s ease, color 0.3s ease;}
+.article-tags span:hover{border-color:#527747;color:#527747;}
+.article-breadcrumb{flex-wrap:wrap;}
+.article-breadcrumb a{min-height:44px;display:inline-flex;align-items:center;font-size:15px;}
+.article-avatar{background:#0c213c !important;color:#f4f3ee !important;}
+.article-cover > div{border-radius:22px !important;border:1.5px solid rgba(199,220,168,0.2) !important;box-shadow:0 22px 64px rgba(12,33,60,0.22);}
+.article-author{background:#fff;border:1px solid var(--line);border-radius:22px;padding:32px;transition:transform 0.42s cubic-bezier(0.16,1,0.3,1), border-color 0.34s ease, box-shadow 0.42s cubic-bezier(0.16,1,0.3,1);}
+.article-author:hover{transform:translateY(-4px);border-color:rgba(82,119,71,0.35);box-shadow:0 12px 32px rgba(21,38,60,0.08);}
+.article-next{background:#fff;border:1px solid var(--line);border-radius:22px;padding:40px;transition:transform 0.42s cubic-bezier(0.16,1,0.3,1), border-color 0.34s ease, box-shadow 0.42s cubic-bezier(0.16,1,0.3,1);}
+.article-next:hover{transform:translateY(-4px);border-color:rgba(82,119,71,0.35);box-shadow:0 12px 32px rgba(21,38,60,0.08);}
+.article-next h2{font-size:clamp(40px,4.6vw,64px);font-weight:450;}
+@media (max-width: 900px){.article-body-layout{grid-template-columns:180px minmax(0,1fr);gap:32px;}}
+@media (max-width: 760px){.article-body-layout{grid-template-columns:1fr;}}
+@media (max-width: 480px){.article-breadcrumb{font-size:15px;}.article-heading h1{font-size:clamp(32px,9vw,48px);}.blog-prose{font-size:17px;}}
+@media (max-width: 360px){.article-author{flex-direction:column;padding:24px;}.article-next{padding:24px;}}`}</style>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -161,6 +179,7 @@ export default async function BlogPost({
             <span aria-current="page">{post.title}</span>
           </nav>
           <article>
+            <Reveal>
             <header className="article-heading">
               <div className="article-tags">
                 {post.tags.map((tag) => (
@@ -202,9 +221,11 @@ export default async function BlogPost({
                     Discuss on LinkedIn ↗
                   </a>
                 ) : null}
-              </div>
-            </header>
+                </div>
+              </header>
+              </Reveal>
             {coverData.url ? (
+              <Reveal>
               <figure className="article-cover">
                 <div>
                   <Image
@@ -220,6 +241,7 @@ export default async function BlogPost({
                   <figcaption>{coverData.caption}</figcaption>
                 ) : null}
               </figure>
+              </Reveal>
             ) : null}
             <div className="article-body-layout">
               <aside className="article-sidebar">
@@ -277,6 +299,7 @@ export default async function BlogPost({
                   </figure>
                 ) : null}
                 {profile ? (
+                  <Reveal>
                   <footer className="article-author">
                     <span className="article-avatar" aria-hidden="true">
                       {initials}
@@ -290,10 +313,12 @@ export default async function BlogPost({
                       </TransitionLink>
                     </div>
                   </footer>
+                  </Reveal>
                 ) : null}
               </div>
             </div>
           </article>
+          <Reveal>
           <section className="article-next">
             <p className="article-eyebrow">
               {next.slug !== post.slug ? 'Read next' : 'More writing'}
@@ -307,6 +332,7 @@ export default async function BlogPost({
               </h2>
             </TransitionLink>
           </section>
+          </Reveal>
         </div>
       </main>
     </>

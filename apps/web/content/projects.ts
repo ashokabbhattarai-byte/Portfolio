@@ -76,8 +76,8 @@ export const projects: Project[] = [
     category: 'AI',
     role: 'Development contributor',
     context: 'Rumsan · Team project',
-    color: '#dce0ef',
-    ink: '#414f8b',
+    color: '#dfe6d8',
+    ink: '#2f4a2b',
     symbol: '“',
     summary: 'Exploring AI, together.',
     overview:

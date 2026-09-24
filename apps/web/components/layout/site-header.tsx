@@ -29,7 +29,8 @@ export function SiteHeader({
   const [scrolled, setScrolled] = useState(false);
   const closeTween = useRef<gsap.core.Tween | null>(null);
   useEffect(() => {
-    const update = () => setScrolled(window.scrollY > 240);
+    const update = () => setScrolled(window.scrollY > 22);
+    update();
     window.addEventListener('scroll', update, { passive: true });
     return () => {
       window.removeEventListener('scroll', update);
@@ -90,14 +91,16 @@ export function SiteHeader({
     closeTween.current = gsap.to(dialog.current, {
       xPercent: full ? 105 : 0,
       opacity: full ? 1 : 0,
-      duration: full ? 0.45 : 0.2,
+      duration: full ? 0.45 : 0.01,
       ease: full ? 'curtain' : 'none',
       onComplete: finish,
     });
   };
   return (
     <>
-      <header className={`site-header ${pathname === '/' ? 'on-hero' : ''}`}>
+      <header
+        className={`site-header ${pathname === '/' ? 'on-hero' : ''} ${scrolled ? 'is-scrolled' : ''}`}
+      >
         <TransitionLink
           href="/"
           className="wordmark"

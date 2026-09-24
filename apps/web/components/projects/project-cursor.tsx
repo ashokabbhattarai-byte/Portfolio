@@ -26,19 +26,23 @@ export function ProjectCursor({
     const media = gsap.matchMedia();
     const arm = () => {
       media.revert();
-      if (!travels()) return;
-      // Hover preview is essential UX — keep it even in calm, just softer
+      // Hover preview is essential UX — keep it even in calm, just softer:
+      // a shorter 0.3 follow and no rotation.
+      const calm = !travels();
       media.add('(hover: hover) and (pointer: fine)', () => {
         const node = ref.current;
         const label = labelRef.current;
         if (!node) return;
         // Velvet-smooth float — longer duration + expo ease for premium lag
-        const x = gsap.quickTo(node, 'x', { duration: 0.72, ease: 'expo.out' });
-        const y = gsap.quickTo(node, 'y', { duration: 0.72, ease: 'expo.out' });
-        const r = gsap.quickTo(node, 'rotation', {
-          duration: 0.9,
-          ease: 'power3.out',
-        });
+        const duration = calm ? 0.3 : 0.72;
+        const x = gsap.quickTo(node, 'x', { duration, ease: 'expo.out' });
+        const y = gsap.quickTo(node, 'y', { duration, ease: 'expo.out' });
+        const r = calm
+          ? null
+          : gsap.quickTo(node, 'rotation', {
+              duration: 0.9,
+              ease: 'power3.out',
+            });
         let active = '';
         let lastX = 0;
         const move = (event: PointerEvent) => {
@@ -52,7 +56,7 @@ export function ProjectCursor({
           // Clamp to viewport with generous padding for 380px media
           x(Math.min(window.innerWidth - 200, Math.max(200, event.clientX)));
           y(Math.min(window.innerHeight - 170, Math.max(170, event.clientY)));
-          r(gsap.utils.clamp(-6, 6, vx * 0.08));
+          r?.(gsap.utils.clamp(-6, 6, vx * 0.08));
           if (slug !== active || node.dataset.mode !== mode) {
             active = slug;
             node.dataset.mode = mode;
@@ -95,7 +99,7 @@ export function ProjectCursor({
             ease: 'power3.in',
             overwrite: 'auto',
           });
-          gsap.to(node, { rotation: 0, duration: 0.5, ease: 'power3.out' });
+          if (!calm) gsap.to(node, { rotation: 0, duration: 0.5, ease: 'power3.out' });
         };
         document.addEventListener('pointermove', move, { passive: true });
         document.addEventListener('pointerleave', hide);
@@ -108,7 +112,7 @@ export function ProjectCursor({
           window.removeEventListener('blur', hide);
           x.tween.kill();
           y.tween.kill();
-          r.tween.kill();
+          r?.tween.kill();
           gsap.killTweensOf(node);
           if (label) gsap.killTweensOf(label);
           node
@@ -125,8 +129,16 @@ export function ProjectCursor({
     };
   }, []);
   return (
-    <div ref={ref} className="project-cursor" aria-hidden="true">
-      <div className="cursor-media">
+    <>
+      <style>{`@media (prefers-reduced-motion:reduce){.project-cursor{display:none!important}}`}</style>
+      <div ref={ref} className="project-cursor" aria-hidden="true">
+      <div
+        className="cursor-media"
+        style={{
+          borderRadius: 22,
+          border: '1px solid rgba(199,220,168,0.22)',
+        }}
+      >
         {projects.map((project) => (
           <div
             data-art={project.slug}
@@ -136,7 +148,7 @@ export function ProjectCursor({
             <ProjectArt project={project} compact />
             <div className="cursor-caption">
               <span className="cursor-title">{project.title}</span>
-              <span className="cursor-meta">
+              <span className="cursor-meta" style={{ fontSize: 12 }}>
                 {project.category} · {project.context}
               </span>
             </div>
@@ -147,5 +159,6 @@ export function ProjectCursor({
         View ↗
       </span>
     </div>
+    </>
   );
 }

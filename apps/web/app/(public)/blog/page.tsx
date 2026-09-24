@@ -1,5 +1,6 @@
 import { ContactFooter } from '@/components/layout/contact-footer';
 import { BlogList } from '@/components/blogs/blog-list';
+import { Reveal } from '@/components/motion/reveal';
 import { TrackView } from '@/components/analytics/track-view';
 import { getBlogs, getProfile } from '@/lib/content';
 import { jsonLd, metadata as pageMetadata, siteUrl } from '@/lib/seo';
@@ -65,8 +66,21 @@ export default async function BlogIndex() {
         />
       ) : null}
       <main id="main" tabIndex={-1} className="inner-page section-shell">
-        <div className="page-heading">
-          <p className="section-label">
+        <style>{`.blog-index-label{font-size:12px !important;letter-spacing:0.16em !important;font-weight:600 !important;color:#527747 !important;}
+.blog-index-label::before{width:28px !important;height:2px !important;background:linear-gradient(90deg, #527747, #c7dca8) !important;}
+.blog-count{font-size:15px;color:#556479;font-variant-numeric:tabular-nums;margin:18px 0 0;}
+@media (max-width: 760px){.blog-count{font-size:15px;}}
+@media (max-width: 480px){.blog-index-wrap h1{font-size:clamp(32px, 9vw, 48px);}}`}</style>
+        <div className="page-heading blog-index-wrap">
+          <p
+            className="section-label blog-index-label"
+            style={{
+              fontSize: 12,
+              letterSpacing: '0.16em',
+              fontWeight: 600,
+              color: '#527747',
+            }}
+          >
             Writing / {String(blogs.length).padStart(2, '0')}
           </p>
           <h1>
@@ -80,9 +94,15 @@ export default async function BlogIndex() {
             <br />
             Longer than a commit message, shorter than a whitepaper.
           </p>
+          <p className="blog-count" aria-live="off">
+            {blogs.length} {blogs.length === 1 ? 'article' : 'articles'} and
+            counting.
+          </p>
         </div>
 
-        <BlogList blogs={blogs} />
+        <Reveal>
+          <BlogList blogs={blogs} />
+        </Reveal>
       </main>
       <ContactFooter />
     </>

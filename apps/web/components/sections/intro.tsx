@@ -1,6 +1,7 @@
-import Image from 'next/image';
 import type { Profile } from '@portfolio/types';
 import { TransitionLink } from '@/components/motion/transition-link';
+import Image from 'next/image';
+import { CraftFilm } from './craft-film';
 import styles from './intro.module.css';
 
 const stages = [
@@ -29,60 +30,38 @@ export function Intro({ profile }: { profile: Profile }) {
       aria-labelledby="approach-title"
     >
       <div className={styles.overview}>
-        <div className={styles.introduction}>
-          <p className="section-label">My approach</p>
-          <h2 id="approach-title">
-            Thoughtful software.
+        <div className={styles.introduction} data-intro-reveal>
+          <p className="section-label">01 / My approach</p>
+          <h2 id="approach-title" data-intro-title>
+            Software with purpose.
             <br />
-            From idea to everyday use.
+            <span>Details that matter.</span>
           </h2>
-          <p className={styles.lead}>
-            I build web applications, internal tools, and practical AI features
-            with attention to the details that matter: usability, performance,
-            and reliable delivery.
+          <p className={styles.lead} data-intro-reveal>
+            I turn complex problems into clear, useful web experiences. From the
+            first question to the final release, I bring design, engineering,
+            and quality together.
           </p>
-          <TransitionLink href="/projects" className={styles.link}>
-            Explore my development projects <span aria-hidden="true">↗</span>
+          <TransitionLink
+            href="/projects"
+            className={styles.link}
+            data-intro-reveal
+          >
+            Explore my projects <span aria-hidden="true">↗</span>
           </TransitionLink>
         </div>
-        <aside className={styles.profile} aria-label={`About ${profile.name}`}>
-          <div className={styles.photoWindow} data-portrait-window>
-            <Image
-              src="/assets/hero-portrait.webp"
-              alt={profile.name}
-              width={890}
-              height={1010}
-              sizes="(max-width: 900px) 80vw, 32vw"
-              data-portrait-drift
-            />
-            <span>Behind the code</span>
-          </div>
-          <h3>{profile.name}</h3>
-          <p className={styles.role}>{profile.role}</p>
-          <p className={styles.bio}>{profile.description}</p>
-          <dl className={styles.facts}>
-            <div>
-              <dt>Based in</dt>
-              <dd>{profile.location}</dd>
-            </div>
-            {profile.languages ? (
-              <div>
-                <dt>Languages</dt>
-                <dd>{profile.languages}</dd>
-              </div>
-            ) : null}
-          </dl>
-          <TransitionLink href="/about" className={styles.link}>
-            More about {profile.name.split(' ')[0]}{' '}
-            <span aria-hidden="true">↗</span>
-          </TransitionLink>
-        </aside>
+        <div data-intro-film data-craft-frame>
+          <CraftFilm />
+        </div>
       </div>
-      <div className={styles.process}>
-        <h3 className="section-label">How I work</h3>
+      <div className={styles.process} data-intro-reveal>
+        <div className={styles.processHeading}>
+          <h3>How I work</h3>
+          <p>Three steps. One thoughtful experience.</p>
+        </div>
         <ol className={styles.stages}>
           {stages.map((stage, index) => (
-            <li className={styles.stage} key={stage.title}>
+            <li className={styles.stage} key={stage.title} data-stage>
               <span className={styles.number} aria-hidden="true">
                 0{index + 1}
               </span>
@@ -92,6 +71,25 @@ export function Intro({ profile }: { profile: Profile }) {
           ))}
         </ol>
       </div>
+      <aside className={styles.profile} aria-label={`About ${profile.name}`}>
+        <div className={styles.photoWindow}>
+          <Image
+            src="/assets/hero-portrait.webp"
+            alt={profile.name}
+            fill
+            sizes="72px"
+          />
+        </div>
+        <div>
+          <h3>{profile.name}</h3>
+          <p className={styles.role}>
+            {profile.role} · {profile.location}
+          </p>
+        </div>
+        <TransitionLink href="/about" className={styles.link}>
+          More about me <span aria-hidden="true">↗</span>
+        </TransitionLink>
+      </aside>
     </section>
   );
 }

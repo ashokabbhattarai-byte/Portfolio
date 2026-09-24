@@ -1,4 +1,5 @@
 import { getBlogs, getExperience, getProjects } from '@/lib/content';
+import { StatsCount } from './stats-count';
 
 export async function StatsRibbon() {
   const [projects, blogs, experience] = await Promise.all([
@@ -19,7 +20,7 @@ export async function StatsRibbon() {
     <div className="stats-ribbon" aria-label="Portfolio at a glance">
       <div className="stat live">
         <span className="stat-value">
-          {live} <em>live</em>
+          <StatsCount value={live} /> <em>live</em>
         </span>
         <span className="stat-label">
           In production with real users — not a prototype
@@ -27,7 +28,7 @@ export async function StatsRibbon() {
       </div>
       <div className="stat">
         <span className="stat-value">
-          {projects.length} <em>projects</em>
+          <StatsCount value={projects.length} /> <em>projects</em>
         </span>
         <span className="stat-label">
           Full-stack, applied AI and blockchain delivery
@@ -35,7 +36,7 @@ export async function StatsRibbon() {
       </div>
       <div className="stat">
         <span className="stat-value">
-          {years} <em>{years === 1 ? 'year' : 'years'}</em>
+          <StatsCount value={years} /> <em>{years === 1 ? 'year' : 'years'}</em>
         </span>
         <span className="stat-label">
           {company
@@ -45,7 +46,7 @@ export async function StatsRibbon() {
       </div>
       <div className="stat">
         <span className="stat-value">
-          {blogs.length} <em>articles</em>
+          <StatsCount value={blogs.length} /> <em>articles</em>
         </span>
         <span className="stat-label">
           Written on architecture, AI and quality assurance

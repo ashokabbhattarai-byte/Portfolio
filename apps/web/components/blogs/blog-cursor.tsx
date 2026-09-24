@@ -104,7 +104,10 @@ export function BlogCursor({
         {blogs.map((post) => {
           const cover =
             post.images?.find(
-              (i) => i.placement === 'COVER' || i.placement === 'HERO',
+              (i) =>
+                i.placement === 'COVER' ||
+                i.placement === 'THUMBNAIL' ||
+                i.placement === 'HERO',
             )?.url ?? post.coverImage;
           return (
             <div
@@ -119,6 +122,7 @@ export function BlogCursor({
                     width: '100%',
                     height: '100%',
                     overflow: 'hidden',
+                    borderRadius: 22,
                   }}
                 >
                   <Image
@@ -135,6 +139,7 @@ export function BlogCursor({
                     width: '100%',
                     height: '100%',
                     background: '#f4f3ee',
+                    color: '#0c213c',
                     display: 'grid',
                     placeItems: 'center',
                     fontSize: 32,
@@ -145,7 +150,7 @@ export function BlogCursor({
               )}
               <div className="cursor-caption">
                 <span className="cursor-title">{post.title}</span>
-                <span className="cursor-meta">
+                <span className="cursor-meta" style={{ fontSize: 12 }}>
                   {post.tags.slice(0, 2).join(' · ')}
                 </span>
               </div>
@@ -153,7 +158,7 @@ export function BlogCursor({
           );
         })}
       </div>
-      <span className="cursor-label" style={{ background: '#0a66c2' }}>
+      <span className="cursor-label" style={{ background: '#527747' }}>
         Read ↗
       </span>
     </div>

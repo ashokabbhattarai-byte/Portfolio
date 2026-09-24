@@ -1,8 +1,26 @@
 import { ProjectExplorer } from '@/components/projects/project-explorer';
 import { ContactFooter } from '@/components/layout/contact-footer';
 import { TrackView } from '@/components/analytics/track-view';
+import { Reveal } from '@/components/motion/reveal';
+import { StatsCount } from '@/components/sections/stats-count';
 import { getProjects } from '@/lib/content';
 import { jsonLd, metadata as pageMetadata, siteUrl } from '@/lib/seo';
+
+/* Navy stats band in the landing stats-ribbon language (bg #0c213c, 22px
+   radius, lime border + 80px grid). Counters reuse the Remotion StatsCount
+   pattern; the pulse/grid fallbacks for calm + reduced-motion live here so
+   globals.css stays untouched. */
+const statsBandStyles = `
+.projects-stats-band .stat{transition:background .35s ease}
+.projects-stats-band .stat:hover{background:rgba(199,220,168,0.06)}
+.projects-stats-band .live-dot{width:8px;height:8px;align-self:center;border-radius:50%;background:#8ee9b1;box-shadow:0 0 0 4px rgba(142,233,177,0.18);animation:projects-live-pulse 1.8s ease-in-out infinite;flex-shrink:0}
+@keyframes projects-live-pulse{0%,100%{box-shadow:0 0 0 4px rgba(142,233,177,0.18)}50%{box-shadow:0 0 0 8px rgba(142,233,177,0.06)}}
+@media (max-width:600px){.projects-stats-band .stats-grid{grid-template-columns:1fr!important}.projects-stats-band .stat{border-right:0!important;border-bottom:1px solid rgba(255,255,255,0.1)}.projects-stats-band .stat:last-child{border-bottom:0}}
+@media (max-width:480px){.projects-stats-band .stat{padding:22px!important}.projects-stats-band .stat-value{font-size:32px!important}}
+@media (max-width:360px){.projects-stats-band .stat{padding:18px!important}}
+[data-flow='calm'] .projects-stats-band .live-dot{animation:none}
+@media (prefers-reduced-motion:reduce){.projects-stats-band .live-dot{animation:none}.projects-stats-band .stat{transition:none}}
+`;
 const validTabs = ['All', 'Full stack', 'AI', 'Blockchain'] as const;
 type Tab = (typeof validTabs)[number];
 
@@ -128,21 +146,137 @@ export default async function Projects({
         />
       ) : null}
       <main id="main" tabIndex={-1} className="inner-page section-shell">
-        <div className="page-heading">
+        <style>{statsBandStyles}</style>
+        <Reveal className="page-heading">
           <p className="section-label">
             {initialTab === 'All'
               ? 'Selected projects'
               : `${initialTab} projects`}{' '}
             / {String(visible.length).padStart(2, '0')}
           </p>
-          <h1>
+          <h1 style={{ fontSize: 'clamp(40px,4.6vw,64px)', color: '#0c213c' }}>
             {copy.h1[0]}
             <br />
             {copy.h1[1]}
           </h1>
-          <p className="heading-note">
+          <p
+            className="heading-note"
+            style={{
+              marginLeft: 0,
+              maxWidth: '64ch',
+              fontSize: 17,
+              lineHeight: 1.7,
+              color: '#556479',
+            }}
+          >
             {copy.note(projects.length, liveCount)}
           </p>
+        </Reveal>
+        <div
+          className="projects-stats-band"
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            background: '#0c213c',
+            border: '1px solid rgba(199,220,168,0.18)',
+            borderRadius: 22,
+            marginBottom: 48,
+            boxShadow:
+              '0 22px 64px rgba(12,33,60,0.22), inset 0 1px 0 rgba(255,255,255,0.07)',
+          }}
+        >
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage:
+                'linear-gradient(rgba(199,220,168,0.11) 1px, transparent 1px), linear-gradient(90deg, rgba(199,220,168,0.11) 1px, transparent 1px)',
+              backgroundSize: '80px 80px',
+              opacity: 0.14,
+              maskImage:
+                'radial-gradient(ellipse at 50% 0%, #000, transparent 75%)',
+              WebkitMaskImage:
+                'radial-gradient(ellipse at 50% 0%, #000, transparent 75%)',
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            className="stats-grid"
+            style={{
+              position: 'relative',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+            }}
+          >
+            <div
+              className="stat"
+              style={{
+                padding: '28px 32px',
+                borderRight: '1px solid rgba(255,255,255,0.1)',
+              }}
+            >
+              <span
+                className="stat-value"
+                style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 10,
+                  color: '#f4f3ee',
+                  fontSize: 'clamp(34px,4vw,52px)',
+                  letterSpacing: '-0.04em',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                <StatsCount value={projects.length} />
+                <em
+                  style={{
+                    color: '#c7dca8',
+                    fontStyle: 'normal',
+                    fontSize: 15,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  total
+                </em>
+              </span>
+              <span style={{ color: '#b7c8bc', fontSize: 15 }}>
+                Projects documented end to end
+              </span>
+            </div>
+            <div className="stat live" style={{ padding: '28px 32px' }}>
+              <span
+                className="stat-value"
+                style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 10,
+                  color: '#f4f3ee',
+                  fontSize: 'clamp(34px,4vw,52px)',
+                  letterSpacing: '-0.04em',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                <span className="live-dot" aria-hidden="true" />
+                <StatsCount value={liveCount} />
+                <em
+                  style={{
+                    color: '#8ee9b1',
+                    fontStyle: 'normal',
+                    fontSize: 15,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  live
+                </em>
+              </span>
+              <span style={{ color: '#b7c8bc', fontSize: 15 }}>
+                Live in production today
+              </span>
+            </div>
+          </div>
         </div>
         <ProjectExplorer projects={projects} initialTab={initialTab} />
       </main>

@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { ContactFooter } from '@/components/layout/contact-footer';
 import { ResumeLinks } from '@/components/ui/resume-links';
 import { Reveal } from '@/components/motion/reveal';
+import { StatsCount } from '@/components/sections/stats-count';
 import { TrackView } from '@/components/analytics/track-view';
 import {
   getCertifications,
@@ -108,42 +109,49 @@ export default async function About() {
               sizes="(max-width: 700px) 100vw, 45vw"
             />
           </div>
-          <div>
-            <span className="direction-arrow" aria-hidden="true">
-              ↘
-            </span>
-            <h2 id="about-intro-title">
-              I’m {firstName}.
-              <br />
-              <span style={{ color: 'var(--accent)' }}>
-                I turn scattered information into usable products.
+          <Reveal>
+            <div>
+              <span
+                className="direction-arrow"
+                aria-hidden="true"
+                style={{ fontSize: 50 }}
+              >
+                ↘
               </span>
-            </h2>
-            <p>{profile.description}</p>
-            {projects.length > 0 ? (
-              <p>
-                Across {projects.length} projects — {liveCount} of them live — I
-                have worked on{' '}
-                {projects
-                  .map((p) => p.title)
-                  .slice(0, 2)
-                  .join(' and ')}
-                , covering full-stack delivery, applied AI and blockchain
-                verification. Every one of them started from a problem someone
-                actually had.
-              </p>
-            ) : null}
-            {skills.length > 0 ? (
-              <p>
-                Day to day that means{' '}
-                {skills[0]?.items.split(',').slice(0, 3).join(', ')} on the
-                build side, and structured quality assurance on the other —
-                because a feature is not finished until it holds up in
-                production.
-              </p>
-            ) : null}
-            <ResumeLinks />
-          </div>
+              <h2 id="about-intro-title">
+                I’m {firstName}.
+                <br />
+                <span style={{ color: 'var(--accent)' }}>
+                  I turn scattered information into usable products.
+                </span>
+              </h2>
+              <p>{profile.description}</p>
+              {projects.length > 0 ? (
+                <p>
+                  Across <StatsCount value={projects.length} /> projects —{' '}
+                  <StatsCount value={liveCount} /> of them live — I have worked
+                  on{' '}
+                  {projects
+                    .map((p) => p.title)
+                    .slice(0, 2)
+                    .join(' and ')}
+                  , covering full-stack delivery, applied AI and blockchain
+                  verification. Every one of them started from a problem someone
+                  actually had.
+                </p>
+              ) : null}
+              {skills.length > 0 ? (
+                <p>
+                  Day to day that means{' '}
+                  {skills[0]?.items.split(',').slice(0, 3).join(', ')} on the
+                  build side, and structured quality assurance on the other —
+                  because a feature is not finished until it holds up in
+                  production.
+                </p>
+              ) : null}
+              <ResumeLinks />
+            </div>
+          </Reveal>
         </section>
         <Reveal>
           <section
@@ -159,73 +167,84 @@ export default async function About() {
                   <span>{item.dates}</span>
                 </p>
                 <div>
-                  <h3>{item.role}</h3>
+                  <h3 style={{ fontSize: 'clamp(20px,1.6vw,26px)' }}>
+                    {item.role}
+                  </h3>
                   <p>{item.detail}</p>
                 </div>
               </article>
             ))}
           </section>
         </Reveal>
-        <section className="skills-section" aria-labelledby="skills-title">
-          <h2 id="skills-title">
-            Skills
-            <br />
-            and tooling.
-          </h2>
-          <div>
-            {skills.map((skill) => (
-              <div className="skill-row" key={skill.id}>
-                <h3>{skill.name}</h3>
-                <p>{skill.items}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-        <section
-          className="education-section"
-          aria-labelledby="education-title"
-        >
-          <h2 id="education-title">Education and certifications</h2>
-          <div>
-            {education.map((item) => (
-              <Fragment key={item.id}>
-                <h3>{item.award}</h3>
-                {/* One dateline: school, then whatever else is recorded. */}
-                <p>
-                  {[item.school, item.dates, ...item.notes]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </p>
-              </Fragment>
-            ))}
-            {certifications.length > 0 && (
-              <>
-                <h3>Certifications</h3>
-                <ul>
-                  {certifications.map((item) => (
-                    <li key={item.id}>
-                      {item.url ? (
-                        <a
-                          className="text-link"
-                          href={item.url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {item.title}
-                        </a>
-                      ) : (
-                        item.title
-                      )}{' '}
-                      — {item.issuer}, {item.date}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-            <h3>Languages</h3>
-            <p>{profile.languages}</p>
-          </div>
-        </section>
+        <Reveal>
+          <section className="skills-section" aria-labelledby="skills-title">
+            <h2 id="skills-title">
+              Skills
+              <br />
+              and tooling.
+            </h2>
+            <div>
+              {skills.map((skill) => (
+                <div className="skill-row" key={skill.id}>
+                  <h3>{skill.name}</h3>
+                  <p>{skill.items}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </Reveal>
+        <Reveal>
+          <section
+            className="education-section"
+            aria-labelledby="education-title"
+          >
+            <h2 id="education-title">Education and certifications</h2>
+            <div>
+              {education.map((item) => (
+                <Fragment key={item.id}>
+                  <h3>{item.award}</h3>
+                  {/* One dateline: school, then whatever else is recorded. */}
+                  <p>
+                    {[item.school, item.dates, ...item.notes]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                </Fragment>
+              ))}
+              {certifications.length > 0 && (
+                <>
+                  <h3>Certifications</h3>
+                  <ul>
+                    {certifications.map((item) => (
+                      <li key={item.id}>
+                        {item.url ? (
+                          <a
+                            className="text-link"
+                            href={item.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              minHeight: 44,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            {item.title}
+                          </a>
+                        ) : (
+                          item.title
+                        )}{' '}
+                        — {item.issuer}, {item.date}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              <h3>Languages</h3>
+              <p>{profile.languages}</p>
+            </div>
+          </section>
+        </Reveal>
       </main>
       <ContactFooter />
     </>

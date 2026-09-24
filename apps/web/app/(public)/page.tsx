@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import styles from './landing.module.css';
+import Image from 'next/image';
 import { TransitionLink } from '@/components/motion/transition-link';
 import { Hero } from '@/components/sections/hero';
 import { LandingScroll } from '@/components/motion/landing-scroll';
@@ -83,16 +83,21 @@ export default async function Home() {
         <Intro profile={profile} />
         <StatsRibbon />
         <FeaturedProjects />
-        <section className={styles.interlude} aria-labelledby="personal-title">
+        <section
+          className={styles.interlude}
+          data-interlude
+          aria-labelledby="personal-title"
+        >
           <div className={styles.portraitStrip} data-portrait-window>
             <Image
               src="/assets/hero-portrait.webp"
               alt={`${profile.name} in the office`}
-              width={890}
-              height={1010}
-              sizes="(max-width: 760px) 100vw, 46vw"
-              data-portrait-drift
+              fill
+              sizes="(max-width: 760px) 90vw, 46vw"
             />
+            <span className={styles.portraitCaption}>
+              ASHOK BHATTARAI <span>LALITPUR, NEPAL ↗</span>
+            </span>
           </div>
           <div className={styles.personalCopy} data-landing-reveal>
             <p>A person behind every project.</p>

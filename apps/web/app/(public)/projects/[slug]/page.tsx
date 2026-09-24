@@ -7,6 +7,17 @@ import { Reveal } from '@/components/motion/reveal';
 import { ViewCount } from '@/components/analytics/view-count';
 import { TrackView } from '@/components/analytics/track-view';
 import { jsonLd, metadata as pageMetadata, siteUrl } from '@/lib/seo';
+
+/* Case-page consistency without touching globals.css: paper/navy pill hover,
+   1-column case-meta at 480px/360px, and calm + reduced-motion fallbacks for
+   the scrubbed visual. */
+const caseStyles = `
+.case-page .case-meta a.pill:hover{background:#e5e9dc;border-color:#527747;color:#0c213c;transform:translateY(-1px)}
+@media (max-width:480px){.case-page .case-meta{grid-template-columns:1fr}.case-page .case-meta a.pill{min-height:44px;width:100%}}
+@media (max-width:360px){.case-page .case-meta{grid-template-columns:1fr;gap:20px}}
+[data-flow='calm'] .case-page .case-visual{transform:none!important}
+@media (prefers-reduced-motion:reduce){.case-page .case-visual,.case-page .project-gallery img{transition:none!important;transform:none!important}.case-page .case-meta a.pill{transition:none}}
+`;
 export async function generateStaticParams() {
   const projects = await getProjects();
   return projects.map((p) => ({ slug: p.slug }));
@@ -105,6 +116,7 @@ export default async function CaseStudy({
   return (
     <>
       <TrackView path={`/projects/${project.slug}`} projectId={project.id} />
+      <style>{caseStyles}</style>
       <main id="main" tabIndex={-1} className="case-page">
         {/* Via `jsonLd`, which escapes the angle brackets for real: the
             '\u003c' this used to pass to `replace` is parsed as '<' before
@@ -126,8 +138,8 @@ export default async function CaseStudy({
                 style={{
                   display: 'flex',
                   gap: 8,
-                  fontSize: 13,
-                  color: 'var(--muted)',
+                  fontSize: 15,
+                  color: '#556479',
                   listStyle: 'none',
                   padding: 0,
                   margin: 0,
@@ -137,7 +149,12 @@ export default async function CaseStudy({
                   <TransitionLink
                     href="/"
                     className="text-link"
-                    style={{ fontSize: 13 }}
+                    style={{
+                      fontSize: 15,
+                      minHeight: 44,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                    }}
                   >
                     Home
                   </TransitionLink>
@@ -147,7 +164,12 @@ export default async function CaseStudy({
                   <TransitionLink
                     href="/projects"
                     className="text-link"
-                    style={{ fontSize: 13 }}
+                    style={{
+                      fontSize: 15,
+                      minHeight: 44,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                    }}
                   >
                     Projects
                   </TransitionLink>
@@ -167,24 +189,46 @@ export default async function CaseStudy({
                 </li>
               </ol>
             </nav>
-            <h1>{project.title}</h1>
+            <h1 style={{ fontSize: 'clamp(40px,4.6vw,64px)', color: '#0c213c' }}>
+              {project.title}
+            </h1>
             <p className="case-tagline">{project.summary}</p>
           </div>
           <div className="case-meta">
             <div>
-              <span>Role</span>
+              <span
+                className="section-label"
+                style={{ marginBottom: 0, fontSize: 12, letterSpacing: '0.16em' }}
+              >
+                Role
+              </span>
               <p>{project.role}</p>
             </div>
             <div>
-              <span>Context</span>
+              <span
+                className="section-label"
+                style={{ marginBottom: 0, fontSize: 12, letterSpacing: '0.16em' }}
+              >
+                Context
+              </span>
               <p>{project.context}</p>
             </div>
             <div>
-              <span>Discipline</span>
+              <span
+                className="section-label"
+                style={{ marginBottom: 0, fontSize: 12, letterSpacing: '0.16em' }}
+              >
+                Discipline
+              </span>
               <p>{project.category}</p>
             </div>
             <div>
-              <span>Views</span>
+              <span
+                className="section-label"
+                style={{ marginBottom: 0, fontSize: 12, letterSpacing: '0.16em' }}
+              >
+                Views
+              </span>
               <p>
                 <ViewCount path={`/projects/${project.slug}`} />
               </p>
@@ -196,13 +240,34 @@ export default async function CaseStudy({
                 rel="noreferrer"
                 className="pill"
                 aria-label={`Open the live ${project.title} site in a new tab`}
+                style={{
+                  background: '#f4f3ee',
+                  color: '#0c213c',
+                  borderColor: '#c8d1df',
+                  minHeight: 56,
+                  borderRadius: 32,
+                  fontSize: 16,
+                  padding: '14px 28px',
+                  gap: 12,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
                 Visit live site <span aria-hidden="true">↗</span>
               </a>
             )}
           </div>
         </div>
-        <div className="case-visual">
+        <div
+          className="case-visual"
+          data-project-art
+          style={{
+            borderRadius: 22,
+            border: '1px solid rgba(12,33,60,0.1)',
+            overflow: 'hidden',
+          }}
+        >
           <ProjectArt project={project} />
         </div>
         <div className="section-shell case-story">
@@ -220,6 +285,10 @@ export default async function CaseStudy({
                 width={1440}
                 height={1000}
                 sizes="(max-width: 700px) 100vw, 88vw"
+                style={{
+                  borderRadius: 22,
+                  border: '1px solid rgba(12,33,60,0.1)',
+                }}
               />
               <figcaption>
                 {project.title} in use · {project.context}
@@ -232,39 +301,50 @@ export default async function CaseStudy({
               <br />A measured contribution.
             </h2>
             <div>
-              <section>
-                <h3>The problem</h3>
-                <p>{project.challenge}</p>
-              </section>
-              <section>
-                <h3>My contribution</h3>
-                <p>{project.contribution}</p>
-              </section>
-              <section>
-                <h3>The outcome</h3>
-                <p>{project.outcome}</p>
-              </section>
-              {project.features.length > 0 && (
+              <Reveal>
                 <section>
-                  <h3>Key capabilities</h3>
+                  <h3>The problem</h3>
+                  <p>{project.challenge}</p>
+                </section>
+              </Reveal>
+              <Reveal>
+                <section>
+                  <h3>My contribution</h3>
+                  <p>{project.contribution}</p>
+                </section>
+              </Reveal>
+              <Reveal>
+                <section>
+                  <h3>The outcome</h3>
+                  <p>{project.outcome}</p>
+                </section>
+              </Reveal>
+              {project.features.length > 0 && (
+                <Reveal>
+                  <section>
+                    <h3>Key capabilities</h3>
+                    <ul>
+                      {project.features.map((feature) => (
+                        <li key={feature}>{feature}</li>
+                      ))}
+                    </ul>
+                  </section>
+                </Reveal>
+              )}
+              <Reveal>
+                <section>
+                  <h3>Focus areas</h3>
                   <ul>
-                    {project.features.map((feature) => (
-                      <li key={feature}>{feature}</li>
+                    {project.focus.map((f) => (
+                      <li key={f}>{f}</li>
                     ))}
                   </ul>
                 </section>
-              )}
-              <section>
-                <h3>Focus areas</h3>
-                <ul>
-                  {project.focus.map((f) => (
-                    <li key={f}>{f}</li>
-                  ))}
-                </ul>
-              </section>
+              </Reveal>
               {/* The provenance note: it used to name SuchanaAI whatever the
                   project was, which misattributed every other case study. */}
-              <p className="case-note">
+              <Reveal>
+                <p className="case-note">
                 {project.live ? (
                   <>
                     My role and dates are documented in my résumé. Features and
@@ -282,13 +362,27 @@ export default async function CaseStudy({
                 ) : (
                   'This overview reflects the project information in my résumé. The visual is an original illustration; internal implementation details are not published.'
                 )}
-              </p>
+                </p>
+              </Reveal>
             </div>
           </div>
         </div>
       </main>
-      <section className="next-project" aria-labelledby="next-project-label">
-        <p id="next-project-label">
+      <section
+        className="next-project"
+        aria-labelledby="next-project-label"
+        style={{ background: '#0c213c' }}
+      >
+        <p
+          id="next-project-label"
+          className="section-label"
+          style={{
+            color: '#c7dca8',
+            fontSize: 12,
+            letterSpacing: '0.16em',
+            justifyContent: 'center',
+          }}
+        >
           {next.slug === project.slug
             ? 'Explore the portfolio'
             : 'Next project'}
@@ -306,7 +400,11 @@ export default async function CaseStudy({
             <ProjectArt project={next} />
           </div>
         </TransitionLink>
-        <TransitionLink href="/projects" className="text-link">
+        <TransitionLink
+          href="/projects"
+          className="text-link"
+          style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center' }}
+        >
           Back to all projects
         </TransitionLink>
       </section>
