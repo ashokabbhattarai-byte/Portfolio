@@ -2550,7 +2550,11 @@ body {
 .article-sidebar li a[aria-current='true'] {
   color: var(--accent);
   border-left-color: var(--accent);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 8%, transparent),
+    transparent
+  );
 }
 .article-sidebar .subheading {
   padding-left: 28px;

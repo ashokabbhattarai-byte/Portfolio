@@ -172,9 +172,7 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
             onFocus={(e) =>
               (e.currentTarget.style.borderColor = 'var(--accent)')
             }
-            onBlur={(e) =>
-              (e.currentTarget.style.borderColor = 'var(--line)')
-            }
+            onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--line)')}
           />
           <span
             aria-hidden="true"
