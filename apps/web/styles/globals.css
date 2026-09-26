@@ -47,6 +47,7 @@ html {
      result stutters on anchor jumps. Restored only when Lenis is off. */
   scroll-behavior: auto;
   scroll-padding-top: 40px;
+  overflow-x: clip;
 }
 html:not(.lenis) {
   scroll-behavior: smooth;
@@ -59,6 +60,8 @@ body {
   font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  min-width: 0;
 }
 button,
 a {
@@ -3603,6 +3606,25 @@ body {
   .contact-page-grid {
     grid-template-columns: 1fr;
   }
+  .article-body-layout {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  .article-sidebar {
+    width: 100% !important;
+    position: static !important;
+  }
+  .project-title h3,
+  .grid .project-title h3 {
+    font-size: clamp(24px, 6.5vw, 32px);
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .page-heading h1 {
+    font-size: clamp(28px, 8vw, 56px);
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
 }
 @media (max-width: 600px) {
   .article-meta {
@@ -3611,11 +3633,29 @@ body {
   .blog-prose pre {
     padding: 16px;
     font-size: 14px;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+@media (max-width: 540px) {
+  .stats-ribbon {
+    grid-template-columns: 1fr !important;
+    margin-inline: var(--gutter) !important;
+  }
+  .stat {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+    padding: 18px 16px !important;
+  }
+  .stat:last-child {
+    border-bottom: 0 !important;
   }
 }
 @media (max-width: 480px) {
   .about-intro h2 {
-    font-size: 32px;
+    font-size: clamp(24px, 7vw, 32px);
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .experience-row h3,
   .skills-section h2,
@@ -3632,7 +3672,9 @@ body {
   }
   .contact-footer h2,
   .contact-heading h2 {
-    font-size: clamp(34px, 10vw, 48px);
+    font-size: clamp(30px, 9vw, 44px);
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .footer-bottom {
     font-size: 12px;
@@ -3642,29 +3684,46 @@ body {
   }
   .article-page .article-heading h1,
   .blog-prose h1 {
-    font-size: clamp(32px, 9vw, 48px);
+    font-size: clamp(28px, 8vw, 44px);
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .blog-prose {
-    font-size: 17px;
-    line-height: 1.75;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .blog-prose h2 {
-    font-size: 26px;
+    font-size: 24px;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .blog-prose h3 {
-    font-size: 22px;
+    font-size: 20px;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .case-page .case-meta {
     grid-template-columns: 1fr;
   }
   .filters {
     width: 100%;
+    gap: 8px;
+  }
+  .filters button {
+    padding: 10px 18px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .contact-email {
+    font-size: clamp(17px, 5.2vw, 24px) !important;
   }
   .navigation-drawer {
     padding: 88px 24px 32px;
   }
   .drawer-link {
-    font-size: 40px;
+    font-size: 34px;
   }
   .drawer-close {
     width: 48px;
@@ -3676,7 +3735,7 @@ body {
     aspect-ratio: 1 / 1;
   }
   .contact-email {
-    font-size: 17px;
+    font-size: 16px !important;
   }
   .footer-bottom {
     font-size: 11px;
@@ -3685,7 +3744,10 @@ body {
     flex-wrap: wrap;
   }
   .case-page .page-heading h1 {
-    font-size: 34px;
+    font-size: 28px !important;
+  }
+  .drawer-link {
+    font-size: 28px;
   }
 }
 [data-flow='calm'] .about-photo,

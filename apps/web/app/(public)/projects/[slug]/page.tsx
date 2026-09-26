@@ -191,8 +191,10 @@ export default async function CaseStudy({
             </nav>
             <h1
               style={{
-                fontSize: 'clamp(40px,4.6vw,64px)',
+                fontSize: 'clamp(28px, 6vw, 64px)',
                 color: 'var(--deep)',
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
               }}
             >
               {project.title}

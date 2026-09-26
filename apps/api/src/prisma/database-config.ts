@@ -41,7 +41,10 @@ export function databaseUrl(env: Record<string, string | undefined>): string {
   if (
     url.hostname.endsWith('.pooler.supabase.com') &&
     url.port === '5432' &&
-    (env.VERCEL === '1' || env.VERCEL === 'true' || env.NODE_ENV === 'production' || env.USE_TRANSACTION_POOLER === 'true')
+    (env.VERCEL === '1' ||
+      env.VERCEL === 'true' ||
+      env.NODE_ENV === 'production' ||
+      env.USE_TRANSACTION_POOLER === 'true')
   ) {
     url.port = '6543';
   }

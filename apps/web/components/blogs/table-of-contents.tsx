@@ -71,10 +71,11 @@ export function TableOfContents({ headings }: { headings: TocItem[] }) {
 .article-sidebar li.toc-sub{padding-left:28px;}
 .article-sidebar li.toc-sub .toc-link{font-size:14px;}
 @media (max-width: 800px){
-.toc-list{display:flex;gap:8px;overflow-x:auto;border-left:0 !important;padding-bottom:8px;}
+.toc-list{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-left:0 !important;padding-bottom:8px;width:100%;max-width:100%;}
+.toc-list::-webkit-scrollbar{display:none;}
 .toc-list li{flex-shrink:0;}
 .toc-list li.toc-sub{padding-left:0;}
-.article-sidebar .toc-link{min-height:44px;border:1px solid rgba(82,119,71,0.25);border-left:1px solid rgba(82,119,71,0.25);border-radius:999px;padding:8px 16px;white-space:nowrap;font-size:14px;color:color-mix(in srgb, var(--accent) 60%, transparent);background:color-mix(in srgb, var(--highlight) calc(0.12 * 100%), transparent);}
+.article-sidebar .toc-link{min-height:40px;border:1px solid rgba(82,119,71,0.25);border-left:1px solid rgba(82,119,71,0.25);border-radius:999px;padding:6px 14px;white-space:nowrap;font-size:13.5px;color:color-mix(in srgb, var(--accent) 60%, transparent);background:color-mix(in srgb, var(--highlight) calc(0.12 * 100%), transparent);}
 .article-sidebar .toc-link[aria-current='true']{background:color-mix(in srgb, var(--accent) 60%, transparent);color:var(--paper);border-color:color-mix(in srgb, var(--accent) 60%, transparent);}
 }`}</style>
       <p className="toc-label">On this page</p>

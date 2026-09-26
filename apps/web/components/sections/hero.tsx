@@ -38,14 +38,22 @@ export function Hero({
         kinetic.forEach((node, index) => {
           const text = node.textContent ?? '';
           node.setAttribute('aria-label', text);
-          node.innerHTML = [...text]
+          const words = text.trim().split(/\s+/);
+          node.innerHTML = words
             .map(
-              (character) =>
-                `<span aria-hidden="true">${character === ' ' ? '&nbsp;' : character}</span>`,
+              (word) =>
+                `<span style="display:inline-block;white-space:nowrap;">${[
+                  ...word,
+                ]
+                  .map(
+                    (character) =>
+                      `<span data-kinetic-char aria-hidden="true" style="display:inline-block;">${character}</span>`,
+                  )
+                  .join('')}</span>`,
             )
-            .join('');
+            .join(' ');
           entry.from(
-            node.querySelectorAll('span'),
+            node.querySelectorAll('[data-kinetic-char]'),
             {
               yPercent: 130,
               opacity: 0,
@@ -616,6 +624,7 @@ export function Hero({
               });
               // keep runner playing at subtle pace
               runnerTl?.play();
+              stopScanInterpolate();
               gsap.to(photo, {
                 rotation: 0.6,
                 duration: 0.6,

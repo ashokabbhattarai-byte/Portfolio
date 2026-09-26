@@ -28,10 +28,9 @@ import type {
 } from '@portfolio/types';
 import { loginUrl } from './auth';
 
-const API_ORIGIN = (process.env.API_URL ?? 'https://api.ashokbhattarai1.com.np').replace(
-  /\/+$/,
-  '',
-);
+const API_ORIGIN = (
+  process.env.API_URL ?? 'https://api.ashokbhattarai1.com.np'
+).replace(/\/+$/, '');
 
 /** The API may serialise these; the wire types do not promise them. */
 export type Timestamped = { updatedAt?: string; createdAt?: string };

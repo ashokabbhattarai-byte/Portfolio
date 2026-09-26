@@ -154,7 +154,8 @@ export default async function BlogPost({
       <TrackView path={`/blog/${post.slug}`} blogId={post.id} />
       <ReadingProgress />
       <main id="main" tabIndex={-1} className="article-page">
-        <style>{`.article-tags span{min-height:44px;display:inline-flex;align-items:center;transition:border-color 0.3s ease, color 0.3s ease;}
+        <style>{`
+.article-tags span{min-height:36px;display:inline-flex;align-items:center;transition:border-color 0.3s ease, color 0.3s ease;}
 .article-tags span:hover{border-color:color-mix(in srgb, var(--accent) 60%, transparent);color:color-mix(in srgb, var(--accent) 60%, transparent);}
 .article-breadcrumb{flex-wrap:wrap;}
 .article-breadcrumb a{min-height:44px;display:inline-flex;align-items:center;font-size:15px;}
@@ -165,10 +166,121 @@ export default async function BlogPost({
 .article-next{background:#fff;border:1px solid var(--line);border-radius:22px;padding:40px;transition:transform 0.42s cubic-bezier(0.16,1,0.3,1), border-color 0.34s ease, box-shadow 0.42s cubic-bezier(0.16,1,0.3,1);}
 .article-next:hover{transform:translateY(-4px);border-color:rgba(82,119,71,0.35);box-shadow:0 12px 32px rgba(21,38,60,0.08);}
 .article-next h2{font-size:clamp(40px,4.6vw,64px);font-weight:450;}
-@media (max-width: 900px){.article-body-layout{grid-template-columns:180px minmax(0,1fr);gap:32px;}}
-@media (max-width: 760px){.article-body-layout{grid-template-columns:1fr;}}
-@media (max-width: 480px){.article-breadcrumb{font-size:15px;}.article-heading h1{font-size:clamp(32px,9vw,48px);}.blog-prose{font-size:17px;}}
-@media (max-width: 360px){.article-author{flex-direction:column;padding:24px;}.article-next{padding:24px;}}`}</style>
+
+.article-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 36px;
+  width: 100%;
+}
+.article-hero-grid.has-cover {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  align-items: center;
+}
+.article-hero-content {
+  min-width: 0;
+  width: 100%;
+}
+.article-hero-content h1 {
+  font-size: clamp(34px, 5.2vw, 68px);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  font-weight: 450;
+  margin: 0;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 900px){
+  .article-body-layout{grid-template-columns:180px minmax(0,1fr);gap:32px;}
+}
+@media (max-width: 800px){
+  .article-page {
+    padding: 100px 16px 56px !important;
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  .article-shell {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .article-hero-grid.has-cover {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  .article-hero-content h1 {
+    font-size: clamp(28px, 8vw, 42px) !important;
+    line-height: 1.16 !important;
+    letter-spacing: -0.03em !important;
+  }
+  .article-deck {
+    font-size: 17px !important;
+    line-height: 1.6 !important;
+    margin: 18px 0 24px !important;
+  }
+  .article-body-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .article-sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+    position: static !important;
+  }
+  .article-reading {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .blog-prose {
+    font-size: 16.5px !important;
+    line-height: 1.75 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+  .blog-prose h1 { font-size: 28px !important; }
+  .blog-prose h2 { font-size: 24px !important; }
+  .blog-prose h3 { font-size: 20px !important; }
+  .blog-prose p, .blog-prose li {
+    font-size: 16.5px !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+  .article-breadcrumb {
+    font-size: 14px;
+    margin-bottom: 24px !important;
+  }
+}
+@media (max-width: 480px){
+  .article-page {
+    padding: 88px 14px 44px !important;
+  }
+  .article-hero-content h1 {
+    font-size: clamp(25px, 8.2vw, 34px) !important;
+  }
+  .article-meta {
+    gap: 14px !important;
+    padding: 16px 0 !important;
+  }
+  .article-date {
+    font-size: 13px !important;
+    flex-wrap: wrap !important;
+  }
+  .article-author, .article-next {
+    padding: 24px !important;
+    border-radius: 18px !important;
+  }
+}
+@media (max-width: 360px){
+  .article-author{flex-direction:column;padding:20px !important;}
+  .article-next{padding:20px !important;}
+  .article-page { padding-inline: 12px !important; }
+}`}</style>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
