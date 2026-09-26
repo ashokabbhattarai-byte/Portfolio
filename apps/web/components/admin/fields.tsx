@@ -263,7 +263,7 @@ export function ColorField({
           type="text"
           value={value}
           spellCheck={false}
-          placeholder="#f4f3ee"
+          placeholder="var(--paper)"
           disabled={common.disabled}
           required={common.required}
           aria-invalid={common.error ? true : undefined}

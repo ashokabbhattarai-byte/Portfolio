@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { ProjectExplorer } from '@/components/projects/project-explorer';
 import { ContactFooter } from '@/components/layout/contact-footer';
 import { TrackView } from '@/components/analytics/track-view';
@@ -6,14 +7,14 @@ import { StatsCount } from '@/components/sections/stats-count';
 import { getProjects } from '@/lib/content';
 import { jsonLd, metadata as pageMetadata, siteUrl } from '@/lib/seo';
 
-/* Navy stats band in the landing stats-ribbon language (bg #0c213c, 22px
+/* Navy stats band in the landing stats-ribbon language (bg var(--deep), 22px
    radius, lime border + 80px grid). Counters reuse the Remotion StatsCount
    pattern; the pulse/grid fallbacks for calm + reduced-motion live here so
    globals.css stays untouched. */
 const statsBandStyles = `
 .projects-stats-band .stat{transition:background .35s ease}
-.projects-stats-band .stat:hover{background:rgba(199,220,168,0.06)}
-.projects-stats-band .live-dot{width:8px;height:8px;align-self:center;border-radius:50%;background:#8ee9b1;box-shadow:0 0 0 4px rgba(142,233,177,0.18);animation:projects-live-pulse 1.8s ease-in-out infinite;flex-shrink:0}
+.projects-stats-band .stat:hover{background:color-mix(in srgb, var(--highlight) calc(0.06 * 100%), transparent)}
+.projects-stats-band .live-dot{width:8px;height:8px;align-self:center;border-radius:50%;background:var(--highlight);box-shadow:0 0 0 4px rgba(142,233,177,0.18);animation:projects-live-pulse 1.8s ease-in-out infinite;flex-shrink:0}
 @keyframes projects-live-pulse{0%,100%{box-shadow:0 0 0 4px rgba(142,233,177,0.18)}50%{box-shadow:0 0 0 8px rgba(142,233,177,0.06)}}
 @media (max-width:600px){.projects-stats-band .stats-grid{grid-template-columns:1fr!important}.projects-stats-band .stat{border-right:0!important;border-bottom:1px solid rgba(255,255,255,0.1)}.projects-stats-band .stat:last-child{border-bottom:0}}
 @media (max-width:480px){.projects-stats-band .stat{padding:22px!important}.projects-stats-band .stat-value{font-size:32px!important}}
@@ -35,7 +36,7 @@ export async function generateMetadata({
     : 'All';
   const projects = await getProjects();
   const titles = projects.map((p) => p.title).join(', ');
-  const tabSuffix = tab !== 'All' ? ` — ${tab}` : '';
+  const tabSuffix = tab !== 'All' ? `, ${tab}` : '';
   const path =
     tab === 'All' ? '/projects' : `/projects?tab=${encodeURIComponent(tab)}`;
   const keywords = [
@@ -51,13 +52,13 @@ export async function generateMetadata({
   return pageMetadata(
     `Projects${tabSuffix}`,
     tab === 'All'
-      ? `Case studies from ${projects.length} software projects by Ashok Bhattarai — ${titles}. Full-stack, AI and blockchain delivery, each with the problem, the contribution and the outcome.`
-      : `${tab} projects by Ashok Bhattarai — ${
+      ? `Case studies from ${projects.length} software projects by Ashok Bhattarai: ${titles}. Full-stack, AI and blockchain delivery, with the problem, contribution and outcome.`
+      : `${tab} projects by Ashok Bhattarai: ${
           projects
             .filter((p) => p.category === tab)
             .map((p) => p.title)
             .join(', ') || tab
-        }. The problem, the contribution and the outcome for each build.`,
+        }. The problem, contribution and outcome for each build.`,
     path,
     keywords,
     /* The filtered views are subsets of the same four case studies. They stay
@@ -73,12 +74,12 @@ const tabCopy: Record<
   All: {
     h1: ['Built end to end.', 'Shipped to production.'],
     note: (total, live) =>
-      `${total} projects across full-stack, AI and blockchain — ${live} live and the rest in delivery. Each one records the problem it solves, the part I built and what shipped.`,
+      `${total} projects across full-stack, AI and blockchain, with ${live} live and the rest in delivery. Each one records the problem it solves, the part I built and what shipped.`,
   },
   'Full stack': {
     h1: ['Full-stack delivery.', 'End to end.'],
     note: () =>
-      'Data model, API and interface designed together — typed, accessible and fast enough to stay out of the user’s way.',
+      'Data model, API and interface designed together: typed, accessible and fast enough to stay out of the user’s way.',
   },
   AI: {
     h1: ['Intelligent products.', 'Practical outcomes.'],
@@ -88,7 +89,7 @@ const tabCopy: Record<
   Blockchain: {
     h1: ['Verifiable by design.', 'Useful in practice.'],
     note: () =>
-      'Authenticity and verification work where a ledger earns its place — the trust problem first, the technology second.',
+      'Authenticity and verification work where a ledger earns its place. The trust problem first, the technology second.',
   },
 };
 
@@ -118,7 +119,7 @@ export default async function Projects({
     ? {
         '@context': 'https://schema.org',
         '@type': 'CollectionPage',
-        name: `Projects — Ashok Bhattarai`,
+        name: `Projects by Ashok Bhattarai`,
         url: `${siteUrl}/projects`,
         inLanguage: 'en',
         isPartOf: { '@id': `${siteUrl}/#website` },
@@ -154,7 +155,9 @@ export default async function Projects({
               : `${initialTab} projects`}{' '}
             / {String(visible.length).padStart(2, '0')}
           </p>
-          <h1 style={{ fontSize: 'clamp(40px,4.6vw,64px)', color: '#0c213c' }}>
+          <h1
+            style={{ fontSize: 'clamp(40px,4.6vw,64px)', color: 'var(--deep)' }}
+          >
             {copy.h1[0]}
             <br />
             {copy.h1[1]}
@@ -177,8 +180,9 @@ export default async function Projects({
           style={{
             position: 'relative',
             overflow: 'hidden',
-            background: '#0c213c',
-            border: '1px solid rgba(199,220,168,0.18)',
+            background: 'var(--deep)',
+            border:
+              '1px solid color-mix(in srgb, var(--highlight) calc(0.18 * 100%), transparent)',
             borderRadius: 22,
             marginBottom: 48,
             boxShadow:
@@ -191,7 +195,7 @@ export default async function Projects({
               position: 'absolute',
               inset: 0,
               backgroundImage:
-                'linear-gradient(rgba(199,220,168,0.11) 1px, transparent 1px), linear-gradient(90deg, rgba(199,220,168,0.11) 1px, transparent 1px)',
+                'linear-gradient(color-mix(in srgb, var(--highlight) calc(0.11 * 100%), transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--highlight) calc(0.11 * 100%), transparent) 1px, transparent 1px)',
               backgroundSize: '80px 80px',
               opacity: 0.14,
               maskImage:
@@ -222,7 +226,7 @@ export default async function Projects({
                   display: 'flex',
                   alignItems: 'baseline',
                   gap: 10,
-                  color: '#f4f3ee',
+                  color: 'var(--paper)',
                   fontSize: 'clamp(34px,4vw,52px)',
                   letterSpacing: '-0.04em',
                   fontVariantNumeric: 'tabular-nums',
@@ -231,7 +235,7 @@ export default async function Projects({
                 <StatsCount value={projects.length} />
                 <em
                   style={{
-                    color: '#c7dca8',
+                    color: 'var(--highlight)',
                     fontStyle: 'normal',
                     fontSize: 15,
                     letterSpacing: '0.08em',
@@ -252,7 +256,7 @@ export default async function Projects({
                   display: 'flex',
                   alignItems: 'baseline',
                   gap: 10,
-                  color: '#f4f3ee',
+                  color: 'var(--paper)',
                   fontSize: 'clamp(34px,4vw,52px)',
                   letterSpacing: '-0.04em',
                   fontVariantNumeric: 'tabular-nums',
@@ -262,7 +266,7 @@ export default async function Projects({
                 <StatsCount value={liveCount} />
                 <em
                   style={{
-                    color: '#8ee9b1',
+                    color: 'var(--highlight)',
                     fontStyle: 'normal',
                     fontSize: 15,
                     letterSpacing: '0.08em',
@@ -278,7 +282,20 @@ export default async function Projects({
             </div>
           </div>
         </div>
-        <ProjectExplorer projects={projects} initialTab={initialTab} />
+        {/* Suspense boundary required: ProjectExplorer reads useSearchParams(),
+            which needs a client-rendered boundary so the route can prerender
+            instead of hanging on "Rendering…". */}
+        <Suspense
+          fallback={
+            <div
+              className="work-toolbar"
+              aria-hidden="true"
+              style={{ minHeight: 60 }}
+            />
+          }
+        >
+          <ProjectExplorer projects={projects} initialTab={initialTab} />
+        </Suspense>
       </main>
       <ContactFooter />
     </>

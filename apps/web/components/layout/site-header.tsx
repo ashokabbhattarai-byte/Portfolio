@@ -4,13 +4,12 @@ import { usePathname } from 'next/navigation';
 import gsap from 'gsap';
 import { TransitionLink } from '@/components/motion/transition-link';
 import { Magnetic } from '@/components/motion/magnetic';
-import { MotionToggle } from '@/components/motion/motion-toggle';
 import { travels } from '@/components/motion/flow';
 import { MotionContext } from '@/components/motion/motion-provider';
 const links = [
   ['/', 'Home'],
   ['/projects', 'Projects'],
-  ['/blog', 'Writing'],
+  ['/blog', 'Blogs'],
   ['/about', 'About'],
   ['/contact', 'Contact'],
 ];
@@ -122,7 +121,6 @@ export function SiteHeader({
           ))}
         </nav>
         <div className={`menu-dock ${scrolled ? 'is-scrolled' : ''}`}>
-          <MotionToggle />
           <Magnetic>
             <button
               ref={trigger}
@@ -145,6 +143,17 @@ export function SiteHeader({
         onCancel={(event) => {
           event.preventDefault();
           close();
+        }}
+        onClick={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          if (
+            event.clientX < rect.left ||
+            event.clientX > rect.right ||
+            event.clientY < rect.top ||
+            event.clientY > rect.bottom
+          ) {
+            close();
+          }
         }}
         aria-label="Navigation"
       >

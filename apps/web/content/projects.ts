@@ -22,13 +22,13 @@ export const projects: Project[] = [
     ink: '#25493e',
     symbol: 'सू',
     live: 'https://suchanaai.tech',
-    summary: 'Public information. A more intelligent starting point.',
+    summary: 'Public notices with a more intelligent starting point.',
     overview:
-      'An AI-powered public notice platform for Nepal, completed and launched as an independent software project.',
+      'An AI-powered public notice platform for Nepal, completed and launched as an independent project.',
     challenge:
-      'Government notices are scattered across different portals. SuchanaAI brings them into one searchable place for people following jobs, exams, tenders, and policy updates.',
+      'Government notices are scattered across different portals. SuchanaAI brings them into one searchable place for people following jobs, exams, tenders and policy updates.',
     contribution:
-      'Built and launched SuchanaAI independently, taking the project from development to a publicly accessible platform.',
+      'Built and launched SuchanaAI independently, taking it from development to a publicly accessible platform.',
     outcome: 'Completed and launched at suchanaai.tech.',
     focus: [
       'Public notices',
@@ -50,13 +50,13 @@ export const projects: Project[] = [
     ink: '#643d29',
     symbol: 'W',
     live: 'https://workops.rumsan.net',
-    summary: 'A little less admin. A little more doing.',
+    summary: 'Less admin work. More focused delivery.',
     overview:
-      'An office utility management system built for Rumsan to support internal office operations.',
+      'An internal utility management system built for Rumsan to support day-to-day office operations.',
     challenge:
-      'Internal office operations need software designed around everyday utility management. WorkOps focuses on this practical, operational space.',
+      'Internal teams need software designed around everyday utility management. WorkOps addresses this practical operational need.',
     contribution:
-      'Built an office utility management system for Rumsan, applying full-stack development to an internal application.',
+      'Built an internal utility management system for Rumsan, applying full-stack development to an internal application.',
     outcome:
       'A dedicated system supporting internal office operations at Rumsan. Access may require an organization account.',
     focus: [
@@ -79,15 +79,14 @@ export const projects: Project[] = [
     color: '#dfe6d8',
     ink: '#2f4a2b',
     symbol: '“',
-    summary: 'Exploring AI, together.',
-    overview:
-      'An AI project at Rumsan, developed as part of the office project team.',
+    summary: 'Exploring applied AI through teamwork.',
+    overview: 'An AI project at Rumsan, developed as part of the project team.',
     challenge:
-      'Working on AI products is a collaborative engineering effort. Chatty is part of my experience contributing to AI projects within a team.',
+      'AI products require collaborative engineering. Chatty reflects my experience contributing to AI projects within a team.',
     contribution:
       'Contributed to development as a member of the Rumsan project team.',
     outcome:
-      'Contributed to the team’s AI development work. Internal product details are not published here.',
+      'Contributed to the team’s AI development work. Internal product details are not published.',
     focus: [
       'Artificial intelligence',
       'Team development',
@@ -108,15 +107,15 @@ export const projects: Project[] = [
     color: '#e7e5bf',
     ink: '#545821',
     symbol: '✓',
-    summary: 'A clearer way to establish authenticity.',
+    summary: 'A clearer way to verify authenticity.',
     overview:
       'A blockchain-based project for verifying certificate authenticity.',
     challenge:
-      'Certificate verification is a question of authenticity. Certfy applies blockchain to this verification problem.',
+      'Certificate verification is a question of trust. Certfy applies blockchain to this verification problem.',
     contribution:
       'Contributed to the development of a blockchain-based certificate verification project.',
     outcome:
-      'Development contributions to certificate authenticity verification. No public deployment or performance results are claimed.',
+      'Development contributions to certificate verification. No public deployment or performance results are claimed.',
     focus: ['Blockchain', 'Certificate authenticity', 'Verification'],
     features: [],
     published: true,

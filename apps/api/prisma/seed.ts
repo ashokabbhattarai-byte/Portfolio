@@ -214,11 +214,11 @@ async function main(): Promise<void> {
   const blogs = [
     {
       slug: 'hello-world',
-      title: 'Hello, World — Why I Rebuilt My Portfolio',
+      title: 'Hello, World: Why I Rebuilt My Portfolio',
       excerpt:
-        'A short note on why I moved to a real CMS, Supabase, and TanStack Query for a portfolio that stays fast.',
+        'Why I moved this portfolio to a real CMS backed by Supabase and TanStack Query, and how the new content setup stays fast and simple to update.',
       content:
-        '# Hello, World\n\nI rebuilt my portfolio around a real content layer. The public site is still static when the API sleeps — but when it’s live, every project, skill, and now blog post comes from Postgres via Prisma, cached at the edge and hydrated with TanStack Query.\n\n## What changed\n\n- **One CMS** for projects, blogs, profile, experience, skills, education, certifications\n- **Supabase Storage** for images (bucket: portfolio-storage) with presigned uploads\n- **Next 16 + TanStack** with 5m stale, 30m gc, optimistic mutations\n\nThe hero, intro, and featured sections are no longer hardcoded. They read from the same SiteContent that powers /work and /blog.\n\n---\n\n*This post is seeded so you can see the blog flow end-to-end. Edit it in /admin/blogs.*',
+        '# Hello, World: Why I Rebuilt My Portfolio\n\nI rebuilt my portfolio around a real content layer. The public site is still static when the API sleeps, but when it’s live, every project, skill, and now blog post comes from Postgres via Prisma, cached at the edge and hydrated with TanStack Query.\n\n## What changed\n\n- **One CMS** for projects, blogs, profile, experience, skills, education, certifications\n- **Supabase Storage** for images (bucket: portfolio-storage) with presigned uploads\n- **Next 16 + TanStack** with 5m stale, 30m GC, and optimistic mutations\n\nThe hero, intro, and featured sections are no longer hardcoded. They read from the same SiteContent that powers /work and /blog.\n\n---\n\n*This post is seeded so you can see the blog flow end-to-end. Edit it in /admin/blogs.*',
       coverImage: `${coverBase}/blogs/hello-world/cover-hello-9c7fe8c6.webp`,
       tags: ['Portfolio', 'Next.js', 'Supabase'],
       published: true,
@@ -235,9 +235,9 @@ async function main(): Promise<void> {
       slug: 'supabase-storage-at-the-edge',
       title: 'Supabase Storage at the Edge',
       excerpt:
-        'How portfolio-storage stays fast: presigned PUTs, public CDN, and folder-scoped keys.',
+        'How the portfolio-storage bucket stays fast with presigned uploads, a public CDN edge cache, and folder-scoped keys that keep every media upload tidy.',
       content:
-        '# Supabase Storage at the Edge\n\nAll media lives in **portfolio-storage**.\n\n## Folder map\n\n- `projects/{slug}/cover-{uuid}.webp`\n- `blogs/{slug}/cover-{uuid}.webp`\n- `profile/`, `certifications/`, etc.\n\n## Upload flow\n\n1. **Presign** – `POST /api/storage/presign` returns a signedUrl (service_role).\n2. **PUT** – browser PUTs directly to Supabase (zero backend egress).\n3. **Public URL** – `.../object/public/portfolio-storage/{path}` is edge-cached and used in Next <Image> via remotePatterns.\n\nThe bucket is public (`bucket.policy.sql`) with RLS for public read / auth write.',
+        '# Supabase Storage at the Edge\n\nAll media lives in **portfolio-storage**.\n\n## Folder map\n\n- `projects/{slug}/cover-{uuid}.webp`\n- `blogs/{slug}/cover-{uuid}.webp`\n- `profile/`, `certifications/`, etc.\n\n## Upload flow\n\n1. **Presign**: `POST /api/storage/presign` returns a signedUrl (service_role).\n2. **PUT**: browser PUTs directly to Supabase (zero backend egress).\n3. **Public URL**: `.../object/public/portfolio-storage/{path}` is edge-cached and used in Next <Image> via remotePatterns.\n\nThe bucket is public (`bucket.policy.sql`) with RLS for public read / auth write.',
       coverImage: `${coverBase}/blogs/supabase-storage-at-the-edge/cover-storage-a1b2c3d4.webp`,
       tags: ['Supabase', 'Storage', 'Performance'],
       published: true,
@@ -254,9 +254,9 @@ async function main(): Promise<void> {
       slug: 'tanstack-makes-it-instant',
       title: 'TanStack Makes It Instant',
       excerpt:
-        'From 123 RSC requests to 5m cached queries — how TanStack keeps the CMS feeling local.',
+        'From 123 RSC requests to 5-minute cached queries: how TanStack Query with optimistic updates keeps the whole admin CMS feeling fast and local.',
       content:
-        '# TanStack Makes It Instant\n\nThe public site fetches **SiteContent** in one round trip (`GET /api/content`) with `Cache-Control: public, s-maxage=60` and `ETag`.\n\nOn the admin, every resource has a dedicated hook: `useAdminProjects()`, `useAdminBlogs()`, etc., with `staleTime: 5m` and optimistic mutations for reorder/delete.\n\nAfter a write, `RevalidateService` purges the Next tag (`blogs`, `projects`, …) so the next hard navigation is fresh, but the current tab stays instant.\n\n---\n\n*Try it: reorder blogs in /admin/blogs and watch the homepage update after revalidation.*',
+        '# TanStack Makes It Instant\n\nThe public site fetches **SiteContent** in one round trip (`GET /api/content`) with `Cache-Control: public, s-maxage=60` and `ETag`.\n\nIn the admin, every resource has a dedicated hook: `useAdminProjects()`, `useAdminBlogs()`, etc., with `staleTime: 5m` and optimistic mutations for reorder/delete.\n\nAfter a write, `RevalidateService` purges the Next tag (`blogs`, `projects`, …) so the next hard navigation is fresh, but the current tab stays instant.\n\n---\n\n*Try it: reorder blogs in /admin/blogs and watch the homepage update after revalidation.*',
       coverImage: `${coverBase}/blogs/tanstack-makes-it-instant/cover-tanstack-e5f6a7b8.webp`,
       tags: ['TanStack', 'React Query', 'UX'],
       published: true,

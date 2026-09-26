@@ -121,7 +121,8 @@ export function LandingScroll() {
           left: '0',
           width: '100%',
           height: '2px',
-          background: 'linear-gradient(90deg, #527747, #a8bf82 60%, #c7dca8)',
+          background:
+            'linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, transparent), var(--accent) 60%, var(--highlight))',
           transformOrigin: 'left',
           zIndex: '60',
           pointerEvents: 'none',

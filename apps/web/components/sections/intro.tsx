@@ -57,7 +57,7 @@ export function Intro({ profile }: { profile: Profile }) {
       <div className={styles.process} data-intro-reveal>
         <div className={styles.processHeading}>
           <h3>How I work</h3>
-          <p>Three steps. One thoughtful experience.</p>
+          <p>Three steps. One considered experience.</p>
         </div>
         <ol className={styles.stages}>
           {stages.map((stage, index) => (
@@ -74,14 +74,18 @@ export function Intro({ profile }: { profile: Profile }) {
       <aside className={styles.profile} aria-label={`About ${profile.name}`}>
         <div className={styles.photoWindow}>
           <Image
-            src="/assets/hero-portrait.webp"
-            alt={profile.name}
+            src="/assets/secondary-portrait.webp"
+            alt={`${profile.name} outdoors in Lalitpur, Nepal`}
             fill
-            sizes="72px"
+            sizes="144px"
           />
+          <span className={styles.statusDot} title="Available for projects" />
         </div>
-        <div>
-          <h3>{profile.name}</h3>
+        <div className={styles.profileDetails}>
+          <div className={styles.nameRow}>
+            <h3>{profile.name}</h3>
+            <span className={styles.availableBadge}>Available</span>
+          </div>
           <p className={styles.role}>
             {profile.role} · {profile.location}
           </p>

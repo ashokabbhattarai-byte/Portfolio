@@ -1,8 +1,4 @@
 .landing {
-  --paper: #eef1f5;
-  --ink: #15263c;
-  --muted: #556479;
-  --line: #c8d1df;
   background: var(--paper);
   overflow: clip;
 }
@@ -11,10 +7,10 @@
   letter-spacing: 0;
 }
 .landing :global(.stats-ribbon) {
-  background: #dfe6d8;
+  background: var(--line);
   margin-inline: var(--gutter);
   border-radius: 22px;
-  border: 1px solid rgba(200, 209, 223, 0.5);
+  border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
   overflow: hidden;
 }
 .landing :global(.featured) {
@@ -54,7 +50,7 @@
 }
 .landing :global(.blog-card) {
   background: #fff;
-  border: 1px solid rgba(200, 209, 223, 0.52);
+  border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
   border-radius: 22px;
   transform-style: preserve-3d;
   transition:
@@ -65,13 +61,13 @@
 }
 .landing :global(.blog-card:hover) {
   transform: perspective(900px) rotateX(2deg) rotateY(-2deg) translateY(-10px);
-  box-shadow: 0 24px 55px rgba(21, 38, 60, 0.16);
+  box-shadow: 0 24px 55px color-mix(in srgb, var(--ink) 16%, transparent);
 }
 .interlude {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
-  min-height: 580px;
-  background: #cad8eb;
+  min-height: 440px;
+  background: var(--line);
   position: relative;
   overflow: clip;
   isolation: isolate;
@@ -81,8 +77,15 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(#c7dca81c 1px, transparent 1px),
-    linear-gradient(90deg, #c7dca81c 1px, transparent 1px);
+    linear-gradient(
+      color-mix(in srgb, var(--highlight) 11%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--highlight) 11%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 80px 80px;
   opacity: 0.11;
   mask-image: radial-gradient(ellipse at 72% 50%, #000, transparent 72%);
@@ -96,10 +99,10 @@
 .portraitStrip {
   overflow: hidden;
   position: relative;
-  min-height: 580px;
+  min-height: 440px;
   border-radius: 22px;
-  border: 1px solid rgba(199, 220, 168, 0.16);
-  background: #091a33;
+  border: 1px solid color-mix(in srgb, var(--highlight) 16%, transparent);
+  background: var(--deep);
   box-shadow:
     0 18px 48px rgba(0, 0, 0, 0.16),
     0 2px 12px rgba(0, 0, 0, 0.08),
@@ -112,7 +115,7 @@
   position: absolute;
   inset: 0;
   object-fit: cover;
-  object-position: 50% 30%;
+  object-position: 50% 15%;
   filter: saturate(1.02) contrast(1.03);
   border-radius: 0;
 }
@@ -143,7 +146,7 @@
 }
 .personalCopy p {
   max-width: 35ch;
-  color: #354c68;
+  color: var(--muted);
   font-size: 18px;
   line-height: 1.7;
 }
@@ -162,7 +165,7 @@
     grid-template-columns: 1fr;
   }
   .portraitStrip {
-    min-height: 380px;
+    min-height: 220px;
     margin: 16px;
   }
   .portraitStrip img {
@@ -188,7 +191,7 @@
     font-size: clamp(32px, 9vw, 48px);
   }
   .portraitStrip {
-    min-height: 320px;
+    min-height: 220px;
     margin: 12px;
     border-radius: 18px;
   }
@@ -201,7 +204,7 @@
 }
 @media (max-width: 360px) {
   .portraitStrip {
-    min-height: 280px;
+    min-height: 220px;
   }
 }
 .landing :global(.grid.project-collection) {
@@ -219,7 +222,7 @@
 }
 .landing :global(.grid .project-entry:hover) {
   transform: translateY(-8px);
-  color: #527747;
+  color: var(--accent);
 }
 .landing :global(.grid .project-art) {
   transition:
@@ -246,7 +249,7 @@
   border-radius: 22px;
   margin-bottom: 24px;
   overflow: hidden;
-  border: 1px solid rgba(200, 209, 223, 0.42);
+  border: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
 }
 .landing :global(.grid .project-category) {
   grid-column: 1;
@@ -263,17 +266,10 @@
   }
 }
 
-/* Premium surfaces — same language as hero (#0c213c deep, #f4f3ee paper).
-   Light sections stay paper, ink is hero navy, accent is global blue. */
-.landing {
-  --paper: #f4f3ee;
-  --ink: #0c213c;
-  --muted: #556479;
-  --line: #c8d1df;
-  --accent: #527747;
-}
+/* Premium surfaces using global tokens */
+
 .landing :global(.section-label) {
-  color: #527747;
+  color: var(--accent);
   text-transform: uppercase;
   font-size: 12px;
   letter-spacing: 0.16em;
@@ -287,15 +283,15 @@
   width: 28px;
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #527747, #c7dca8);
+  background: linear-gradient(90deg, var(--accent), var(--highlight));
   display: inline-block;
 }
 .landing :global(.stats-ribbon) {
-  background: #0c213c;
+  background: var(--deep);
   border-radius: 22px;
-  border: 1px solid rgba(199, 220, 168, 0.18);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
   box-shadow:
-    0 22px 64px rgba(12, 33, 60, 0.22),
+    0 22px 64px color-mix(in srgb, var(--deep) 22%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.07);
   overflow: hidden;
   position: relative;
@@ -305,8 +301,15 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(#c7dca81c 1px, transparent 1px),
-    linear-gradient(90deg, #c7dca81c 1px, transparent 1px);
+    linear-gradient(
+      color-mix(in srgb, var(--highlight) 11%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--highlight) 11%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 80px 80px;
   opacity: 0.14;
   mask-image: radial-gradient(ellipse at 50% 0%, #000, transparent 75%);
@@ -323,20 +326,20 @@
   transition: background 0.35s ease;
 }
 .landing :global(.stats-ribbon .stat:hover) {
-  background: rgba(199, 220, 168, 0.06);
+  background: color-mix(in srgb, var(--highlight) 16%, transparent);
 }
 .landing :global(.stats-ribbon .stat-value) {
-  color: #f4f3ee;
+  color: var(--paper);
   font-variant-numeric: tabular-nums;
 }
 .landing :global(.stats-ribbon .stat-value em) {
-  color: #c7dca8;
+  color: var(--highlight);
 }
 .landing :global(.stats-ribbon .stat-label) {
-  color: #b7c8bc;
+  color: var(--muted);
 }
 .landing :global(.stats-ribbon .stat.live .stat-value em) {
-  color: #8ee9b1;
+  color: var(--accent-2);
 }
 .landing :global(.stats-ribbon .stat.live .stat-value::before) {
   content: '';
@@ -344,18 +347,18 @@
   height: 8px;
   align-self: center;
   border-radius: 50%;
-  background: #8ee9b1;
-  box-shadow: 0 0 0 4px rgba(142, 233, 177, 0.18);
+  background: var(--accent-2);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-2) 18%, transparent);
   animation: stat-live-pulse 1.8s ease-in-out infinite;
   flex-shrink: 0;
 }
 @keyframes stat-live-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 4px rgba(142, 233, 177, 0.18);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-2) 18%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(142, 233, 177, 0.06);
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent-2) 18%, transparent);
   }
 }
 .landing :global(.section-heading h2) {
@@ -375,9 +378,9 @@
 }
 .landing :global(.grid .project-thumbnail) {
   border-radius: 22px;
-  background: #0c213c;
+  background: var(--deep);
   margin-bottom: 22px;
-  border: 1px solid rgba(12, 33, 60, 0.1);
+  border: 1px solid color-mix(in srgb, var(--deep) 28%, transparent);
   overflow: hidden;
 }
 .landing :global(.grid .project-title h3) {
@@ -393,16 +396,16 @@
   border-radius: 22px;
   padding: clamp(20px, 2.5vw, 40px);
   gap: clamp(20px, 3vw, 44px);
-  background: #0c213c;
-  color: #f4f3ee;
+  background: var(--deep);
+  color: var(--paper);
   min-height: 0;
   grid-template-columns: 0.9fr 1.1fr;
   position: relative;
   overflow: clip;
   isolation: isolate;
-  border: 1px solid rgba(199, 220, 168, 0.16);
+  border: 1px solid color-mix(in srgb, var(--highlight) 16%, transparent);
   box-shadow:
-    0 22px 64px rgba(12, 33, 60, 0.28),
+    0 22px 64px color-mix(in srgb, var(--deep) 28%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 .interlude::before {
@@ -410,8 +413,15 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(#c7dca81c 1px, transparent 1px),
-    linear-gradient(90deg, #c7dca81c 1px, transparent 1px);
+    linear-gradient(
+      color-mix(in srgb, var(--highlight) 11%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--highlight) 11%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 80px 80px;
   opacity: 0.16;
   mask-image: radial-gradient(ellipse at 72% 50%, #000, transparent 72%);
@@ -420,10 +430,10 @@
 }
 .portraitStrip {
   margin: 0;
-  min-height: 460px;
+  min-height: 220px;
   border-radius: 22px;
-  border: 1.5px solid rgba(199, 220, 168, 0.2);
-  background: #091a33;
+  border: 1.5px solid color-mix(in srgb, var(--highlight) 16%, transparent);
+  background: var(--deep);
   box-shadow:
     0 22px 64px rgba(0, 0, 0, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.07);
@@ -437,10 +447,10 @@
   z-index: 3;
   inset: auto 12px 12px;
   padding: 10px 14px;
-  background: rgba(8, 25, 45, 0.62);
-  color: #eef1e4;
+  background: color-mix(in srgb, var(--deep) 62%, transparent);
+  color: var(--paper);
   backdrop-filter: blur(10px) saturate(1.15);
-  border: 1px solid rgba(199, 220, 168, 0.22);
+  border: 1px solid color-mix(in srgb, var(--highlight) 16%, transparent);
   border-radius: 999px;
   display: flex;
   justify-content: space-between;
@@ -458,17 +468,17 @@
   line-height: 1.02;
   font-weight: 450;
   letter-spacing: -0.06em;
-  color: #f4f3ee;
+  color: var(--paper);
   margin: 22px 0;
 }
 .personalCopy p {
-  color: #b7c8bc;
+  color: var(--muted);
   font-size: 17px;
   line-height: 1.7;
   max-width: 43ch;
 }
 .personalCopy > p:first-child {
-  color: #c7dca8;
+  color: var(--highlight);
   text-transform: uppercase;
   font-size: 12px;
   font-weight: 600;
@@ -482,16 +492,18 @@
   margin-top: 28px;
   padding: 14px 24px;
   border-radius: 32px;
-  background: #f4f3ee;
-  color: #0c213c;
+  background: var(--paper);
+  color: var(--ink);
   font-size: 16px;
   font-weight: 500;
   border-bottom: 0;
-  transition: background 180ms ease, transform 180ms ease;
+  transition: all 400ms var(--ease);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ink) 6%, transparent);
 }
 .personalCopy a:hover {
-  background: #e5e9dc;
-  transform: translateY(-1px);
+  background: var(--line);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 12%, transparent);
 }
 @media (max-width: 900px) {
   .interlude {
@@ -499,7 +511,7 @@
     gap: 16px;
   }
   .portraitStrip {
-    min-height: 380px;
+    min-height: 220px;
   }
 }
 @media (max-width: 760px) {
@@ -510,7 +522,7 @@
     gap: 12px;
   }
   .portraitStrip {
-    min-height: 320px;
+    min-height: 220px;
     max-width: 460px;
     width: 100%;
     justify-self: center;

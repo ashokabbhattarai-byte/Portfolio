@@ -208,6 +208,33 @@ export class MediaService {
     return row;
   }
 
+  /** Every non-deleted article referencing the asset, so the library can show
+   *  exactly what blocks a delete and link straight to it. Uses the same
+   *  reference checks as remove() so the two can never disagree. */
+  async usage(id: string) {
+    const row = await this.prisma.mediaAsset.findFirst({
+      where: { id, deletedAt: null },
+      select: { url: true },
+    });
+    if (!row) fail('MEDIA_NOT_FOUND', 'Image not found.', 404);
+    const articles = await this.prisma.blog.findMany({
+      where: {
+        deletedAt: null,
+        OR: [
+          { featuredImageId: id },
+          { ogImageId: id },
+          { inlineMedia: { some: { id } } },
+          { content: { contains: row.url } },
+          { coverImage: row.url },
+          { images: { some: { url: row.url } } },
+        ],
+      },
+      select: { id: true, slug: true, title: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return { articles };
+  }
+
   async update(id: string, dto: MediaMetadataDto, actor: Actor) {
     return this.prisma.$transaction(async (tx) => {
       const row = await tx.mediaAsset.findFirst({

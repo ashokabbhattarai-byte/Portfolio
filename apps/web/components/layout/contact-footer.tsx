@@ -23,10 +23,11 @@ export async function ContactFooter() {
           right: 0,
           height: 1,
           background:
-            'linear-gradient(90deg, transparent 8%, #c7dca8 50%, transparent 92%)',
+            'linear-gradient(90deg, transparent 8%, var(--highlight) 50%, transparent 92%)',
           opacity: 0.55,
           pointerEvents: 'none',
-          boxShadow: '0 0 14px rgba(168,191,130,0.6)',
+          boxShadow:
+            '0 0 14px color-mix(in srgb, var(--highlight) 60%, transparent)',
           zIndex: 1,
         }}
       />
@@ -42,10 +43,11 @@ export async function ContactFooter() {
                   height: 'clamp(56px,6vw,90px)',
                   borderRadius: 22,
                   overflow: 'hidden',
-                  border: '1px solid rgba(199,220,168,0.25)',
+                  border:
+                    '1px solid color-mix(in srgb, var(--highlight) calc(0.25 * 100%), transparent)',
                   boxShadow:
                     '0 8px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08)',
-                  background: '#0c213c',
+                  background: 'var(--deep)',
                   flexShrink: 0,
                 }}
                 aria-hidden="true"
@@ -147,7 +149,7 @@ export async function ContactFooter() {
           {[
             { href: '/', label: 'Home' },
             { href: '/projects', label: 'Projects' },
-            { href: '/blog', label: 'Writing' },
+            { href: '/blog', label: 'Blogs' },
             { href: '/about', label: 'About' },
             { href: '/contact', label: 'Contact' },
           ].map((item) => (
@@ -176,7 +178,11 @@ export async function ContactFooter() {
             href={profile.github}
             target="_blank"
             rel="noreferrer"
-            style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center' }}
+            style={{
+              minHeight: 44,
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
           >
             GitHub <span aria-hidden="true">↗</span>
           </a>

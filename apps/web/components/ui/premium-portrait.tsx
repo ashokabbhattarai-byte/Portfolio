@@ -13,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
  * Matches hero's 22px rectangle professional style with Remotion-like
  * interpolate scanning (GSAP + bezier) and GSAP perimeter runner.
  *
- * Keeps palette #0c213c / #03102a + #527747 / #c7dca8 lime — no new colors.
+ * Keeps palette var(--deep) / #03102a + color-mix(in srgb, var(--accent) 60%, transparent) / var(--highlight) lime — no new colors.
  * Hover: corners, HUD, scan line + bar, code ticker, data bars, glare.
  * Scroll: portrait drifts with ScrollTrigger scrub (bi-directional).
  * Click: flash + pulse + runner burst.
@@ -364,7 +364,7 @@ export function PremiumPortrait({
         (e as PointerEvent & { offsetX: number }).offsetX ?? rect.width / 2;
       const y =
         (e as PointerEvent & { offsetY: number }).offsetY ?? rect.height / 2;
-      dot.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#c7dca8;box-shadow:0 0 14px #a8bf82;pointer-events:none;z-index:7;`;
+      dot.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--highlight);box-shadow:0 0 14px var(--accent);pointer-events:none;z-index:7;`;
       photo.appendChild(dot);
       gsap
         .timeline({ onComplete: () => dot.remove() })
@@ -434,7 +434,7 @@ export function PremiumPortrait({
       className={`${hero.portrait} ${className}`}
       data-hero-photo
       tabIndex={0}
-      aria-label={`${alt} — hover for tech preview, click for pulse`}
+      aria-label={`${alt}: hover for tech preview, click for pulse`}
       style={{ maxWidth: '560px', width: '100%' }}
     >
       <div className={hero.shutter} data-photo-shutter aria-hidden="true" />
@@ -529,7 +529,7 @@ export function PremiumPortrait({
             bottom: 14,
             zIndex: 6,
             background: 'rgba(238,241,245,0.92)',
-            color: '#0c213c',
+            color: 'var(--deep)',
             padding: '6px 12px',
             borderRadius: 999,
             fontSize: 11,

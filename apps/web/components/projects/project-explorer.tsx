@@ -107,7 +107,7 @@ export function ProjectExplorer({
   );
   return (
     <>
-      <style>{`@media (max-width:900px){.work-toolbar[data-explorer]{flex-wrap:wrap}}@media (max-width:760px){.work-toolbar[data-explorer] .filters button{font-size:16px;min-height:44px}}.work-toolbar[data-explorer] button:focus-visible{outline:3px solid #527747;outline-offset:3px}@media (prefers-reduced-motion:reduce){.work-toolbar[data-explorer] button{transition:none!important}}`}</style>
+      <style>{`@media (max-width:900px){.work-toolbar[data-explorer]{flex-wrap:wrap}}@media (max-width:760px){.work-toolbar[data-explorer] .filters button{font-size:16px;min-height:44px}}.work-toolbar[data-explorer] button:focus-visible{outline:3px solid color-mix(in srgb, var(--accent) 60%, transparent);outline-offset:3px}@media (prefers-reduced-motion:reduce){.work-toolbar[data-explorer] button{transition:none!important}}`}</style>
       <div className="work-toolbar" data-explorer ref={toolbarRef}>
         <div className="filters" aria-label="Filter projects by discipline">
           {filters.map((name) => (

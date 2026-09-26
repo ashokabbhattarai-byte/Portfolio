@@ -28,14 +28,14 @@ export default async function PublicLayout({
     familyName: profile.name.split(' ').slice(1).join(' ') || undefined,
     jobTitle: profile.role,
     description: profile.description,
-    email: `mailto:${profile.email}`,
+    email: profile.email,
     ...(siteUrl
       ? {
           url: siteUrl,
           image: {
             '@type': 'ImageObject',
             url: `${siteUrl}/assets/portrait.webp`,
-            caption: `${profile.name} — ${profile.role}`,
+            caption: `${profile.name}, ${profile.role}`,
           },
         }
       : {}),
@@ -76,7 +76,7 @@ export default async function PublicLayout({
         '@type': 'WebSite',
         '@id': siteId,
         ...(siteUrl ? { url: siteUrl } : {}),
-        name: `${profile.name} — ${profile.role}`,
+        name: `${profile.name}, ${profile.role}`,
         description: profile.description,
         inLanguage: 'en',
         publisher: { '@id': personId },

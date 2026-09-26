@@ -1,10 +1,12 @@
-import { Fragment } from 'react';
 import Image from 'next/image';
 import { ContactFooter } from '@/components/layout/contact-footer';
 import { ResumeLinks } from '@/components/ui/resume-links';
 import { Reveal } from '@/components/motion/reveal';
 import { StatsCount } from '@/components/sections/stats-count';
 import { TrackView } from '@/components/analytics/track-view';
+import { AboutExperience } from '@/components/about/about-experience';
+import { AboutSkills } from '@/components/about/about-skills';
+import { AboutEducation } from '@/components/about/about-education';
 import {
   getCertifications,
   getEducation,
@@ -33,7 +35,7 @@ export async function generateMetadata() {
     ...experience.map((e) => e.company),
   ];
   return pageMetadata(
-    `About ${profile.name} — ${profile.role}`,
+    `About ${profile.name}, ${profile.role}`,
     `${profile.description} Based in ${profile.location}, with experience at ${experience
       .map((e) => `${e.company} as ${e.role}`)
       .join(' and ')}.`,
@@ -96,7 +98,7 @@ export default async function About() {
             </span>
           </h1>
           <p className="heading-note">
-            The full picture — how I work, what I have shipped, and the
+            The full picture: how I work, what I have shipped, and the
             experience and education behind it.
           </p>
         </div>
@@ -128,8 +130,8 @@ export default async function About() {
               <p>{profile.description}</p>
               {projects.length > 0 ? (
                 <p>
-                  Across <StatsCount value={projects.length} /> projects —{' '}
-                  <StatsCount value={liveCount} /> of them live — I have worked
+                  Across <StatsCount value={projects.length} /> projects, with{' '}
+                  <StatsCount value={liveCount} /> of them live, I have worked
                   on{' '}
                   {projects
                     .map((p) => p.title)
@@ -144,9 +146,8 @@ export default async function About() {
                 <p>
                   Day to day that means{' '}
                   {skills[0]?.items.split(',').slice(0, 3).join(', ')} on the
-                  build side, and structured quality assurance on the other —
-                  because a feature is not finished until it holds up in
-                  production.
+                  build side, and structured quality assurance on the other. A
+                  feature is not finished until it holds up in production.
                 </p>
               ) : null}
               <ResumeLinks />
@@ -154,96 +155,17 @@ export default async function About() {
           </Reveal>
         </section>
         <Reveal>
-          <section
-            className="experience-section"
-            aria-labelledby="experience-title"
-          >
-            <h2 id="experience-title">Experience</h2>
-            {experience.map((item) => (
-              <article className="experience-row" key={item.id}>
-                <p>
-                  {item.company}
-                  <br />
-                  <span>{item.dates}</span>
-                </p>
-                <div>
-                  <h3 style={{ fontSize: 'clamp(20px,1.6vw,26px)' }}>
-                    {item.role}
-                  </h3>
-                  <p>{item.detail}</p>
-                </div>
-              </article>
-            ))}
-          </section>
+          <AboutExperience experience={experience} />
         </Reveal>
         <Reveal>
-          <section className="skills-section" aria-labelledby="skills-title">
-            <h2 id="skills-title">
-              Skills
-              <br />
-              and tooling.
-            </h2>
-            <div>
-              {skills.map((skill) => (
-                <div className="skill-row" key={skill.id}>
-                  <h3>{skill.name}</h3>
-                  <p>{skill.items}</p>
-                </div>
-              ))}
-            </div>
-          </section>
+          <AboutSkills skills={skills} />
         </Reveal>
         <Reveal>
-          <section
-            className="education-section"
-            aria-labelledby="education-title"
-          >
-            <h2 id="education-title">Education and certifications</h2>
-            <div>
-              {education.map((item) => (
-                <Fragment key={item.id}>
-                  <h3>{item.award}</h3>
-                  {/* One dateline: school, then whatever else is recorded. */}
-                  <p>
-                    {[item.school, item.dates, ...item.notes]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </p>
-                </Fragment>
-              ))}
-              {certifications.length > 0 && (
-                <>
-                  <h3>Certifications</h3>
-                  <ul>
-                    {certifications.map((item) => (
-                      <li key={item.id}>
-                        {item.url ? (
-                          <a
-                            className="text-link"
-                            href={item.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{
-                              minHeight: 44,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                            }}
-                          >
-                            {item.title}
-                          </a>
-                        ) : (
-                          item.title
-                        )}{' '}
-                        — {item.issuer}, {item.date}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              <h3>Languages</h3>
-              <p>{profile.languages}</p>
-            </div>
-          </section>
+          <AboutEducation
+            education={education}
+            certifications={certifications}
+            languages={profile.languages}
+          />
         </Reveal>
       </main>
       <ContactFooter />

@@ -1,21 +1,23 @@
 .section {
   border-top: 1px solid var(--line);
+  padding-block-top: clamp(64px, 7vw, 100px);
 }
 .heading {
   display: flex;
   justify-content: space-between;
-  align-items: end;
+  align-items: flex-end;
   gap: 24px;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
 }
 .heading h2 {
   font-size: clamp(40px, 4.6vw, 64px);
   font-weight: 450;
   letter-spacing: -0.06em;
   line-height: 1.05;
+  color: var(--deep);
 }
 .heading p {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--muted);
   margin-top: 14px;
   line-height: 1.6;
@@ -23,15 +25,27 @@
 .all {
   display: inline-flex;
   white-space: nowrap;
-  gap: 30px;
+  gap: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid;
-  font-size: 12px;
+  border-bottom: 1px solid currentColor;
+  font-size: 15px;
+  font-weight: 550;
+  color: var(--deep);
+  transition: color 0.35s ease;
+}
+.all span {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.all:hover {
+  color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.all:hover span {
+  transform: translate(3px, -3px);
 }
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: 24px;
 }
 .card {
   min-width: 0;
@@ -40,19 +54,22 @@
   display: block;
   height: 100%;
   overflow: hidden;
-  border: 1px solid #c8d1df;
-  border-radius: 22px;
-  background: #fff;
-  box-shadow: 0 2px 10px rgba(12, 33, 60, 0.05);
+  border: 1px solid rgba(82, 119, 71, 0.18);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafcf8 100%);
+  box-shadow:
+    0 10px 30px -10px rgba(12, 33, 60, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transition:
-    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.45s,
-    border-color 0.35s;
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease;
 }
 .thumbnail {
-  height: clamp(175px, 17vw, 230px);
+  height: clamp(185px, 18vw, 240px);
   overflow: hidden;
-  background: #0c213c;
+  background: #071629;
+  position: relative;
 }
 .thumbnail :global(.project-art) {
   width: 100%;
@@ -60,70 +77,73 @@
   min-height: 0;
   aspect-ratio: auto;
   border-radius: 0;
-  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .thumbnail :global(.project-screenshot img) {
   object-fit: cover;
   object-position: top;
 }
 .body {
-  padding: 22px;
+  padding: 24px;
 }
 .meta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.12em;
-  color: #527747;
+  color: color-mix(in srgb, var(--accent) 60%, transparent);
   text-transform: uppercase;
 }
 .body h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 500;
+  font-weight: 550;
   font-size: clamp(23px, 2vw, 30px);
   letter-spacing: -0.04em;
-  margin: 20px 0 12px;
+  color: var(--deep);
+  margin: 18px 0 12px;
 }
 .body h3 span {
   font-size: 22px;
-  transition: transform 0.4s;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .body p {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 13.5px;
   line-height: 1.7;
   min-height: 3.4em;
 }
 .footer {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid rgba(12, 33, 60, 0.08);
   padding-top: 18px;
   margin-top: 24px;
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
+  font-weight: 500;
 }
 .link:hover {
-  transform: translateY(-7px);
+  transform: translateY(-8px);
   box-shadow:
-    0 18px 36px rgba(23, 59, 56, 0.12),
-    0 2px 10px rgba(23, 59, 56, 0.06);
-  border-color: #9aaa91;
+    0 24px 48px -12px rgba(12, 33, 60, 0.14),
+    0 4px 16px rgba(82, 119, 71, 0.08);
+  border-color: rgba(82, 119, 71, 0.45);
 }
 .link:hover .thumbnail :global(.project-art) {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 .link:hover h3 span {
-  transform: translate(3px, -3px);
+  transform: translate(4px, -4px);
 }
 .link:focus-visible,
 .all:focus-visible {
-  outline: 2px solid #527747;
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
   outline-offset: 5px;
 }
 .all {
@@ -131,10 +151,10 @@
   align-items: center;
   font-size: 15px;
   font-weight: 500;
-  color: #0c213c;
+  color: var(--deep);
 }
 .all:hover {
-  color: #527747;
+  color: color-mix(in srgb, var(--accent) 60%, transparent);
 }
 @media (max-width: 900px) {
   .grid {

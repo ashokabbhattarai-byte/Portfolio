@@ -92,7 +92,7 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
         }}
       >
         <p style={{ color: '#556479', fontSize: 17, margin: 0 }}>
-          The first articles are in progress — check back soon.
+          The first articles are in progress. Check back soon.
         </p>
       </div>
     );
@@ -154,11 +154,11 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
                 <div
                   className="project-art"
                   style={{
-                    background: '#0c213c',
+                    background: 'var(--deep)',
                     display: 'grid',
                     placeItems: 'center',
                     fontSize: 32,
-                    color: '#f4f3ee',
+                    color: 'var(--paper)',
                     borderRadius: '22px 22px 0 0',
                     aspectRatio: '16 / 9',
                   }}
@@ -199,8 +199,9 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
                     alignItems: 'center',
                     fontSize: 12,
                     fontWeight: 600,
-                    color: '#527747',
-                    background: 'rgba(199,220,168,0.12)',
+                    color: 'color-mix(in srgb, var(--accent) 60%, transparent)',
+                    background:
+                      'color-mix(in srgb, var(--highlight) calc(0.12 * 100%), transparent)',
                     border: '1px solid rgba(82,119,71,0.25)',
                     borderRadius: 999,
                     padding: '4px 12px',
@@ -228,8 +229,9 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
                     alignItems: 'center',
                     fontSize: 12,
                     fontWeight: 600,
-                    color: '#527747',
-                    background: 'rgba(199,220,168,0.12)',
+                    color: 'color-mix(in srgb, var(--accent) 60%, transparent)',
+                    background:
+                      'color-mix(in srgb, var(--highlight) calc(0.12 * 100%), transparent)',
                     border: '1px solid rgba(82,119,71,0.25)',
                     borderRadius: 999,
                     padding: '4px 12px',

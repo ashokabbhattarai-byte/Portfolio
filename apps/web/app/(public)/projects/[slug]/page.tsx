@@ -12,7 +12,7 @@ import { jsonLd, metadata as pageMetadata, siteUrl } from '@/lib/seo';
    1-column case-meta at 480px/360px, and calm + reduced-motion fallbacks for
    the scrubbed visual. */
 const caseStyles = `
-.case-page .case-meta a.pill:hover{background:#e5e9dc;border-color:#527747;color:#0c213c;transform:translateY(-1px)}
+.case-page .case-meta a.pill:hover{background:#e5e9dc;border-color:color-mix(in srgb, var(--accent) 60%, transparent);color:var(--deep);transform:translateY(-1px)}
 @media (max-width:480px){.case-page .case-meta{grid-template-columns:1fr}.case-page .case-meta a.pill{min-height:44px;width:100%}}
 @media (max-width:360px){.case-page .case-meta{grid-template-columns:1fr;gap:20px}}
 [data-flow='calm'] .case-page .case-visual{transform:none!important}
@@ -40,8 +40,8 @@ export async function generateMetadata({
     'Software engineering case study',
   ];
   return pageMetadata(
-    `${p.title} — ${p.category} project`,
-    `${p.summary} ${p.overview} A ${p.category.toLowerCase()} project built by Ashok Bhattarai — ${p.context}.`,
+    `${p.title}, ${p.category} project`,
+    `${p.summary} ${p.overview} A ${p.category.toLowerCase()} project built by Ashok Bhattarai (${p.context}).`,
     `/projects/${p.slug}`,
     keywords,
     /* `image: null` hands og:image to the sibling opengraph-image route, which
@@ -189,7 +189,12 @@ export default async function CaseStudy({
                 </li>
               </ol>
             </nav>
-            <h1 style={{ fontSize: 'clamp(40px,4.6vw,64px)', color: '#0c213c' }}>
+            <h1
+              style={{
+                fontSize: 'clamp(40px,4.6vw,64px)',
+                color: 'var(--deep)',
+              }}
+            >
               {project.title}
             </h1>
             <p className="case-tagline">{project.summary}</p>
@@ -198,7 +203,11 @@ export default async function CaseStudy({
             <div>
               <span
                 className="section-label"
-                style={{ marginBottom: 0, fontSize: 12, letterSpacing: '0.16em' }}
+                style={{
+                  marginBottom: 0,
+                  fontSize: 12,
+                  letterSpacing: '0.16em',
+                }}
               >
                 Role
               </span>
@@ -207,7 +216,11 @@ export default async function CaseStudy({
             <div>
               <span
                 className="section-label"
-                style={{ marginBottom: 0, fontSize: 12, letterSpacing: '0.16em' }}
+                style={{
+                  marginBottom: 0,
+                  fontSize: 12,
+                  letterSpacing: '0.16em',
+                }}
               >
                 Context
               </span>
@@ -216,7 +229,11 @@ export default async function CaseStudy({
             <div>
               <span
                 className="section-label"
-                style={{ marginBottom: 0, fontSize: 12, letterSpacing: '0.16em' }}
+                style={{
+                  marginBottom: 0,
+                  fontSize: 12,
+                  letterSpacing: '0.16em',
+                }}
               >
                 Discipline
               </span>
@@ -225,7 +242,11 @@ export default async function CaseStudy({
             <div>
               <span
                 className="section-label"
-                style={{ marginBottom: 0, fontSize: 12, letterSpacing: '0.16em' }}
+                style={{
+                  marginBottom: 0,
+                  fontSize: 12,
+                  letterSpacing: '0.16em',
+                }}
               >
                 Views
               </span>
@@ -241,8 +262,8 @@ export default async function CaseStudy({
                 className="pill"
                 aria-label={`Open the live ${project.title} site in a new tab`}
                 style={{
-                  background: '#f4f3ee',
-                  color: '#0c213c',
+                  background: 'var(--paper)',
+                  color: 'var(--deep)',
                   borderColor: '#c8d1df',
                   minHeight: 56,
                   borderRadius: 32,
@@ -281,7 +302,7 @@ export default async function CaseStudy({
                 src={project.gallery}
                 /* Named after the project rather than hard-coded to SuchanaAI —
                    every case study renders through this same figure. */
-                alt={`${project.title} interface — ${project.summary}`}
+                alt={`${project.title} interface, ${project.summary}`}
                 width={1440}
                 height={1000}
                 sizes="(max-width: 700px) 100vw, 88vw"
@@ -345,23 +366,23 @@ export default async function CaseStudy({
                   project was, which misattributed every other case study. */}
               <Reveal>
                 <p className="case-note">
-                {project.live ? (
-                  <>
-                    My role and dates are documented in my résumé. Features and
-                    screenshots reflect the{' '}
-                    <a
-                      className="text-link"
-                      href={project.live}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      public {project.title} site
-                    </a>
-                    , reviewed September 2026.
-                  </>
-                ) : (
-                  'This overview reflects the project information in my résumé. The visual is an original illustration; internal implementation details are not published.'
-                )}
+                  {project.live ? (
+                    <>
+                      My role and dates are documented in my résumé. Features
+                      and screenshots reflect the{' '}
+                      <a
+                        className="text-link"
+                        href={project.live}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        public {project.title} site
+                      </a>
+                      , reviewed September 2026.
+                    </>
+                  ) : (
+                    'This overview reflects the project information in my résumé. The visual is an original illustration; internal implementation details are not published.'
+                  )}
                 </p>
               </Reveal>
             </div>
@@ -371,13 +392,13 @@ export default async function CaseStudy({
       <section
         className="next-project"
         aria-labelledby="next-project-label"
-        style={{ background: '#0c213c' }}
+        style={{ background: 'var(--deep)' }}
       >
         <p
           id="next-project-label"
           className="section-label"
           style={{
-            color: '#c7dca8',
+            color: 'var(--highlight)',
             fontSize: 12,
             letterSpacing: '0.16em',
             justifyContent: 'center',
@@ -403,7 +424,11 @@ export default async function CaseStudy({
         <TransitionLink
           href="/projects"
           className="text-link"
-          style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center' }}
+          style={{
+            minHeight: 44,
+            display: 'inline-flex',
+            alignItems: 'center',
+          }}
         >
           Back to all projects
         </TransitionLink>

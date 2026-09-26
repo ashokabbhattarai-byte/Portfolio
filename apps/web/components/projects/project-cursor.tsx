@@ -99,7 +99,8 @@ export function ProjectCursor({
             ease: 'power3.in',
             overwrite: 'auto',
           });
-          if (!calm) gsap.to(node, { rotation: 0, duration: 0.5, ease: 'power3.out' });
+          if (!calm)
+            gsap.to(node, { rotation: 0, duration: 0.5, ease: 'power3.out' });
         };
         document.addEventListener('pointermove', move, { passive: true });
         document.addEventListener('pointerleave', hide);
@@ -132,33 +133,34 @@ export function ProjectCursor({
     <>
       <style>{`@media (prefers-reduced-motion:reduce){.project-cursor{display:none!important}}`}</style>
       <div ref={ref} className="project-cursor" aria-hidden="true">
-      <div
-        className="cursor-media"
-        style={{
-          borderRadius: 22,
-          border: '1px solid rgba(199,220,168,0.22)',
-        }}
-      >
-        {projects.map((project) => (
-          <div
-            data-art={project.slug}
-            key={project.slug}
-            className="cursor-art-wrap"
-          >
-            <ProjectArt project={project} compact />
-            <div className="cursor-caption">
-              <span className="cursor-title">{project.title}</span>
-              <span className="cursor-meta" style={{ fontSize: 12 }}>
-                {project.category} · {project.context}
-              </span>
+        <div
+          className="cursor-media"
+          style={{
+            borderRadius: 22,
+            border:
+              '1px solid color-mix(in srgb, var(--highlight) calc(0.22 * 100%), transparent)',
+          }}
+        >
+          {projects.map((project) => (
+            <div
+              data-art={project.slug}
+              key={project.slug}
+              className="cursor-art-wrap"
+            >
+              <ProjectArt project={project} compact />
+              <div className="cursor-caption">
+                <span className="cursor-title">{project.title}</span>
+                <span className="cursor-meta" style={{ fontSize: 12 }}>
+                  {project.category} · {project.context}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <span ref={labelRef} className="cursor-label">
+          View ↗
+        </span>
       </div>
-      <span ref={labelRef} className="cursor-label">
-        View ↗
-      </span>
-    </div>
     </>
   );
 }

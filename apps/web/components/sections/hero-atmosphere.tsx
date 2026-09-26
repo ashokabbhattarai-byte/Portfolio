@@ -120,7 +120,7 @@ export function HeroAtmosphere({
         const py = p.oy - Math.sin(angle) * push;
 
         // color lerp: muted lime -> warm white on hover
-        // base: #c7dca8, hover: #e5e9dc -> #ffffff
+        // base: var(--highlight), hover: #e5e9dc -> #ffffff
         const mix = boosted;
         // use rgba lerp manually via alpha + color
         // draw outer glow for boosted dots

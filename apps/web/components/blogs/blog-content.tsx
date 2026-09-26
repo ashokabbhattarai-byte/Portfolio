@@ -16,7 +16,7 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function inlineMd(text: string): string {
+function inlineMd(text: string, imgFallback = 'Article image'): string {
   text = escapeHtml(text);
   // keep code spans before other inline
   const codes: string[] = [];
@@ -28,7 +28,7 @@ function inlineMd(text: string): string {
   // images ![alt](url) → figure + figcaption with dimensions to avoid CLS
   text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
     if (!/^(https?:\/\/|\/(?!\/))/.test(url)) return alt;
-    const img = `<img src="${url}" alt="${alt || 'Article image'}" loading="lazy" width="1200" height="675" />`;
+    const img = `<img src="${url}" alt="${alt || imgFallback}" loading="lazy" width="1200" height="675" />`;
     return alt
       ? `<figure class="blog-figure">${img}<figcaption>${alt}</figcaption></figure>`
       : `<figure class="blog-figure">${img}</figure>`;
@@ -50,7 +50,7 @@ function inlineMd(text: string): string {
   return text;
 }
 
-function mdToHtml(md: string): string {
+function mdToHtml(md: string, imgFallback = 'Article image'): string {
   const headings = extractHeadings(md);
   let headingIndex = 0;
   const lines = md.replace(/\r\n/g, '\n').split('\n');
@@ -63,13 +63,13 @@ function mdToHtml(md: string): string {
   const flushPara = () => {
     if (para.length) {
       const pText = para.join(' ').trim();
-      if (pText) html += `<p>${inlineMd(pText)}</p>`;
+      if (pText) html += `<p>${inlineMd(pText, imgFallback)}</p>`;
       para = [];
     }
   };
 
   const pushListItem = (content: string) => {
-    html += `<li>${inlineMd(content)}</li>`;
+    html += `<li>${inlineMd(content, imgFallback)}</li>`;
   };
 
   for (let i = 0; i < lines.length; i++) {
@@ -120,7 +120,7 @@ function mdToHtml(md: string): string {
         level === 2 || level === 3
           ? (headings[headingIndex++]?.id ?? slugify(text))
           : slugify(text);
-      html += `<h${level} id="${id}">${inlineMd(text)}</h${level}>`;
+      html += `<h${level} id="${id}">${inlineMd(text, imgFallback)}</h${level}>`;
       continue;
     }
     // hr ---
@@ -140,7 +140,7 @@ function mdToHtml(md: string): string {
         html += `</${inList}>`;
         inList = null;
       }
-      html += `<blockquote>${inlineMd(trimmed.slice(2).trim())}</blockquote>`;
+      html += `<blockquote>${inlineMd(trimmed.slice(2).trim(), imgFallback)}</blockquote>`;
       continue;
     }
     // ul - or * or •
@@ -209,12 +209,17 @@ function mdToHtml(md: string): string {
 
 export function BlogContent({
   content,
+  title,
   className,
 }: {
   content: string;
+  title?: string;
   className?: string;
 }) {
-  const html = useMemo(() => mdToHtml(content), [content]);
+  const html = useMemo(
+    () => mdToHtml(content, title ?? 'Article image'),
+    [content, title],
+  );
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const root = ref.current;
@@ -285,9 +290,9 @@ export function BlogContent({
   return (
     <>
       <style>{`.blog-prose h4{scroll-margin-top:110px;line-height:1.3;letter-spacing:-0.02em;font-weight:500;margin:2em 0 0.7em;font-size:20px;}
-.blog-prose pre{background:#0c213c !important;border:1px solid rgba(199,220,168,0.2);border-radius:22px;font-size:16px;}
-.blog-prose :not(pre) > code{border-radius:8px;border:1px solid rgba(82,119,71,0.25);background:rgba(199,220,168,0.12);}
-.blog-prose blockquote{border-left:3px solid #527747;background:rgba(199,220,168,0.12);border-radius:0 22px 22px 0;}
+.blog-prose pre{background:var(--deep) !important;border:1px solid color-mix(in srgb, var(--highlight) calc(0.2 * 100%), transparent);border-radius:22px;font-size:16px;}
+.blog-prose :not(pre) > code{border-radius:8px;border:1px solid rgba(82,119,71,0.25);background:color-mix(in srgb, var(--highlight) calc(0.12 * 100%), transparent);}
+.blog-prose blockquote{border-left:3px solid color-mix(in srgb, var(--accent) 60%, transparent);background:color-mix(in srgb, var(--highlight) calc(0.12 * 100%), transparent);border-radius:0 22px 22px 0;}
 .blog-prose hr{border-top-color:#c8d1df;}
 .blog-prose .blog-figure{margin:1.6em 0;}
 .blog-prose .blog-figure img{border-radius:22px;width:100%;height:auto;}

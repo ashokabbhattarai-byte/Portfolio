@@ -28,7 +28,7 @@ const DEFAULT_SCOPES: PublisherScope[] = [
 ];
 
 function formatDate(value: string | null): string {
-  if (!value) return '—';
+  if (!value) return 'Not set';
   return new Date(value).toLocaleString('en-GB', {
     dateStyle: 'medium',
     timeStyle: 'short',
@@ -253,7 +253,7 @@ function RevealDialog({
         <h2>Copy your key now</h2>
         <p>
           This is the only time <strong>{issued.name}</strong> will be shown. It
-          is stored as a hash — if you lose it, rotate the key to get a new one.
+          is stored as a hash. If you lose it, rotate the key to get a new one.
         </p>
         <code className="key-reveal-value">{issued.key}</code>
         <div className="adm-row-actions">
@@ -358,7 +358,7 @@ function CreateKeyDialog({
           <legend>Scopes</legend>
           <p className="adm-hint">
             Grant the least the tool needs. Without <code>blog:publish</code> an
-            agent can draft and edit but can never make a post public — even if
+            agent can draft and edit but can never make a post public, even if
             it asks to.
           </p>
           {scopes.map((info) => (

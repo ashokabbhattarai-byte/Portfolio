@@ -15,16 +15,16 @@ gsap.registerPlugin(ScrollTrigger);
    rotate(45deg) on hover. (The rotate(0deg) override lives in globals.css —
    this later, more specific rule wins without touching that file.) */
 const listStyles = `
-[data-projects-list] .project-title h3{font-size:clamp(28px,3.5vw,52px);color:#0c213c;letter-spacing:-0.05em}
+[data-projects-list] .project-title h3{font-size:clamp(28px,3.5vw,52px);color:var(--deep);letter-spacing:-0.05em}
 [data-projects-list] .project-context,[data-projects-list] .project-category{font-size:15px}
 [data-projects-list].grid .project-entry{background:#fff;border:1px solid rgba(12,33,60,0.1);border-radius:22px;padding:26px;transition:transform .6s cubic-bezier(0.16,1,0.3,1),box-shadow .6s cubic-bezier(0.16,1,0.3,1),border-color .3s ease,color .35s ease}
-[data-projects-list].grid .project-entry:hover{transform:translateY(-7px);border-color:#527747;box-shadow:0 18px 36px rgba(23,59,56,0.12);color:#527747}
+[data-projects-list].grid .project-entry:hover{transform:translateY(-7px);border-color:color-mix(in srgb, var(--accent) 60%, transparent);box-shadow:0 18px 36px rgba(23,59,56,0.12);color:color-mix(in srgb, var(--accent) 60%, transparent)}
 [data-projects-list].grid .project-thumbnail{border-radius:22px;overflow:hidden;border:1px solid rgba(12,33,60,0.1)}
-[data-projects-list] .project-arrow{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:#f4f3ee;border:1px solid #c8d1df;font-size:16px!important;transition:background .34s cubic-bezier(0.16,1,0.3,1),color .34s cubic-bezier(0.16,1,0.3,1),border-color .34s cubic-bezier(0.16,1,0.3,1),transform .52s cubic-bezier(0.16,1,0.3,1)}
-[data-projects-list] .project-entry:hover .project-arrow{background:#527747;color:#fff;border-color:#527747;transform:rotate(45deg) scale(1.06);box-shadow:0 8px 20px rgba(82,119,71,0.32)}
-[data-projects-list] .project-entry:focus-visible{outline:3px solid #527747;outline-offset:4px}
+[data-projects-list] .project-arrow{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:var(--paper);border:1px solid #c8d1df;font-size:16px!important;transition:background .34s cubic-bezier(0.16,1,0.3,1),color .34s cubic-bezier(0.16,1,0.3,1),border-color .34s cubic-bezier(0.16,1,0.3,1),transform .52s cubic-bezier(0.16,1,0.3,1)}
+[data-projects-list] .project-entry:hover .project-arrow{background:color-mix(in srgb, var(--accent) 60%, transparent);color:#fff;border-color:color-mix(in srgb, var(--accent) 60%, transparent);transform:rotate(45deg) scale(1.06);box-shadow:0 8px 20px rgba(82,119,71,0.32)}
+[data-projects-list] .project-entry:focus-visible{outline:3px solid color-mix(in srgb, var(--accent) 60%, transparent);outline-offset:4px}
 [data-projects-list].grid .project-entry:active{transform:translateY(-2px)}
-@media (hover:none){[data-projects-list] .project-entry:active{color:#527747}[data-projects-list].grid .project-entry:active{transform:translateY(-2px)}}
+@media (hover:none){[data-projects-list] .project-entry:active{color:color-mix(in srgb, var(--accent) 60%, transparent)}[data-projects-list].grid .project-entry:active{transform:translateY(-2px)}}
 @media (max-width:760px){[data-projects-list].grid{grid-template-columns:1fr}[data-projects-list] .project-context,[data-projects-list] .project-category{font-size:15px}}
 @media (max-width:480px){[data-projects-list].grid .project-entry{padding:20px}}
 @media (max-width:360px){[data-projects-list].grid .project-entry{padding:18px}}
@@ -83,7 +83,11 @@ export function ProjectList({
   return (
     <>
       <style>{listStyles}</style>
-      <div ref={ref} className={`project-collection ${mode}`} data-projects-list>
+      <div
+        ref={ref}
+        className={`project-collection ${mode}`}
+        data-projects-list
+      >
         <div className="work-columns utility">
           <span>Project</span>
           <span>Discipline</span>
@@ -97,7 +101,7 @@ export function ProjectList({
             data-project={project.slug}
             data-flip-id={project.slug}
             data-preview={mode === 'list' ? 'media' : 'cursor'}
-            aria-label={`${project.title} — ${project.category} project. ${project.summary}`}
+            aria-label={`${project.title}, ${project.category} project. ${project.summary}`}
           >
             <div className="project-thumbnail">
               <ProjectArt project={project} />

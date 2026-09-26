@@ -1,6 +1,7 @@
 import { BlogCounts } from '@/components/analytics/blog-engagement';
 import { getBlogs } from '@/lib/content';
 import { TransitionLink } from '@/components/motion/transition-link';
+import { Magnetic } from '@/components/motion/magnetic';
 import { CraftFilm } from './craft-film';
 import styles from './featured-writing.module.css';
 
@@ -40,6 +41,7 @@ export async function FeaturedBlogs() {
                 key={post.id}
                 className={styles.article}
                 data-writing-entry
+                data-blog={post.slug}
               >
                 <TransitionLink
                   href={`/blog/${post.slug}`}
@@ -62,10 +64,22 @@ export async function FeaturedBlogs() {
           ) : (
             <p className={styles.empty}>
               The first notes are taking shape. Architecture decisions,
-              practical AI, and the details behind a thoughtful release.
+              practical AI, and the details behind a careful release.
             </p>
           )}
         </div>
+      </div>
+      <div className="more-work">
+        <Magnetic>
+          <TransitionLink
+            className="pill"
+            href="/blog"
+            aria-label={`Read all ${blogs.length} articles`}
+          >
+            All articles <sup>{String(blogs.length).padStart(2, '0')}</sup>
+            <span aria-hidden="true">↗</span>
+          </TransitionLink>
+        </Magnetic>
       </div>
     </section>
   );

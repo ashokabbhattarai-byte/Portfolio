@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
-import { setFlow, travels, watchFlow } from '@/components/motion/flow';
 import styles from './craft-film.module.css';
 
 const FilmPlayer = dynamic(() => import('./craft-player'), { ssr: false });
@@ -15,23 +14,26 @@ export function CraftFilm({
   const host = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [motion, setMotion] = useState(false);
-  const [paused, setPaused] = useState(false);
   useEffect(() => {
-    const sync = () => setMotion(travels());
-    sync();
-    const stop = watchFlow(sync);
-    const observer = new IntersectionObserver(
+    const playObserver = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0.1 },
+    );
+    const loadObserver = new IntersectionObserver(
       ([entry]) => {
-        setVisible(entry.isIntersecting);
         if (entry.isIntersecting) setLoaded(true);
       },
-      { rootMargin: '80px' },
+      { rootMargin: '600px' },
     );
-    if (host.current) observer.observe(host.current);
+
+    if (host.current) {
+      playObserver.observe(host.current);
+      loadObserver.observe(host.current);
+    }
+
     return () => {
-      stop();
-      observer.disconnect();
+      playObserver.disconnect();
+      loadObserver.disconnect();
     };
   }, []);
   return (
@@ -46,12 +48,7 @@ export function CraftFilm({
           </strong>
           <i>From first principles to the final detail.</i>
         </div>
-        {loaded && (
-          <FilmPlayer
-            variant={variant}
-            playing={visible && motion && !paused}
-          />
-        )}
+        {loaded && <FilmPlayer variant={variant} playing={visible} />}
       </div>
       <div className={styles.caption}>
         <span>
@@ -60,24 +57,6 @@ export function CraftFilm({
             ? 'Inside the notebook'
             : 'A practice of continuous refinement'}
         </span>
-        <button
-          type="button"
-          onClick={() => {
-            if (!motion) {
-              setPaused(false);
-              setFlow('full');
-            } else setPaused(!paused);
-          }}
-          aria-label={
-            !motion
-              ? 'Enable portfolio animations'
-              : paused
-                ? 'Play portfolio film'
-                : 'Pause portfolio film'
-          }
-        >
-          {!motion ? 'Enable motion ↗' : paused ? 'Play ↗' : 'Pause Ⅱ'}
-        </button>
       </div>
     </div>
   );

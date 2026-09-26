@@ -28,7 +28,7 @@ export async function generateMetadata() {
     ...projects.slice(0, 4).map((p) => p.title),
   ];
   return pageMetadata(
-    `${profile.name} — ${profile.role} in ${profile.location}`,
+    `${profile.name}, ${profile.role} in ${profile.location}`,
     `${profile.description} Selected projects: ${projects
       .slice(0, 3)
       .map((p) => p.title)
@@ -54,7 +54,7 @@ export default async function Home() {
         '@type': 'ProfilePage',
         '@id': `${siteUrl}/#profilepage`,
         url: siteUrl,
-        name: `${profile.name} — ${profile.role}`,
+        name: `${profile.name}, ${profile.role}`,
         description: profile.description,
         inLanguage: 'en',
         isPartOf: { '@id': `${siteUrl}/#website` },
@@ -90,10 +90,10 @@ export default async function Home() {
         >
           <div className={styles.portraitStrip} data-portrait-window>
             <Image
-              src="/assets/hero-portrait.webp"
-              alt={`${profile.name} in the office`}
+              src="/assets/secondary-wide.webp"
+              alt={`${profile.name} outdoors in Lalitpur, Nepal`}
               fill
-              sizes="(max-width: 760px) 90vw, 46vw"
+              sizes="(max-width: 760px) 90vw, 50vw"
             />
             <span className={styles.portraitCaption}>
               ASHOK BHATTARAI <span>LALITPUR, NEPAL ↗</span>

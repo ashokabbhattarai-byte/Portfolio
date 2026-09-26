@@ -9,9 +9,9 @@ export async function generateMetadata() {
   const blogs = await getBlogs();
   const topics = [...new Set(blogs.flatMap((b) => b.tags))].slice(0, 6);
   return pageMetadata(
-    'Engineering blog',
-    `Writing on full-stack engineering, applied AI and quality assurance by Ashok Bhattarai${
-      blogs.length ? ` — ${blogs.length} posts` : ''
+    'Engineering Notes on Shipping Software',
+    `Blogs on full-stack engineering, applied AI and quality assurance by Ashok Bhattarai${
+      blogs.length ? `, ${blogs.length} posts` : ''
     }${topics.length ? ` on ${topics.join(', ')}` : ''}.`,
     '/blog',
     [
@@ -35,10 +35,10 @@ export default async function BlogIndex() {
         '@context': 'https://schema.org',
         '@type': 'Blog',
         '@id': `${siteUrl}/blog#blog`,
-        name: `${profile.name} — Engineering blog`,
+        name: `${profile.name}: Engineering Blog`,
         url: `${siteUrl}/blog`,
         description:
-          'Writing on full-stack engineering, applied AI and quality assurance.',
+          'Blogs on full-stack engineering, applied AI and quality assurance.',
         inLanguage: 'en',
         isPartOf: { '@id': `${siteUrl}/#website` },
         author: { '@id': `${siteUrl}/#person` },
@@ -66,8 +66,8 @@ export default async function BlogIndex() {
         />
       ) : null}
       <main id="main" tabIndex={-1} className="inner-page section-shell">
-        <style>{`.blog-index-label{font-size:12px !important;letter-spacing:0.16em !important;font-weight:600 !important;color:#527747 !important;}
-.blog-index-label::before{width:28px !important;height:2px !important;background:linear-gradient(90deg, #527747, #c7dca8) !important;}
+        <style>{`.blog-index-label{font-size:12px !important;letter-spacing:0.16em !important;font-weight:600 !important;color:color-mix(in srgb, var(--accent) 60%, transparent) !important;}
+.blog-index-label::before{width:28px !important;height:2px !important;background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, transparent), var(--highlight)) !important;}
 .blog-count{font-size:15px;color:#556479;font-variant-numeric:tabular-nums;margin:18px 0 0;}
 @media (max-width: 760px){.blog-count{font-size:15px;}}
 @media (max-width: 480px){.blog-index-wrap h1{font-size:clamp(32px, 9vw, 48px);}}`}</style>
@@ -78,10 +78,10 @@ export default async function BlogIndex() {
               fontSize: 12,
               letterSpacing: '0.16em',
               fontWeight: 600,
-              color: '#527747',
+              color: 'color-mix(in srgb, var(--accent) 60%, transparent)',
             }}
           >
-            Writing / {String(blogs.length).padStart(2, '0')}
+            Blogs / {String(blogs.length).padStart(2, '0')}
           </p>
           <h1>
             Notes from
@@ -89,7 +89,7 @@ export default async function BlogIndex() {
             the build.
           </h1>
           <p className="heading-note">
-            What shipping actually looks like — architecture decisions, applied
+            What shipping actually looks like: architecture decisions, applied
             AI, and the quality assurance that keeps products dependable.
             <br />
             Longer than a commit message, shorter than a whitepaper.

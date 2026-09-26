@@ -265,6 +265,17 @@ export function MediaPickerDialog({
         event.preventDefault();
         onClose();
       }}
+      onClick={(event) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        if (
+          event.clientX < rect.left ||
+          event.clientX > rect.right ||
+          event.clientY < rect.top ||
+          event.clientY > rect.bottom
+        ) {
+          onClose();
+        }
+      }}
     >
       <header className="media-dialog-head">
         <h2>{title}</h2>

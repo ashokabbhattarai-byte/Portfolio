@@ -15,7 +15,7 @@ export default async function AdminActivityPage() {
           <span className="adm-eyebrow">AI · activity</span>
           <h1>Activity log</h1>
           <p>
-            Every publish, schedule, upload and key change, and who made it —
+            Every publish, schedule, upload and key change, and who made it:
             you, an AI key, or the scheduler. Secrets are never recorded.
           </p>
         </div>

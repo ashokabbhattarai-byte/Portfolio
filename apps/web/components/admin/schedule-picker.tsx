@@ -179,6 +179,17 @@ export function SchedulePicker({
         event.preventDefault();
         onCancel();
       }}
+      onClick={(event) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        if (
+          event.clientX < rect.left ||
+          event.clientX > rect.right ||
+          event.clientY < rect.top ||
+          event.clientY > rect.bottom
+        ) {
+          onCancel();
+        }
+      }}
     >
       <header className="sched-head">
         <h2>{title}</h2>

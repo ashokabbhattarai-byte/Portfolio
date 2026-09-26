@@ -46,7 +46,9 @@ export function metadata(
     title: absoluteTitle ? { absolute: title } : title,
     description,
     keywords,
-    alternates: siteUrl ? { canonical: path } : undefined,
+    /* Absolute canonical: crawlers prefer it, and it stays correct even if a
+       layout without metadataBase ever renders the page. */
+    alternates: siteUrl ? { canonical: `${siteUrl}${path}` } : undefined,
     openGraph: {
       title,
       description,

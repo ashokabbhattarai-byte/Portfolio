@@ -204,7 +204,7 @@ export function ExperienceClient({ initial }: { initial: PageResult<Row> }) {
                 label="Dates"
                 value={form.values.dates}
                 onChange={(v) => form.set('dates', v)}
-                hint="Jul 2026 — Present"
+                hint="Jul 2026 to Present"
               />
               <TextAreaField
                 id="detail"

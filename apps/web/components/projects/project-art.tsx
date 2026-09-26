@@ -28,7 +28,7 @@ export function ProjectArt({
           className={`project-art project-screenshot ${compact ? 'compact' : ''}`}
           data-project-art={compact ? undefined : true}
           style={{
-            background: '#0c213c',
+            background: 'var(--deep)',
             borderRadius: 22,
             border: '1px solid rgba(12,33,60,0.1)',
           }}

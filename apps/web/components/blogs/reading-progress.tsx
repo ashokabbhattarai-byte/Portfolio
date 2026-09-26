@@ -75,7 +75,7 @@ export function ReadingProgress() {
           height: '100%',
           width: '100%',
           background:
-            'linear-gradient(90deg, #527747, #a8bf82 60%, #c7dca8)',
+            'linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, transparent), var(--accent) 60%, var(--highlight))',
           transform: 'scaleX(0)',
           transformOrigin: 'left',
         }}

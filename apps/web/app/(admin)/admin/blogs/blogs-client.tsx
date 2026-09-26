@@ -114,7 +114,7 @@ export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
                   {post.createdByAI && (
                     <span title="Drafted by an AI agent">AI</span>
                   )}
-                  {/* A scheduled post's whole point is the time it goes out —
+                  {/* A scheduled post's whole point is the time it goes out, so
                       that belongs in the list, not one click inside it. */}
                   {post.status === 'SCHEDULED' && post.scheduledAt && (
                     <span className="blog-row-when">

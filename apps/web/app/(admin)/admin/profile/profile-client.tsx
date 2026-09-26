@@ -98,7 +98,7 @@ export function ProfileClient({ initial }: { initial: Profile }) {
                 color: 'var(--muted)',
               }}
             >
-              Resume (PDF) — premium
+              Resume (PDF), premium
             </label>
             {form.values.resume ? (
               <div
@@ -137,8 +137,8 @@ export function ProfileClient({ initial }: { initial: Profile }) {
                     {form.values.resume}
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--muted)' }}>
-                    Current resume — will be used for “View résumé” and
-                    “Download PDF” links site-wide.
+                    Current resume will be used for “View résumé” and “Download
+                    PDF” links site-wide.
                   </div>
                 </div>
                 <a
@@ -159,7 +159,7 @@ export function ProfileClient({ initial }: { initial: Profile }) {
                 </a>
               </div>
             ) : (
-              <p className="adm-hint">No resume set — upload a PDF below.</p>
+              <p className="adm-hint">No resume set. Upload a PDF below.</p>
             )}
             <FileUploadField
               id="resume"
@@ -171,14 +171,14 @@ export function ProfileClient({ initial }: { initial: Profile }) {
               folder="profile"
               slug="resume"
               accept="application/pdf"
-              hint="PDF up to 8 MiB. Stored in portfolio-storage/profile/resume/ – edge-cached, instant site-wide."
+              hint="PDF up to 8 MiB. Stored in portfolio-storage/profile/resume/, edge-cached, instant site-wide."
             />
             <TextField
               id="resume-manual"
               label="Or paste resume URL"
               value={form.values.resume}
               onChange={(v) => form.set('resume', v)}
-              hint="Supabase public URL or /assets/... — upload above will overwrite this field"
+              hint="Supabase public URL or /assets/..., upload above will overwrite this field"
               placeholder="https://.../resume.pdf or /assets/ashok-bhattarai-resume.pdf"
             />
           </div>

@@ -138,8 +138,8 @@ export function BlogCursor({
                   style={{
                     width: '100%',
                     height: '100%',
-                    background: '#f4f3ee',
-                    color: '#0c213c',
+                    background: 'var(--paper)',
+                    color: 'var(--deep)',
                     display: 'grid',
                     placeItems: 'center',
                     fontSize: 32,
@@ -158,7 +158,12 @@ export function BlogCursor({
           );
         })}
       </div>
-      <span className="cursor-label" style={{ background: '#527747' }}>
+      <span
+        className="cursor-label"
+        style={{
+          background: 'color-mix(in srgb, var(--accent) 60%, transparent)',
+        }}
+      >
         Read ↗
       </span>
     </div>

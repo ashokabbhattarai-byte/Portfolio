@@ -8,7 +8,7 @@ import styles from '@/components/sections/hero.module.css';
 /**
  * Footer tech atmosphere — mirrors hero's premium canvas field so the footer
  * feels like the same product, not a different page.
- * Same palette (#0c213c + #527747/#c7dca8 lime), same dot-field + glow + ripples.
+ * Same palette (var(--deep) + color-mix(in srgb, var(--accent) 60%, transparent)/var(--highlight) lime), same dot-field + glow + ripples.
  * Pointer + click are handled on the footer container itself.
  */
 export function FooterAtmosphere() {
@@ -397,7 +397,7 @@ export function FooterAtmosphere() {
           opacity: 0.12,
           pointerEvents: 'none',
           backgroundImage:
-            'linear-gradient(#c7dca81c 1px, transparent 1px), linear-gradient(90deg, #c7dca81c 1px, transparent 1px)',
+            'linear-gradient(var(--highlight)1c 1px, transparent 1px), linear-gradient(90deg, var(--highlight)1c 1px, transparent 1px)',
           backgroundSize: '80px 80px',
           maskImage:
             'radial-gradient(ellipse at 72% 48%, #000, transparent 70%)',
@@ -412,7 +412,7 @@ export function FooterAtmosphere() {
           aspectRatio: '1',
           borderRadius: '50%',
           background:
-            'radial-gradient(circle at 35% 35%, #a8bf8252, #52774700 68%)',
+            'radial-gradient(circle at 35% 35%, var(--accent)52, color-mix(in srgb, var(--accent) 60%, transparent)00 68%)',
           filter: 'blur(14px)',
           pointerEvents: 'none',
           left: '68%',
@@ -430,7 +430,7 @@ export function FooterAtmosphere() {
           top: '-20%',
           height: '18%',
           background:
-            'linear-gradient(transparent, rgba(199,220,168,.10), transparent)',
+            'linear-gradient(transparent, color-mix(in srgb, var(--highlight) calc(.10 * 100%), transparent), transparent)',
           mixBlendMode: 'screen' as const,
           pointerEvents: 'none',
         }}

@@ -309,6 +309,13 @@ export type MediaAsset = {
   usageCount?: number;
 };
 
+/** An article referencing a media asset, for the library's usage display. */
+export type MediaUsageRef = {
+  id: string;
+  slug: string;
+  title: string;
+};
+
 export type PageResult<T> = {
   items: T[];
   total: number;

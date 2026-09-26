@@ -16,7 +16,9 @@ export function StatsCount({ value }: { value: number }) {
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduce = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
     const calm = document.documentElement.dataset.flow === 'calm';
     if (reduce || calm || value <= 0) {
       node.textContent = String(value);
@@ -60,7 +62,11 @@ export function StatsCount({ value }: { value: number }) {
   }, [value]);
 
   return (
-    <span ref={ref} data-stat-num={value} style={{ fontVariantNumeric: 'tabular-nums' }}>
+    <span
+      ref={ref}
+      data-stat-num={value}
+      style={{ fontVariantNumeric: 'tabular-nums' }}
+    >
       {value}
     </span>
   );

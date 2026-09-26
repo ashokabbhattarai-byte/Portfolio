@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import type { MediaAsset, PageResult } from '@portfolio/types';
+import Link from 'next/link';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { MediaAsset, MediaUsageRef, PageResult } from '@portfolio/types';
 import { adminApi, ApiError } from '@/lib/admin-api';
 import {
   formatBytes,
@@ -19,10 +20,52 @@ export function MediaClient() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [editing, setEditing] = useState<MediaAsset | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [blockedRefs, setBlockedRefs] = useState<MediaUsageRef[] | null>(null);
+  const copyTimer = useRef<number | null>(null);
+
+  /* Copies the public URL so it can be pasted straight into article content.
+     Falls back to a temporary textarea where the async clipboard API is
+     unavailable (older browsers, non-secure contexts). */
+  async function copyText(text: string): Promise<boolean> {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {
+      /* fall through to the legacy path */
+    }
+    try {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(area);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async function copyLink(asset: MediaAsset) {
+    if (await copyText(asset.url)) {
+      setCopiedId(asset.id);
+      if (copyTimer.current) window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopiedId(null), 1600);
+    } else {
+      setError('The link could not be copied. Select the URL manually.');
+    }
+  }
 
   const load = useCallback(async (nextPage: number, term: string) => {
     setLoading(true);
     setError('');
+    setBlockedRefs(null);
     try {
       setResult(
         await adminApi.media.list({
@@ -59,10 +102,28 @@ export function MediaClient() {
     try {
       await adminApi.media.remove(asset.id);
       setNotice(`Deleted ${asset.originalFilename}.`);
+      setBlockedRefs(null);
       void load(page, search);
     } catch (caught) {
-      /* MEDIA_IN_USE is the common case and is not a failure of the UI — the
-         message names what to do, so it is shown as-is. */
+      /* A 409 means articles still reference the asset. Name them with links
+         so delete becomes a two-click job instead of a dead end. */
+      if (caught instanceof ApiError && caught.status === 409) {
+        try {
+          const refs = await adminApi.media.usage(asset.id);
+          setBlockedRefs(refs.articles);
+          setError(
+            `“${asset.originalFilename}” is used by ${
+              refs.articles.length === 1
+                ? '1 article'
+                : `${refs.articles.length} articles`
+            }. Remove it there first, then delete it here.`,
+          );
+          return;
+        } catch {
+          /* Fall through to the generic API message. */
+        }
+      }
+      setBlockedRefs(null);
       setError(
         caught instanceof ApiError
           ? caught.message
@@ -91,6 +152,12 @@ export function MediaClient() {
 
   return (
     <>
+      <style>{`.media-url-row{display:flex;gap:8px;align-items:stretch}
+.media-url-row input{flex:1;min-width:0;font-family:ui-monospace,monospace;font-size:12px;}
+.adm-usage-links{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;}
+.adm-usage-links a{display:inline-flex;align-items:center;min-height:44px;color:var(--accent,color-mix(in srgb, var(--accent) 60%, transparent));}
+.adm-usage-links a:hover{text-decoration:underline;text-underline-offset:4px;}
+#media-usage-label{font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}`}</style>
       <MediaUploader
         onUploaded={(asset) => {
           setNotice(`Uploaded ${asset.originalFilename}.`);
@@ -127,6 +194,18 @@ export function MediaClient() {
             {error}
           </p>
         )}
+        {blockedRefs && blockedRefs.length > 0 && (
+          <ul
+            className="adm-usage-links"
+            aria-label="Articles using this image"
+          >
+            {blockedRefs.map((ref) => (
+              <li key={ref.id}>
+                <Link href={`/admin/blogs/${ref.id}/edit`}>{ref.title}</Link>
+              </li>
+            ))}
+          </ul>
+        )}
         {notice && !error && (
           <p className="adm-notice ok" role="status">
             {notice}
@@ -155,6 +234,14 @@ export function MediaClient() {
                 <button
                   type="button"
                   className="adm-btn tiny"
+                  onClick={() => void copyLink(asset)}
+                  aria-live="polite"
+                >
+                  {copiedId === asset.id ? 'Copied' : 'Copy link'}
+                </button>
+                <button
+                  type="button"
+                  className="adm-btn tiny"
                   onClick={() => setEditing(asset)}
                 >
                   Edit
@@ -166,7 +253,7 @@ export function MediaClient() {
                   disabled={asset.used}
                   title={
                     asset.used
-                      ? 'In use by an article — remove the reference first.'
+                      ? 'In use by an article, remove the reference first.'
                       : undefined
                   }
                 >
@@ -224,6 +311,50 @@ function MetadataDialog({
 }) {
   const [alt, setAlt] = useState(asset.alt);
   const [caption, setCaption] = useState(asset.caption);
+  const [copied, setCopied] = useState(false);
+  const [usage, setUsage] = useState<MediaUsageRef[] | null>(null);
+
+  /* Load referencing articles lazily: only the dialog needs names, and only
+     for assets the list already flags as used. */
+  useEffect(() => {
+    let live = true;
+    setUsage(null);
+    if (!asset.used) return;
+    adminApi.media
+      .usage(asset.id)
+      .then((refs) => {
+        if (live) setUsage(refs.articles);
+      })
+      .catch(() => {
+        if (live) setUsage([]);
+      });
+    return () => {
+      live = false;
+    };
+  }, [asset.id, asset.used]);
+
+  async function copyUrl() {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(asset.url);
+      } else {
+        const area = document.createElement('textarea');
+        area.value = asset.url;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        document.body.removeChild(area);
+      }
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* Selection fallback: focus the field so the URL can be copied by hand. */
+      document.getElementById('media-url')?.focus();
+    }
+  }
 
   return (
     <div
@@ -257,6 +388,54 @@ function MetadataDialog({
             </div>
           ) : null}
         </dl>
+
+        <div className="adm-field">
+          <label htmlFor="media-url">Public URL</label>
+          <div className="media-url-row">
+            <input
+              id="media-url"
+              readOnly
+              value={asset.url}
+              onFocus={(event) => event.target.select()}
+            />
+            <button
+              type="button"
+              className="adm-btn"
+              onClick={() => void copyUrl()}
+            >
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          <p className="adm-hint">
+            Paste this link anywhere an article needs the image.
+          </p>
+        </div>
+
+        {asset.used ? (
+          <div className="adm-field">
+            <span id="media-usage-label">Used in</span>
+            {usage === null ? (
+              <p className="adm-hint">Checking references…</p>
+            ) : usage.length === 0 ? (
+              <p className="adm-hint">
+                No references found. The image can be deleted.
+              </p>
+            ) : (
+              <ul
+                className="adm-usage-links"
+                aria-labelledby="media-usage-label"
+              >
+                {usage.map((ref) => (
+                  <li key={ref.id}>
+                    <Link href={`/admin/blogs/${ref.id}/edit`}>
+                      {ref.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : null}
 
         <div className="adm-field">
           <label htmlFor="media-alt">Alt text</label>

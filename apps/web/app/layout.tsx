@@ -1,20 +1,16 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import { getProfile } from '@/lib/content';
 import { siteUrl } from '@/lib/seo';
 import '@/styles/globals.css';
-const geist = localFont({
-  src: '../public/fonts/geist-latin.woff2',
-  display: 'swap',
-  variable: '--font-sans',
-});
+import '@fontsource-variable/geist';
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getProfile();
   /* The default title carries the two queries worth ranking for — the name and
      the role-plus-place — and stays inside the ~60 characters Google renders
      before truncating. Deeper routes override it through the template. */
-  const title = `${profile.name} — ${profile.role}, ${profile.location}`;
-  const description = `${profile.description} Full-stack engineering, AI product work and quality assurance from ${profile.location}.`;
+  const title = `${profile.name}, ${profile.role} in ${profile.location}`;
+  const description = `${profile.name} is a ${profile.role} in ${profile.location}, building full-stack web apps, applied AI products and QA-driven releases.`;
   const keywords = [
     profile.name,
     `${profile.name} developer`,
@@ -39,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: profile.name,
     publisher: profile.name,
     category: 'Technology',
-    applicationName: `${profile.name} — Portfolio`,
+    applicationName: `${profile.name} Portfolio`,
     referrer: 'origin-when-cross-origin',
     /* Stops Safari turning the phone-shaped numbers in project copy into
        tappable links, which breaks the type. */
@@ -84,6 +80,14 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
+/* theme-color lives here rather than in the metadata object: Next renders it
+   as <meta name="theme-color"> from the viewport export, and the value matches
+   theme_color in app/manifest.ts so the address bar and the installed app agree. */
+export const viewport: Viewport = {
+  themeColor: '#292a2e',
+  width: 'device-width',
+  initialScale: 1,
+};
 /* The root layout owns only the document shell. Every piece of marketing
     chrome — motion system, header, cursor — belongs to the (public) group, so
     the admin never downloads GSAP or Lenis at all. */
@@ -97,7 +101,6 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={geist.variable}
       data-motion="ready"
       data-scroll-behavior="smooth"
       suppressHydrationWarning

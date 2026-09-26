@@ -327,6 +327,10 @@ export const adminApi = {
       request<PageResult<MediaAsset>>(`/media${query(params)}`),
     get: (id: string) =>
       request<MediaAsset>(`/media/${encodeURIComponent(id)}`),
+    usage: (id: string) =>
+      request<{ articles: { id: string; slug: string; title: string }[] }>(
+        `/media/${encodeURIComponent(id)}/usage`,
+      ),
     capabilities: () =>
       request<{
         generation: { enabled: boolean; provider?: string; model?: string };

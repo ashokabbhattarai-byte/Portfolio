@@ -7,8 +7,8 @@ import { jsonLd, metadata as pageMetadata, siteUrl } from '@/lib/seo';
 export async function generateMetadata() {
   const profile = await getProfile();
   return pageMetadata(
-    `Contact ${profile.name} — ${profile.role}`,
-    `Get in touch with ${profile.name}, ${profile.role} in ${profile.location}. Available for full-stack, AI and quality assurance work — email ${profile.email} for a reply within a day.`,
+    `Contact ${profile.name}, ${profile.role}`,
+    `Get in touch with ${profile.name}, ${profile.role} in ${profile.location}. Available for full-stack, AI and QA work. Email ${profile.email} for a reply within a day.`,
     '/contact',
     [
       `Contact ${profile.name}`,
@@ -69,9 +69,9 @@ export default async function Contact() {
               <p>
                 A product to build, a role to fill,
                 <br />
-                or a problem worth thinking through —
+                or a problem worth thinking through.
                 <br />
-                every message gets a considered reply.
+                Every message gets a considered reply.
               </p>
               <a
                 className="contact-email"
@@ -97,7 +97,7 @@ export default async function Contact() {
                   fontSize: 12,
                   letterSpacing: '0.16em',
                   fontWeight: 600,
-                  color: '#527747',
+                  color: 'color-mix(in srgb, var(--accent) 60%, transparent)',
                 }}
               >
                 Elsewhere
@@ -121,7 +121,7 @@ export default async function Contact() {
                   fontSize: 12,
                   letterSpacing: '0.16em',
                   fontWeight: 600,
-                  color: '#527747',
+                  color: 'color-mix(in srgb, var(--accent) 60%, transparent)',
                 }}
               >
                 Based in
@@ -133,7 +133,7 @@ export default async function Contact() {
                   fontSize: 12,
                   letterSpacing: '0.16em',
                   fontWeight: 600,
-                  color: '#527747',
+                  color: 'color-mix(in srgb, var(--accent) 60%, transparent)',
                 }}
               >
                 Response time
@@ -147,7 +147,7 @@ export default async function Contact() {
             className="contact-signoff"
             style={{ fontSize: 16, color: '#556479' }}
           >
-            Namaste — let’s make something worth using.
+            Namaste. Let’s make something worth using.
           </p>
         </Reveal>
       </main>

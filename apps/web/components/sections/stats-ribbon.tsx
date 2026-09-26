@@ -20,10 +20,11 @@ export async function StatsRibbon() {
     <div className="stats-ribbon" aria-label="Portfolio at a glance">
       <div className="stat live">
         <span className="stat-value">
+          <span className="live-ping" aria-hidden="true" />
           <StatsCount value={live} /> <em>live</em>
         </span>
         <span className="stat-label">
-          In production with real users — not a prototype
+          In production with real users, not a prototype
         </span>
       </div>
       <div className="stat">

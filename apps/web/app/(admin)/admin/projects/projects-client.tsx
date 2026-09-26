@@ -29,7 +29,7 @@ const defaultProject: Omit<Project, 'id'> = {
   summary: '',
   color: '#dae5dc',
   ink: '#25493e',
-  symbol: '—',
+  symbol: '•',
   live: null,
   image: null,
   gallery: null,

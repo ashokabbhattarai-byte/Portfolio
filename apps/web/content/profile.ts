@@ -17,7 +17,7 @@ export const profile: Profile = {
   linkedin: null,
   resume: '/assets/ashok-bhattarai-resume.pdf',
   description:
-    'Building SuchanaAI — Nepal’s searchable gov notices, so a Lok Sewa ad doesn’t need five tabs. I ship full-stack and AI products that stay fast because QA is part of the build, not after it.',
+    'Building SuchanaAI, Nepal’s searchable government notices, so a Lok Sewa ad does not need five tabs. I ship full-stack and AI products that stay fast because QA is part of the build, not an afterthought.',
   languages: 'Nepali (native), English, Hindi',
 };
 export const experience: Experience[] = [
@@ -25,7 +25,7 @@ export const experience: Experience[] = [
     id: 'experience-rumsan-associate',
     role: 'Associate Software Engineer',
     company: 'Rumsan',
-    dates: 'Jul 2026 — Present',
+    dates: 'Jul 2026 to Present',
     detail:
       'Contributing to software engineering, internal applications, and AI projects.',
     position: 0,
@@ -34,7 +34,7 @@ export const experience: Experience[] = [
     id: 'experience-rumsan-intern',
     role: 'Full Stack Intern',
     company: 'Rumsan',
-    dates: 'Oct 2025 — Apr 2026',
+    dates: 'Oct 2025 to Apr 2026',
     detail:
       'Hands-on full-stack application development within the engineering team.',
     position: 1,

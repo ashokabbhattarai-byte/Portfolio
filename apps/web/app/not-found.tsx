@@ -12,7 +12,7 @@ export default function NotFound() {
       tabIndex={-1}
       className="inner-page section-shell not-found"
     >
-      <p className="section-label">404 — Page not found</p>
+      <p className="section-label">404: Page not found</p>
       <h1>
         This page
         <br />
@@ -20,7 +20,7 @@ export default function NotFound() {
       </h1>
       <p>
         The link may be out of date, or the page may have moved. The projects
-        and writing are all still here.
+        and blogs are all still here.
       </p>
       <TransitionLink className="pill" href="/">
         Back to home <span aria-hidden="true">↗</span>

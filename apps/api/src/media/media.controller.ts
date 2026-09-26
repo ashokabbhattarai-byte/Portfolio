@@ -52,6 +52,13 @@ export class MediaController {
     return this.media.get(id);
   }
 
+  /** Which articles reference an asset. Powers the library's "used in"
+   *  display and names exactly what blocks a delete. */
+  @Get(':id/usage')
+  usage(@Param('id') id: string) {
+    return this.media.usage(id);
+  }
+
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
