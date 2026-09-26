@@ -21,7 +21,7 @@ import {
 import { projects } from '@/content/projects';
 /* Server-only. The browser never reaches the API directly — it calls /api on
    its own origin and next.config.ts rewrites. */
-const apiUrl = process.env.API_URL ?? 'http://localhost:4000';
+const apiUrl = process.env.API_URL ?? 'https://api.ashokbhattarai1.com.np';
 /* The committed content is the floor, not a placeholder: a dead API degrades
    the site to the last deployed copy instead of taking it offline. */
 const committed: SiteContent = {

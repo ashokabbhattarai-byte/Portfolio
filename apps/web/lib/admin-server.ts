@@ -28,7 +28,7 @@ import type {
 } from '@portfolio/types';
 import { loginUrl } from './auth';
 
-const API_ORIGIN = (process.env.API_URL ?? 'http://localhost:4000').replace(
+const API_ORIGIN = (process.env.API_URL ?? 'https://api.ashokbhattarai1.com.np').replace(
   /\/+$/,
   '',
 );
