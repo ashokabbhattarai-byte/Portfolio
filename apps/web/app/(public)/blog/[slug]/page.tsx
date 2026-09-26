@@ -136,11 +136,16 @@ export default async function BlogPost({
   const blogUrl = `${siteUrl ?? 'http://localhost:3000'}/blog/${post.slug}`;
   const jsonLd = generateBlogJsonLd(post, profile, blogUrl);
   const breadcrumbs = generateBlogBreadcrumbs(post, siteUrl);
+  const contentImageUrls = new Set(
+    Array.from(post.content.matchAll(/!\[.*?\]\((.*?)\)/g)).map((m) =>
+      m[1].trim(),
+    ),
+  );
   const inlineImages = (post.images ?? []).filter(
-    (i) => i.placement === 'INLINE',
+    (i) => i.placement === 'INLINE' && !contentImageUrls.has(i.url.trim()),
   );
   const galleryImages = (post.images ?? []).filter(
-    (i) => i.placement === 'GALLERY',
+    (i) => i.placement === 'GALLERY' && !contentImageUrls.has(i.url.trim()),
   );
 
   const headings = extractHeadings(post.content);

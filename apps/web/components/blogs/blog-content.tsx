@@ -17,36 +17,64 @@ function escapeHtml(s: string): string {
 }
 
 function inlineMd(text: string, imgFallback = 'Article image'): string {
-  text = escapeHtml(text);
-  // keep code spans before other inline
+  // 1. extract code spans
   const codes: string[] = [];
   text = text.replace(/`([^`]+)`/g, (_, code) => {
     const idx = codes.length;
-    codes.push(`<code>${code}</code>`);
+    codes.push(`<code>${escapeHtml(code)}</code>`);
     return `__CODE_${idx}__`;
   });
-  // images ![alt](url) → figure + figcaption with dimensions to avoid CLS
+
+  // 2. extract images ![alt](url)
+  const images: string[] = [];
   text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
-    if (!/^(https?:\/\/|\/(?!\/))/.test(url)) return alt;
-    const img = `<img src="${url}" alt="${alt || imgFallback}" loading="lazy" width="1200" height="675" />`;
-    return alt
-      ? `<figure class="blog-figure">${img}<figcaption>${alt}</figcaption></figure>`
-      : `<figure class="blog-figure">${img}</figure>`;
+    const idx = images.length;
+    if (!/^(https?:\/\/|\/(?!\/))/.test(url)) {
+      images.push(escapeHtml(alt));
+    } else {
+      const cleanUrl = url.trim();
+      const cleanAlt = escapeHtml(alt || imgFallback);
+      const img = `<img src="${cleanUrl}" alt="${cleanAlt}" loading="lazy" decoding="async" width="1200" height="675" />`;
+      images.push(
+        alt
+          ? `<span class="blog-inline-figure">${img}<span class="blog-caption">${cleanAlt}</span></span>`
+          : `<span class="blog-inline-figure">${img}</span>`,
+      );
+    }
+    return `__IMG_${idx}__`;
   });
-  // links [text](url) — only external/mailto open a new tab
+
+  // 3. extract links [label](url)
+  const links: string[] = [];
   text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
-    if (/^(https?:\/\/|mailto:)/.test(url))
-      return `<a href="${url}" target="_blank" rel="noreferrer">${label}</a>`;
-    if (/^(#|\/(?!\/))/.test(url)) return `<a href="${url}">${label}</a>`;
-    return label;
+    const idx = links.length;
+    const cleanUrl = url.trim();
+    const cleanLabel = escapeHtml(label);
+    if (/^(https?:\/\/|mailto:)/.test(cleanUrl)) {
+      links.push(
+        `<a href="${cleanUrl}" target="_blank" rel="noreferrer">${cleanLabel}</a>`,
+      );
+    } else if (/^(#|\/(?!\/))/.test(cleanUrl)) {
+      links.push(`<a href="${cleanUrl}">${cleanLabel}</a>`);
+    } else {
+      links.push(cleanLabel);
+    }
+    return `__LINK_${idx}__`;
   });
-  // bold **text**
+
+  // 4. escape remaining text
+  text = escapeHtml(text);
+
+  // 5. bold & italic
   text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  // italic *text* or _text_
   text = text.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>');
   text = text.replace(/(?<!_)_\b([^_\n]+)_\b(?!_)/g, '<em>$1</em>');
-  // restore codes
+
+  // 6. restore tokens
+  text = text.replace(/__LINK_(\d+)__/g, (_, i) => links[Number(i)]);
+  text = text.replace(/__IMG_(\d+)__/g, (_, i) => images[Number(i)]);
   text = text.replace(/__CODE_(\d+)__/g, (_, i) => codes[Number(i)]);
+
   return text;
 }
 
@@ -104,6 +132,24 @@ function mdToHtml(md: string, imgFallback = 'Article image'): string {
       }
       continue;
     }
+
+    // standalone image line ![alt](url)
+    const imgMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imgMatch) {
+      flushPara();
+      if (inList) {
+        html += `</${inList}>`;
+        inList = null;
+      }
+      const alt = imgMatch[1];
+      const url = imgMatch[2].trim();
+      if (/^(https?:\/\/|\/(?!\/))/.test(url)) {
+        const cleanAlt = escapeHtml(alt || imgFallback);
+        html += `<figure class="blog-figure"><img src="${url}" alt="${cleanAlt}" loading="lazy" decoding="async" width="1200" height="675" />${alt ? `<figcaption>${cleanAlt}</figcaption>` : ''}</figure>`;
+      }
+      continue;
+    }
+
     // headings # ## ### ####
     const hm = line.match(/^(#{1,4})\s+(.+)$/);
     if (hm) {
@@ -114,8 +160,6 @@ function mdToHtml(md: string, imgFallback = 'Article image'): string {
       }
       const level = hm[1].length;
       const text = hm[2].trim();
-      /* extractHeadings only tracks h2/h3 for the TOC — h1/h4 ids come
-         straight from the text so the headingIndex stays aligned. */
       const id =
         level === 2 || level === 3
           ? (headings[headingIndex++]?.id ?? slugify(text))
@@ -166,16 +210,11 @@ function mdToHtml(md: string, imgFallback = 'Article image'): string {
       continue;
     }
     // paragraph - accumulate
-    // need to handle inline without escaping twice
-    // we flush via separate logic - collect raw lines
     if (inList) {
-      // if we are in list but line is not list item, close list
-      // actually list items already handled, so this line is paragraph inside list? treat as new para
       html += `</${inList}>`;
       inList = null;
     }
     para.push(line);
-    // if next line is empty or heading/list, flush
     const next = lines[i + 1];
     if (
       next === undefined ||
@@ -185,20 +224,10 @@ function mdToHtml(md: string, imgFallback = 'Article image'): string {
       /^\d+\.\s+/.test(next.trim()) ||
       next.trim().startsWith('```') ||
       next.trim().startsWith('> ') ||
+      /^!\[([^\]]*)\]\(([^)]+)\)$/.test(next.trim()) ||
       /^---+$/.test((next || '').trim())
     ) {
-      // flush para as one paragraph
-      if (para.length) {
-        const pText = para.join(' ').trim();
-        // for paragraph, we need to inline without pre-escaping the whole (inlineMd will handle)
-        // but we have raw text, so inlineMd will escape as needed via its internal code handling
-        // We should not escape before inlineMd, inlineMd does selective escaping
-        // So we pass raw
-        // For now, we need a version that doesn't double escape: we will manually handle
-        // Instead of flushPara's previous logic, we do:
-        html += `<p>${inlineMd(pText)}</p>`;
-        para = [];
-      }
+      flushPara();
     }
   }
   flushPara();
