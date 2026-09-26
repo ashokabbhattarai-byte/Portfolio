@@ -375,6 +375,7 @@ export default async function BlogPost({
                           src={coverData.url}
                           alt={coverData.alt ?? post.title}
                           fill
+                          unoptimized
                           sizes="(max-width: 1024px) 90vw, 680px"
                           style={{ objectFit: 'cover' }}
                           loading="eager"
@@ -408,6 +409,7 @@ export default async function BlogPost({
                       alt={img.alt ?? post.title}
                       width={1000}
                       height={750}
+                      unoptimized
                       sizes="(max-width: 800px) 90vw, 760px"
                     />
                     {img.caption ? (
@@ -424,6 +426,7 @@ export default async function BlogPost({
                           alt={img.alt ?? post.title}
                           width={800}
                           height={600}
+                          unoptimized
                           sizes="(max-width: 600px) 90vw, 380px"
                         />
                         {img.caption ? (
@@ -439,6 +442,7 @@ export default async function BlogPost({
                       alt={`${post.title} gallery`}
                       width={1000}
                       height={750}
+                      unoptimized
                       sizes="(max-width: 800px) 90vw, 760px"
                     />
                   </figure>

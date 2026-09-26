@@ -17,14 +17,10 @@ const nextConfig: NextConfig = {
      get a corner each. Dev only; neither ships to production. */
   devIndicators: { position: 'bottom-right' },
   images: {
-    // Supabase Storage is the CMS media CDN – edge-cached, WebP, 60d immutable
+    unoptimized: true,
     remotePatterns: [
-      ...(supabaseHost
-        ? [{ protocol: 'https' as const, hostname: supabaseHost }]
-        : []),
-      { protocol: 'https', hostname: '*.supabase.co' },
-      { protocol: 'https', hostname: '*.supabase.in' },
-      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: '**' },
+      { protocol: 'http', hostname: '**' },
     ],
     formats: ['image/avif', 'image/webp'],
   },

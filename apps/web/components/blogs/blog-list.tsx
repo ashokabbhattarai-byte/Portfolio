@@ -306,6 +306,7 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
                       src={cover}
                       alt={alt}
                       fill
+                      unoptimized
                       sizes="(max-width: 700px) 100vw, 400px"
                       style={{ objectFit: 'cover' }}
                     />
