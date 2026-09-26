@@ -30,8 +30,6 @@ import type {
 } from '@portfolio/types';
 import { LOGIN_PATH, loginUrl } from './auth';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.ashokbhattarai1.com.np';
-
 export class ApiError extends Error {
   readonly status: number;
   /** Field-level messages, when the API returns a validation envelope. */
@@ -95,7 +93,7 @@ async function readBody(response: Response): Promise<unknown> {
 let inFlightRefresh: Promise<boolean> | null = null;
 
 function refreshSession(): Promise<boolean> {
-  inFlightRefresh ??= fetch(`${BASE_URL}/api/auth/refresh`, {
+  inFlightRefresh ??= fetch('/api/auth/refresh', {
     method: 'POST',
     credentials: 'include',
     headers: { accept: 'application/json' },
@@ -146,7 +144,7 @@ async function request<T>(
 
   let response: Response;
   try {
-    response = await fetch(`${BASE_URL}/api${path}`, {
+    response = await fetch(`/api${path}`, {
       method,
       headers,
       credentials: 'include',
@@ -187,7 +185,7 @@ async function upload<T>(
 ): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${BASE_URL}/api${path}`, {
+    response = await fetch(`/api${path}`, {
       method: 'POST',
       headers: { accept: 'application/json' },
       credentials: 'include',
@@ -433,7 +431,7 @@ export const adminApi = {
     /* Login and logout bypass `request` on purpose: a 401 here is the answer,
        not a stale token, so it must never trigger a refresh or a redirect. */
     async login(email: string, password: string): Promise<Response> {
-      return fetch(`${BASE_URL}/api/auth/login`, {
+      return fetch('/api/auth/login', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -444,7 +442,7 @@ export const adminApi = {
       });
     },
     async logout(everywhere = false): Promise<void> {
-      await fetch(`${BASE_URL}/api/auth/${everywhere ? 'logout-all' : 'logout'}`, {
+      await fetch(`/api/auth/${everywhere ? 'logout-all' : 'logout'}`, {
         method: 'POST',
         credentials: 'include',
         headers: { accept: 'application/json' },
