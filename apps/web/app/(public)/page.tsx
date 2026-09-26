@@ -15,24 +15,36 @@ import { jsonLd, metadata as pageMetadata, siteUrl } from '@/lib/seo';
 export async function generateMetadata() {
   const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
   const keywords = [
+    'Ashok Bhattarai',
+    'ashokbhattarai',
+    'Ashok Bhattarai Portfolio',
+    'Ashok Bhattarai Nepal',
+    'Ashok Bhattarai Developer',
+    'Ashok Bhattarai Software Engineer',
+    'Ashok Bhattarai Lalitpur',
+    'Ashok Bhattarai Rumsan',
+    'ashokabbhattarai',
+    'ashokabbhattaraii',
     profile.name,
+    `${profile.name} developer`,
     `${profile.name} portfolio`,
+    `${profile.name} website`,
     profile.role,
     `${profile.role} ${profile.location}`,
     'Full-stack developer Nepal',
-    'Next.js developer',
-    'React developer',
-    'TypeScript',
-    'AI product engineer',
-    'Quality assurance',
+    'Next.js developer Nepal',
+    'React developer Nepal',
+    'TypeScript engineer Nepal',
+    'AI product engineer Nepal',
+    'Software engineer Lalitpur',
     ...projects.slice(0, 4).map((p) => p.title),
   ];
   return pageMetadata(
-    `${profile.name}, ${profile.role} in ${profile.location}`,
-    `${profile.description} Selected projects: ${projects
+    `${profile.name} — ${profile.role} & AI Engineer | Official Portfolio`,
+    `Official portfolio of ${profile.name} (ashokbhattarai), ${profile.role} based in ${profile.location}. Explore featured projects (${projects
       .slice(0, 3)
       .map((p) => p.title)
-      .join(', ')}.`,
+      .join(', ')}), software engineering experience, and technical writing.`,
     '/',
     keywords,
     { type: 'profile', absoluteTitle: true },
@@ -48,26 +60,27 @@ export default async function Home() {
   /* Marks the home page as the canonical profile for the Person in the layout
      graph, and surfaces the project list to crawlers that never run the
      filters. */
-  const schema = siteUrl
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'ProfilePage',
-        '@id': `${siteUrl}/#profilepage`,
-        url: siteUrl,
-        name: `${profile.name}, ${profile.role}`,
-        description: profile.description,
-        inLanguage: 'en',
-        isPartOf: { '@id': `${siteUrl}/#website` },
-        mainEntity: { '@id': `${siteUrl}/#person` },
-        about: { '@id': `${siteUrl}/#person` },
-        hasPart: projects.slice(0, 6).map((project) => ({
-          '@type': 'CreativeWork',
-          name: project.title,
-          url: `${siteUrl}/projects/${project.slug}`,
-          abstract: project.summary,
-        })),
-      }
-    : null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    '@id': `${siteUrl}/#profilepage`,
+    url: siteUrl,
+    name: `${profile.name} — ${profile.role} Portfolio`,
+    headline: `${profile.name} — Software Developer & AI Product Engineer`,
+    description: profile.description,
+    inLanguage: 'en',
+    isPartOf: { '@id': `${siteUrl}/#website` },
+    mainEntity: { '@id': `${siteUrl}/#person` },
+    about: { '@id': `${siteUrl}/#person` },
+    primaryImageOfPage: `${siteUrl}/assets/hero-portrait.webp`,
+    hasPart: projects.slice(0, 6).map((project) => ({
+      '@type': 'CreativeWork',
+      name: project.title,
+      url: `${siteUrl}/projects/${project.slug}`,
+      abstract: project.summary,
+      creator: { '@id': `${siteUrl}/#person` },
+    })),
+  };
   return (
     <>
       <TrackView path="/" />

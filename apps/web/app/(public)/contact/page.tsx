@@ -7,17 +7,22 @@ import { jsonLd, metadata as pageMetadata, siteUrl } from '@/lib/seo';
 export async function generateMetadata() {
   const profile = await getProfile();
   return pageMetadata(
-    `Contact ${profile.name}, ${profile.role}`,
-    `Get in touch with ${profile.name}, ${profile.role} in ${profile.location}. Available for full-stack, AI and QA work. Email ${profile.email} for a reply within a day.`,
+    `Contact ${profile.name} — ${profile.role} in ${profile.location}`,
+    `Get in touch with ${profile.name} (ashokbhattarai), ${profile.role} based in ${profile.location}. Reach out at ${profile.email} for full-stack engineering, applied AI, or software development opportunities.`,
     '/contact',
     [
+      'Ashok Bhattarai',
+      'ashokbhattarai',
       `Contact ${profile.name}`,
       `Hire ${profile.name}`,
+      'Ashok Bhattarai email',
+      'Ashok Bhattarai contact',
+      'Ashok Bhattarai Nepal',
       profile.role,
       `Software developer ${profile.location}`,
       'Hire full-stack developer Nepal',
       'Freelance Next.js developer',
-      'Remote software engineer',
+      'Remote software engineer Nepal',
       profile.email,
     ],
     { absoluteTitle: true },
@@ -25,17 +30,35 @@ export async function generateMetadata() {
 }
 export default async function Contact() {
   const profile = await getProfile();
-  const schema = siteUrl
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'ContactPage',
-        name: `Contact ${profile.name}`,
-        url: `${siteUrl}/contact`,
-        inLanguage: 'en',
-        isPartOf: { '@id': `${siteUrl}/#website` },
-        mainEntity: { '@id': `${siteUrl}/#person` },
-      }
-    : null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    '@id': `${siteUrl}/contact#contactpage`,
+    name: `Contact ${profile.name}`,
+    headline: `Contact ${profile.name} — ${profile.role}`,
+    url: `${siteUrl}/contact`,
+    description: `Contact ${profile.name} for software engineering and AI projects.`,
+    inLanguage: 'en',
+    isPartOf: { '@id': `${siteUrl}/#website` },
+    mainEntity: { '@id': `${siteUrl}/#person` },
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: siteUrl,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Contact',
+          item: `${siteUrl}/contact`,
+        },
+      ],
+    },
+  };
   return (
     <>
       <TrackView path="/contact" />

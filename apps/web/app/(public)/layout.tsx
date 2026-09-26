@@ -15,33 +15,53 @@ export default async function PublicLayout({
   /* One @graph rather than several loose blocks: it lets the Person, the site
      and the professional service reference each other by @id, which is what
      Google uses to build the knowledge panel for a personal name query. */
-  const personId = `${siteUrl ?? ''}/#person`;
-  const siteId = `${siteUrl ?? ''}/#website`;
+  const personId = `${siteUrl}/#person`;
+  const siteId = `${siteUrl}/#website`;
   const [city, country = 'Nepal'] = profile.location
     .split(',')
     .map((part) => part.trim());
+
+  const sameAsProfiles = Array.from(
+    new Set(
+      [
+        profile.github,
+        'https://github.com/ashokabbhattaraii',
+        'https://github.com/ashokabbhattarai-byte',
+        profile.linkedin,
+        siteUrl,
+      ].filter(Boolean) as string[],
+    ),
+  );
+
   const person = {
     '@type': 'Person',
     '@id': personId,
     name: profile.name,
+    alternateName: [
+      'ashokbhattarai',
+      'Ashok Bhattarai Nepal',
+      'ashokabbhattarai',
+      'ashokabbhattaraii',
+      'Ashok Prasad Bhattarai',
+    ],
     givenName: profile.name.split(' ')[0],
     familyName: profile.name.split(' ').slice(1).join(' ') || undefined,
     jobTitle: profile.role,
     description: profile.description,
+    disambiguatingDescription:
+      'Software Developer, Full-Stack Engineer and AI Product Developer based in Lalitpur, Nepal',
     email: profile.email,
-    ...(siteUrl
-      ? {
-          url: siteUrl,
-          image: {
-            '@type': 'ImageObject',
-            url: `${siteUrl}/assets/portrait.webp`,
-            caption: `${profile.name}, ${profile.role}`,
-          },
-        }
-      : {}),
+    url: siteUrl,
+    mainEntityOfPage: siteUrl,
+    image: {
+      '@type': 'ImageObject',
+      url: `${siteUrl}/assets/hero-portrait.webp`,
+      caption: `${profile.name} — ${profile.role}`,
+    },
     address: {
       '@type': 'PostalAddress',
       addressLocality: city,
+      addressRegion: 'Bagmati',
       addressCountry: country,
     },
     nationality: { '@type': 'Country', name: country },
@@ -49,13 +69,30 @@ export default async function PublicLayout({
       .split(',')
       .map((value) => value.replace(/\(.*?\)/, '').trim())
       .filter(Boolean),
-    sameAs: [profile.github, profile.linkedin].filter(Boolean) as string[],
-    knowsAbout: skills
-      .flatMap((s) => s.items.split(',').map((i) => i.trim()))
-      .filter(Boolean)
-      .slice(0, 14),
+    sameAs: sameAsProfiles,
+    knowsAbout: [
+      'Software Engineering',
+      'Full-Stack Web Development',
+      'Next.js',
+      'React.js',
+      'TypeScript',
+      'JavaScript',
+      'AI Product Development',
+      'NestJS',
+      'Node.js',
+      'Quality Assurance',
+      'PostgreSQL',
+      'Prisma ORM',
+      'REST APIs',
+      ...skills
+        .flatMap((s) => s.items.split(',').map((i) => i.trim()))
+        .filter(Boolean),
+    ].slice(0, 20),
     worksFor: experience[0]
-      ? { '@type': 'Organization', name: experience[0].company }
+      ? {
+          '@type': 'Organization',
+          name: experience[0].company,
+        }
       : undefined,
     hasOccupation: {
       '@type': 'Occupation',
@@ -68,6 +105,7 @@ export default async function PublicLayout({
       name: item.school,
     })),
   };
+
   const schema = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -75,11 +113,17 @@ export default async function PublicLayout({
       {
         '@type': 'WebSite',
         '@id': siteId,
-        ...(siteUrl ? { url: siteUrl } : {}),
-        name: `${profile.name}, ${profile.role}`,
+        url: siteUrl,
+        name: `${profile.name} — Official Portfolio`,
+        alternateName: [
+          'Ashok Bhattarai',
+          'ashokbhattarai',
+          'Ashok Bhattarai Portfolio',
+        ],
         description: profile.description,
         inLanguage: 'en',
         publisher: { '@id': personId },
+        author: { '@id': personId },
         copyrightHolder: { '@id': personId },
       },
     ],

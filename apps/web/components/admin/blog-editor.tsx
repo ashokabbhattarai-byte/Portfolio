@@ -187,7 +187,7 @@ export function BlogEditor({ post }: { post: Blog | null }) {
         qc.invalidateQueries({ queryKey: qk.blogs() }),
         qc.invalidateQueries({ queryKey: qk.siteContent() }),
       ]);
-      if (!post) router.replace(`/admin/blogs/${saved.id}/edit`);
+      if (!post) router.replace(`/admin-252755/blogs/${saved.id}/edit`);
       else router.refresh();
     },
   });
@@ -294,7 +294,7 @@ export function BlogEditor({ post }: { post: Blog | null }) {
                 autosave === 'saved' ||
                 window.confirm('Discard your unsaved changes?')
               ) {
-                router.push('/admin/blogs');
+                router.push('/admin-252755/blogs');
               }
             }}
             disabled={form.busy}
@@ -596,7 +596,7 @@ export function BlogEditor({ post }: { post: Blog | null }) {
                           const copy = await adminApi.blogOps.duplicate(
                             post.id,
                           );
-                          router.push(`/admin/blogs/${copy.id}/edit`);
+                          router.push(`/admin-252755/blogs/${copy.id}/edit`);
                         })
                       }
                     >
@@ -631,7 +631,7 @@ export function BlogEditor({ post }: { post: Blog | null }) {
                           'Article deleted.',
                           async () => {
                             await adminApi.blogs.remove(post.id);
-                            router.push('/admin/blogs');
+                            router.push('/admin-252755/blogs');
                           },
                           `Delete “${post.title}”? This cannot be undone.`,
                         )
@@ -660,7 +660,7 @@ export function BlogEditor({ post }: { post: Blog | null }) {
           <button
             type="button"
             className="adm-btn ghost"
-            onClick={() => router.push('/admin/blogs')}
+            onClick={() => router.push('/admin-252755/blogs')}
             disabled={form.busy}
           >
             Cancel

@@ -9,9 +9,10 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       }) as never,
   );
   return {
-    name: `${profile.name}, ${profile.role ?? 'Software Developer'}`,
-    short_name: profile.name.split(' ')[0] ?? 'Ashok',
-    description: profile.description ?? 'Software developer in Nepal',
+    name: `${profile.name} — Software Developer & AI Engineer`,
+    short_name: 'Ashok Bhattarai',
+    description:
+      profile.description ?? 'Software developer and AI engineer in Nepal',
     id: '/',
     scope: '/',
     start_url: '/',

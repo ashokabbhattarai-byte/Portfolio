@@ -61,7 +61,7 @@ const nextConfig: NextConfig = {
       },
       /* The CMS is never a search result and never framed. */
       {
-        source: '/admin/:path*',
+        source: '/admin-252755/:path*',
         headers: [
           { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
           { key: 'X-Frame-Options', value: 'DENY' },

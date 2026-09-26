@@ -9,9 +9,19 @@ export async function generateMetadata(): Promise<Metadata> {
   /* The default title carries the two queries worth ranking for — the name and
      the role-plus-place — and stays inside the ~60 characters Google renders
      before truncating. Deeper routes override it through the template. */
-  const title = `${profile.name}, ${profile.role} in ${profile.location}`;
-  const description = `${profile.name} is a ${profile.role} in ${profile.location}, building full-stack web apps, applied AI products and QA-driven releases.`;
+  const title = `${profile.name} — ${profile.role} & AI Engineer in ${profile.location}`;
+  const description = `${profile.name} (ashokbhattarai) is a ${profile.role} based in ${profile.location}, specializing in Next.js, React, TypeScript, AI products, and full-stack software development.`;
   const keywords = [
+    'Ashok Bhattarai',
+    'ashokbhattarai',
+    'Ashok Bhattarai Portfolio',
+    'Ashok Bhattarai Nepal',
+    'Ashok Bhattarai Lalitpur',
+    'Ashok Bhattarai Developer',
+    'Ashok Bhattarai Software Engineer',
+    'Ashok Bhattarai Rumsan',
+    'ashokabbhattarai',
+    'ashokabbhattaraii',
     profile.name,
     `${profile.name} developer`,
     `${profile.name} portfolio`,
@@ -27,11 +37,11 @@ export async function generateMetadata(): Promise<Metadata> {
     'Hire software developer Nepal',
   ];
   return {
-    metadataBase: new URL(siteUrl ?? 'http://localhost:3000'),
+    metadataBase: new URL(siteUrl),
     title: { default: title, template: `%s | ${profile.name}` },
     description,
     keywords,
-    authors: [{ name: profile.name, url: siteUrl ?? undefined }],
+    authors: [{ name: profile.name, url: siteUrl }],
     creator: profile.name,
     publisher: profile.name,
     category: 'Technology',
@@ -40,43 +50,48 @@ export async function generateMetadata(): Promise<Metadata> {
     /* Stops Safari turning the phone-shaped numbers in project copy into
        tappable links, which breaks the type. */
     formatDetection: { telephone: false, address: false, email: false },
-    alternates: siteUrl ? { canonical: '/' } : undefined,
-    robots: siteUrl
-      ? {
-          index: true,
-          follow: true,
-          googleBot: {
-            index: true,
-            follow: true,
-            'max-image-preview': 'large',
-            'max-snippet': -1,
-            'max-video-preview': -1,
-          },
-        }
-      : { index: false, follow: false },
+    alternates: {
+      canonical: siteUrl,
+      languages: {
+        'en-US': siteUrl,
+        'ne-NP': siteUrl,
+        'x-default': siteUrl,
+      },
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
+    },
     openGraph: {
       title,
       description,
-      type: 'website',
-      siteName: profile.name,
+      type: 'profile',
+      siteName: `${profile.name} — Portfolio`,
       locale: 'en_US',
-      url: siteUrl ?? undefined,
-      images: siteUrl
-        ? [
-            {
-              url: `${siteUrl}/opengraph-image`,
-              width: 1200,
-              height: 630,
-              alt: title,
-            },
-          ]
-        : undefined,
+      url: siteUrl,
+      images: [
+        {
+          url: `${siteUrl}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: `${profile.name} — Software Developer & AI Engineer`,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: siteUrl ? [`${siteUrl}/opengraph-image`] : undefined,
+      creator: '@ashokabbhattarai',
+      site: '@ashokabbhattarai',
+      images: [`${siteUrl}/opengraph-image`],
     },
   };
 }

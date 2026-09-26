@@ -30,8 +30,18 @@ export class ProfileService {
       where: { id: 'profile' },
     });
     if (!row) {
-      // No row yet — return something to keep public site rendering; will be created on first patch
-      throw new Error('Profile not seeded. Run db:seed.');
+      return {
+        name: 'Ashok Bhattarai',
+        role: 'Software developer',
+        location: 'Lalitpur, Nepal',
+        email: 'ashok.ab.bhattaraii@gmail.com',
+        github: 'https://github.com/ashokabbhattaraii',
+        linkedin: null,
+        resume: '/assets/ashok-bhattarai-resume.pdf',
+        description:
+          'Building SuchanaAI, Nepal’s searchable government notices. I ship full-stack and AI products.',
+        languages: 'Nepali (native), English, Hindi',
+      };
     }
     return toWire(row as unknown as Record<string, unknown>);
   }

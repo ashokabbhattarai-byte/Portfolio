@@ -9,18 +9,22 @@ export async function generateMetadata() {
   const blogs = await getBlogs();
   const topics = [...new Set(blogs.flatMap((b) => b.tags))].slice(0, 6);
   return pageMetadata(
-    'Engineering Notes on Shipping Software',
-    `Blogs on full-stack engineering, applied AI and quality assurance by Ashok Bhattarai${
-      blogs.length ? `, ${blogs.length} posts` : ''
+    'Engineering Notes on Shipping Software — Ashok Bhattarai',
+    `Technical blog and engineering notes by Ashok Bhattarai (ashokbhattarai) on full-stack architecture, Next.js, applied AI, and quality assurance${
+      blogs.length ? `, featuring ${blogs.length} articles` : ''
     }${topics.length ? ` on ${topics.join(', ')}` : ''}.`,
     '/blog',
     [
+      'Ashok Bhattarai',
+      'ashokbhattarai',
       'Ashok Bhattarai blog',
+      'Ashok Bhattarai writing',
+      'Ashok Bhattarai Nepal',
       'Software engineering blog',
       'Full-stack engineering notes',
       'AI product development',
-      'Quality assurance writing',
       'Next.js articles',
+      'Quality assurance writing',
       ...topics,
     ],
   );
@@ -30,31 +34,46 @@ export default async function BlogIndex() {
   const [blogs, profile] = await Promise.all([getBlogs(), getProfile()]);
   /* A Blog node with its posts listed is what earns the "from this site"
      article treatment; individual posts carry their own BlogPosting. */
-  const schema = siteUrl
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'Blog',
-        '@id': `${siteUrl}/blog#blog`,
-        name: `${profile.name}: Engineering Blog`,
-        url: `${siteUrl}/blog`,
-        description:
-          'Blogs on full-stack engineering, applied AI and quality assurance.',
-        inLanguage: 'en',
-        isPartOf: { '@id': `${siteUrl}/#website` },
-        author: { '@id': `${siteUrl}/#person` },
-        publisher: { '@id': `${siteUrl}/#person` },
-        blogPost: blogs.map((post) => ({
-          '@type': 'BlogPosting',
-          headline: post.title,
-          description: post.excerpt,
-          url: `${siteUrl}/blog/${post.slug}`,
-          datePublished: post.publishedAt ?? undefined,
-          dateModified: post.updatedAt ?? undefined,
-          keywords: post.tags.join(', '),
-          author: { '@id': `${siteUrl}/#person` },
-        })),
-      }
-    : null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    '@id': `${siteUrl}/blog#blog`,
+    name: `${profile.name}: Engineering Blog`,
+    url: `${siteUrl}/blog`,
+    description:
+      'Blogs on full-stack engineering, applied AI and quality assurance by Ashok Bhattarai.',
+    inLanguage: 'en',
+    isPartOf: { '@id': `${siteUrl}/#website` },
+    author: { '@id': `${siteUrl}/#person` },
+    publisher: { '@id': `${siteUrl}/#person` },
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: siteUrl,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Blog',
+          item: `${siteUrl}/blog`,
+        },
+      ],
+    },
+    blogPost: blogs.map((post) => ({
+      '@type': 'BlogPosting',
+      headline: post.title,
+      description: post.excerpt,
+      url: `${siteUrl}/blog/${post.slug}`,
+      datePublished: post.publishedAt ?? undefined,
+      dateModified: post.updatedAt ?? undefined,
+      keywords: post.tags.join(', '),
+      author: { '@id': `${siteUrl}/#person` },
+    })),
+  };
 
   return (
     <>

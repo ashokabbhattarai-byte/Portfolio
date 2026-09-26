@@ -5,21 +5,25 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: siteUrl ? ['/'] : undefined,
-        /* /admin/ has its own noindex too, so a misconfigured edge cache cannot
-           leak the CMS into the index. The resume PDF stays out on purpose:
-           the same history is rendered as HTML on /about, which is canonical. */
-        disallow: siteUrl
-          ? ['/admin/', '/api/', '/assets/ashok-bhattarai-resume.pdf']
-          : ['/'],
+        allow: ['/', '/about', '/projects', '/blog', '/contact'],
+        disallow: [
+          '/admin-252755/',
+          '/admin/',
+          '/api/',
+          '/_next/',
+          '/assets/ashok-bhattarai-resume.pdf',
+        ],
+      },
+      {
+        userAgent: 'Googlebot',
+        allow: ['/', '/about', '/projects', '/blog', '/contact'],
+        disallow: ['/admin-252755/', '/admin/', '/api/'],
       },
       {
         userAgent: 'GPTBot',
-        disallow: ['/admin/', '/api/'],
+        disallow: ['/admin-252755/', '/admin/', '/api/'],
       },
     ],
-    /* No `host` directive: crawlers discontinued it, so it would only add an
-       unrecognised line to robots.txt. */
-    ...(siteUrl ? { sitemap: `${siteUrl}/sitemap.xml` } : {}),
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

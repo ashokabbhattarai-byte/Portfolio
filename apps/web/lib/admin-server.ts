@@ -21,6 +21,7 @@ import type {
   Certification,
   Education,
   Experience,
+  MediaAsset,
   Profile,
   Project,
   Skill,
@@ -112,6 +113,7 @@ export const getCertifications = () =>
   serverGet<PageResult<Certification & Timestamped>>(
     '/certifications/admin/search',
   );
+export const getMedia = () => serverGet<PageResult<MediaAsset>>('/media');
 
 /** A 401 here means the cookie died between the proxy's check and this fetch,
  *  or the account was disabled. Either way the only cure is signing in again. */

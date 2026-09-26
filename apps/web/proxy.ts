@@ -51,15 +51,15 @@ export async function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
   url.pathname = LOGIN_PATH;
   url.search = '';
-  if (next !== '/admin') url.searchParams.set('next', next);
+  if (next !== '/admin-252755') url.searchParams.set('next', next);
   const response = NextResponse.redirect(url);
   response.headers.set('cache-control', 'no-store');
   return response;
 }
 
 export const config = {
-  /* Everything under /admin except the login screen itself, which has to stay
-     reachable while signed out. The second pattern also excludes /admin/login
+  /* Everything under /admin-252755 except the login screen itself, which has to stay
+     reachable while signed out. The second pattern also excludes /admin-252755/login
      sub-paths without catching names that merely start with "login". */
-  matcher: ['/admin', '/admin/((?!login$|login/).*)'],
+  matcher: ['/admin-252755', '/admin-252755/((?!login$|login/).*)'],
 };

@@ -33,7 +33,7 @@ import { PublishingModule } from './publishing/publishing.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60_000,
-        limit: 120,
+        limit: 300,
       },
     ]),
     PrismaModule,

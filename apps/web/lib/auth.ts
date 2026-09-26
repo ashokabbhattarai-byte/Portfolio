@@ -13,11 +13,11 @@ export const ACCESS_COOKIE_NAMES = [
   'portfolio_access',
 ] as const;
 
-export const ADMIN_HOME = '/admin';
-export const LOGIN_PATH = '/admin/login';
+export const ADMIN_HOME = '/admin-252755';
+export const LOGIN_PATH = '/admin-252755/login';
 
-const ADMIN_PATH = /^\/admin(?:[/?#].*)?$/;
-const LOGIN_ROUTE = /^\/admin\/login(?:[/?#]|$)/;
+const ADMIN_PATH = /^\/admin-252755(?:[/?#].*)?$/;
+const LOGIN_ROUTE = /^\/admin-252755\/login(?:[/?#]|$)/;
 
 /* Backslashes, whitespace and control characters are all smuggling vectors for
    a browser's URL parser; none of them belong in an admin path. */
@@ -31,13 +31,13 @@ function smuggled(value: string): boolean {
 }
 
 /** Only bare, same-origin admin paths survive. Anything protocol-relative,
- *  smuggled, dot-segmented or pointing outside /admin collapses to the
+ *  smuggled, dot-segmented or pointing outside /admin-252755 collapses to the
  *  dashboard, so `?next=` can never become an open redirect. */
 export function safeNext(value: string | null | undefined): string {
   if (!value) return ADMIN_HOME;
   if (smuggled(value)) return ADMIN_HOME;
   if (value.startsWith('//')) return ADMIN_HOME;
-  // `..` resolves back out of /admin once the browser normalises the path.
+  // `..` resolves back out of /admin-252755 once the browser normalises the path.
   if (value.split(/[/?#]/).includes('..')) return ADMIN_HOME;
   if (!ADMIN_PATH.test(value)) return ADMIN_HOME;
   // Bouncing back to the login screen after logging in is a loop, not a next.
@@ -53,16 +53,16 @@ export function loginUrl(next?: string | null): string {
 }
 
 export const adminSections = [
-  { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/analytics', label: 'Analytics' },
-  { href: '/admin/projects', label: 'Projects' },
-  { href: '/admin/blogs', label: 'Blogs' },
-  { href: '/admin/media', label: 'Media' },
-  { href: '/admin/ai/api-keys', label: 'AI keys' },
-  { href: '/admin/ai/activity', label: 'Activity' },
-  { href: '/admin/profile', label: 'Profile' },
-  { href: '/admin/experience', label: 'Experience' },
-  { href: '/admin/skills', label: 'Skills' },
-  { href: '/admin/education', label: 'Education' },
-  { href: '/admin/certifications', label: 'Certifications' },
+  { href: '/admin-252755', label: 'Dashboard' },
+  { href: '/admin-252755/analytics', label: 'Analytics' },
+  { href: '/admin-252755/projects', label: 'Projects' },
+  { href: '/admin-252755/blogs', label: 'Blogs' },
+  { href: '/admin-252755/media', label: 'Media' },
+  { href: '/admin-252755/ai/api-keys', label: 'AI keys' },
+  { href: '/admin-252755/ai/activity', label: 'Activity' },
+  { href: '/admin-252755/profile', label: 'Profile' },
+  { href: '/admin-252755/experience', label: 'Experience' },
+  { href: '/admin-252755/skills', label: 'Skills' },
+  { href: '/admin-252755/education', label: 'Education' },
+  { href: '/admin-252755/certifications', label: 'Certifications' },
 ] as const;

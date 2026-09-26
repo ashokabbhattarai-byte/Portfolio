@@ -23,7 +23,15 @@ export async function generateMetadata() {
     getExperience(),
   ]);
   const keywords = [
+    'Ashok Bhattarai',
+    'ashokbhattarai',
     `About ${profile.name}`,
+    'Ashok Bhattarai bio',
+    'Ashok Bhattarai background',
+    'Ashok Bhattarai education',
+    'Ashok Bhattarai experience',
+    'Ashok Bhattarai Nepal',
+    'Ashok Bhattarai Rumsan',
     profile.name,
     profile.role,
     `${profile.role} ${profile.location}`,
@@ -35,10 +43,12 @@ export async function generateMetadata() {
     ...experience.map((e) => e.company),
   ];
   return pageMetadata(
-    `About ${profile.name}, ${profile.role}`,
-    `${profile.description} Based in ${profile.location}, with experience at ${experience
-      .map((e) => `${e.company} as ${e.role}`)
-      .join(' and ')}.`,
+    `About ${profile.name} — ${profile.role} & Full-Stack Developer`,
+    `Learn about ${profile.name} (ashokbhattarai), ${profile.role} in ${profile.location}. Experience at ${experience
+      .map((e) => `${e.company} (${e.role})`)
+      .join(
+        ', ',
+      )}, background in computer science, skills, and certifications.`,
     '/about',
     keywords,
     { type: 'profile', absoluteTitle: true },
@@ -58,26 +68,43 @@ export default async function About() {
   const firstName = profile.name.split(' ')[0];
   const country = profile.location.split(',').pop()?.trim() ?? profile.location;
   const liveCount = projects.filter((p) => p.live).length;
-  const schema = siteUrl
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'AboutPage',
-        name: `About ${profile.name}`,
-        url: `${siteUrl}/about`,
-        description: profile.description,
-        inLanguage: 'en',
-        isPartOf: { '@id': `${siteUrl}/#website` },
-        mainEntity: { '@id': `${siteUrl}/#person` },
-        /* The résumé history lives here rather than in the layout graph so the
-           dates sit on the page that actually renders them. */
-        mentions: experience.map((item) => ({
-          '@type': 'OrganizationRole',
-          roleName: item.role,
-          description: item.detail,
-          memberOf: { '@type': 'Organization', name: item.company },
-        })),
-      }
-    : null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    '@id': `${siteUrl}/about#aboutpage`,
+    name: `About ${profile.name}`,
+    headline: `About ${profile.name} — ${profile.role} in ${profile.location}`,
+    url: `${siteUrl}/about`,
+    description: profile.description,
+    inLanguage: 'en',
+    isPartOf: { '@id': `${siteUrl}/#website` },
+    mainEntity: { '@id': `${siteUrl}/#person` },
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: siteUrl,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'About',
+          item: `${siteUrl}/about`,
+        },
+      ],
+    },
+    /* The résumé history lives here rather than in the layout graph so the
+       dates sit on the page that actually renders them. */
+    mentions: experience.map((item) => ({
+      '@type': 'OrganizationRole',
+      roleName: item.role,
+      description: item.detail,
+      memberOf: { '@type': 'Organization', name: item.company },
+    })),
+  };
   return (
     <>
       <TrackView path="/about" />
