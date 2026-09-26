@@ -80,7 +80,7 @@
 .stage {
   position: relative;
   padding: 30px 28px 32px;
-  border: 1px solid rgba(82, 119, 71, 0.18);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
   border-radius: 24px;
   background: linear-gradient(180deg, #ffffff 0%, #fafcf8 100%);
   box-shadow:
@@ -109,11 +109,11 @@
 }
 .stage:hover {
   background: #ffffff;
-  border-color: rgba(82, 119, 71, 0.45);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   transform: translateY(-6px);
   box-shadow:
     0 24px 48px -12px rgba(12, 33, 60, 0.12),
-    0 4px 16px rgba(82, 119, 71, 0.08);
+    0 4px 16px color-mix(in srgb, var(--accent) 8%, transparent);
 }
 .stage:hover::before {
   opacity: 1;
@@ -133,7 +133,7 @@
   color: var(--highlight);
   margin-bottom: 24px;
   box-shadow:
-    0 0 0 4px rgba(82, 119, 71, 0.1),
+    0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition:
     transform 0.35s ease,
@@ -142,7 +142,7 @@
 .stage:hover .number {
   transform: scale(1.08);
   box-shadow:
-    0 0 0 6px rgba(82, 119, 71, 0.18),
+    0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent),
     0 0 16px color-mix(in srgb, var(--highlight) calc(0.4 * 100%), transparent);
 }
 .stage h4 {
@@ -162,7 +162,7 @@
 .profile {
   margin-top: 32px;
   padding: 22px 28px;
-  border: 1px solid rgba(82, 119, 71, 0.2);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
   border-radius: 26px;
   background: linear-gradient(135deg, #ffffff 0%, #f6f9f4 100%);
   box-shadow:
@@ -198,7 +198,7 @@
   border: 2.5px solid #173b38;
   box-shadow:
     0 0 0 4px #ffffff,
-    0 0 0 6px rgba(82, 119, 71, 0.25),
+    0 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent),
     0 8px 16px rgba(0, 0, 0, 0.12);
 }
 .photoWindow img {

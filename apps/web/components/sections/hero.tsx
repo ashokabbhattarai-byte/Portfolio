@@ -893,7 +893,7 @@ export function Hero({
         >
           <span className={styles.hudLeft}>
             <i className={styles.hudDot} aria-hidden="true" />
-            SYSTEM ACTIVE
+            OPEN TO WORK
           </span>
           <span className={styles.hudRight}>ID: AB_076 · 27.67°N 85.32°E</span>
         </div>

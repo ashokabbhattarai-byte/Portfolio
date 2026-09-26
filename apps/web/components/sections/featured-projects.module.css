@@ -54,7 +54,7 @@
   display: block;
   height: 100%;
   overflow: hidden;
-  border: 1px solid rgba(82, 119, 71, 0.18);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
   border-radius: 24px;
   background: linear-gradient(180deg, #ffffff 0%, #fafcf8 100%);
   box-shadow:
@@ -132,8 +132,8 @@
   transform: translateY(-8px);
   box-shadow:
     0 24px 48px -12px rgba(12, 33, 60, 0.14),
-    0 4px 16px rgba(82, 119, 71, 0.08);
-  border-color: rgba(82, 119, 71, 0.45);
+    0 4px 16px color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 .link:hover .thumbnail :global(.project-art) {
   transform: scale(1.06);

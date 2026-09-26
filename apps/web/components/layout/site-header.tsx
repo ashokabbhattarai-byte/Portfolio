@@ -120,22 +120,22 @@ export function SiteHeader({
             </Magnetic>
           ))}
         </nav>
-        <div className={`menu-dock ${scrolled ? 'is-scrolled' : ''}`}>
-          <Magnetic>
-            <button
-              ref={trigger}
-              className="menu-trigger"
-              onClick={() => setOpen(true)}
-              aria-label="Open navigation"
-              aria-expanded={open}
-              aria-controls="navigation-drawer"
-            >
-              <span />
-              <span />
-            </button>
-          </Magnetic>
-        </div>
       </header>
+      <div className={`menu-dock ${scrolled ? 'is-scrolled' : ''}`}>
+        <Magnetic>
+          <button
+            ref={trigger}
+            className="menu-trigger"
+            onClick={() => setOpen(true)}
+            aria-label="Open navigation"
+            aria-expanded={open}
+            aria-controls="navigation-drawer"
+          >
+            <span />
+            <span />
+          </button>
+        </Magnetic>
+      </div>
       <dialog
         id="navigation-drawer"
         ref={dialog}
