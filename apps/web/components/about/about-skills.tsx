@@ -15,38 +15,42 @@ export function AboutSkills({ skills }: { skills: Skill[] }) {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-    if (!container.current) return;
-    const cards = gsap.utils.toArray<HTMLElement>(`.${styles.skillCard}`);
-    const film = container.current.querySelector(`.${styles.skillsFilmCol}`);
+      if (!container.current) return;
+      const cards = gsap.utils.toArray<HTMLElement>(`.${styles.skillCard}`);
+      const film = container.current.querySelector(`.${styles.skillsFilmCol}`);
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container.current,
-        start: 'top 80%',
-      },
-    });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container.current,
+          start: 'top 80%',
+        },
+      });
 
-    if (film) {
+      if (film) {
+        tl.fromTo(
+          film,
+          { opacity: 0, scale: 0.95 },
+          { opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out' },
+          0,
+        );
+      }
+
       tl.fromTo(
-        film,
-        { opacity: 0, scale: 0.95 },
-        { opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out' },
-        0
+        cards,
+        { x: 30, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power2.out' },
+        0.2,
       );
-    }
-
-    tl.fromTo(
-      cards,
-      { x: 30, opacity: 0 },
-      { x: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power2.out' },
-      0.2
-    );
     }, container);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={container} className={styles.sectionWrap} aria-labelledby="skills-heading">
+    <section
+      ref={container}
+      className={styles.sectionWrap}
+      aria-labelledby="skills-heading"
+    >
       <div className={styles.sectionHeader}>
         <span className={styles.sectionLabel}>Technical Stack</span>
         <h2 id="skills-heading" className={styles.sectionTitle}>

@@ -14,27 +14,38 @@ export function AboutExperience({ experience }: { experience: Experience[] }) {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-    if (!container.current) return;
-    const cards = gsap.utils.toArray<HTMLElement>(`.${styles.expCard}`);
-    const line = container.current.querySelector(`.${styles.timelineLine}`);
+      if (!container.current) return;
+      const cards = gsap.utils.toArray<HTMLElement>(`.${styles.expCard}`);
+      const line = container.current.querySelector(`.${styles.timelineLine}`);
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container.current,
-        start: 'top 75%',
-      },
-    });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container.current,
+          start: 'top 75%',
+        },
+      });
 
-    if (line) {
-      tl.fromTo(line, { scaleY: 0 }, { scaleY: 1, duration: 1.2, ease: 'expo.inOut' }, 0);
-    }
+      if (line) {
+        tl.fromTo(
+          line,
+          { scaleY: 0 },
+          { scaleY: 1, duration: 1.2, ease: 'expo.inOut' },
+          0,
+        );
+      }
 
-    tl.fromTo(
-      cards,
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: 'back.out(1.2)' },
-      0.2
-    );
+      tl.fromTo(
+        cards,
+        { y: 40, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.2,
+          ease: 'back.out(1.2)',
+        },
+        0.2,
+      );
     }, container);
     return () => ctx.revert();
   }, []);

@@ -19,7 +19,7 @@ export function AboutEducation({
   languages: string;
 }) {
   const container = useRef<HTMLDivElement>(null);
-  
+
   const languageList = languages
     .split(',')
     .map((l) => l.trim())
@@ -27,35 +27,39 @@ export function AboutEducation({
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-    if (!container.current) return;
-    const items = gsap.utils.toArray<HTMLElement>([
-      `.${styles.eduCard}`, 
-      `.${styles.certItem}`,
-      `.${styles.languagesCard}`
-    ]);
+      if (!container.current) return;
+      const items = gsap.utils.toArray<HTMLElement>([
+        `.${styles.eduCard}`,
+        `.${styles.certItem}`,
+        `.${styles.languagesCard}`,
+      ]);
 
-    gsap.fromTo(
-      items,
-      { y: 30, opacity: 0, scale: 0.98 },
-      { 
-        y: 0, 
-        opacity: 1, 
-        scale: 1,
-        duration: 0.7, 
-        stagger: 0.1, 
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: container.current,
-          start: 'top 80%',
-        }
-      }
-    );
+      gsap.fromTo(
+        items,
+        { y: 30, opacity: 0, scale: 0.98 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.7,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: container.current,
+            start: 'top 80%',
+          },
+        },
+      );
     }, container);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={container} className={styles.sectionWrap} aria-labelledby="education-heading">
+    <section
+      ref={container}
+      className={styles.sectionWrap}
+      aria-labelledby="education-heading"
+    >
       <div className={styles.sectionHeader}>
         <span className={styles.sectionLabel}>Background & Credentials</span>
         <h2 id="education-heading" className={styles.sectionTitle}>
