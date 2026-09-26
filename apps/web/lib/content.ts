@@ -19,6 +19,7 @@ import {
   skills,
 } from '@/content/profile';
 import { projects } from '@/content/projects';
+import { blogs } from '@/content/blogs';
 /* Server-only. The browser never reaches the API directly — it calls /api on
    its own origin and next.config.ts rewrites. */
 const apiUrl = process.env.API_URL ?? 'https://api.ashokbhattarai1.com.np';
@@ -27,7 +28,7 @@ const apiUrl = process.env.API_URL ?? 'https://api.ashokbhattarai1.com.np';
 const committed: SiteContent = {
   profile,
   projects,
-  blogs: [],
+  blogs,
   experience,
   skills,
   education,

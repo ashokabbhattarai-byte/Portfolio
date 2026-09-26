@@ -207,94 +207,31 @@ async function main(): Promise<void> {
   }
   console.log(`[seed] ${certifications.length} certification rows upserted`);
 
-  const supa =
-    process.env.SUPABASE_URL ?? 'https://vaxrgatdyazjvtugzstk.supabase.co';
-  const bucket = process.env.SUPABASE_BUCKET ?? 'portfolio-storage';
-  const coverBase = `${supa}/storage/v1/object/public/${bucket}`;
-  const blogs = [
-    {
-      slug: 'hello-world',
-      title: 'Hello, World: Why I Rebuilt My Portfolio',
-      excerpt:
-        'Why I moved this portfolio to a real CMS backed by Supabase and TanStack Query, and how the new content setup stays fast and simple to update.',
-      content:
-        '# Hello, World: Why I Rebuilt My Portfolio\n\nI rebuilt my portfolio around a real content layer. The public site is still static when the API sleeps, but when it’s live, every project, skill, and now blog post comes from Postgres via Prisma, cached at the edge and hydrated with TanStack Query.\n\n## What changed\n\n- **One CMS** for projects, blogs, profile, experience, skills, education, certifications\n- **Supabase Storage** for images (bucket: portfolio-storage) with presigned uploads\n- **Next 16 + TanStack** with 5m stale, 30m GC, and optimistic mutations\n\nThe hero, intro, and featured sections are no longer hardcoded. They read from the same SiteContent that powers /work and /blog.\n\n---\n\n*This post is seeded so you can see the blog flow end-to-end. Edit it in /admin/blogs.*',
-      coverImage: `${coverBase}/blogs/hello-world/cover-hello-9c7fe8c6.webp`,
-      tags: ['Portfolio', 'Next.js', 'Supabase'],
-      published: true,
-      featured: true,
-      position: 0,
-      status: 'PUBLISHED' as const,
-      scheduledAt: null,
-      publishedAt: new Date().toISOString(),
-      linkedinUrl: 'https://www.linkedin.com/in/ashokabbhattaraii/',
-      linkedinPostId: null,
-      linkedinStatus: 'posted',
-    },
-    {
-      slug: 'supabase-storage-at-the-edge',
-      title: 'Supabase Storage at the Edge',
-      excerpt:
-        'How the portfolio-storage bucket stays fast with presigned uploads, a public CDN edge cache, and folder-scoped keys that keep every media upload tidy.',
-      content:
-        '# Supabase Storage at the Edge\n\nAll media lives in **portfolio-storage**.\n\n## Folder map\n\n- `projects/{slug}/cover-{uuid}.webp`\n- `blogs/{slug}/cover-{uuid}.webp`\n- `profile/`, `certifications/`, etc.\n\n## Upload flow\n\n1. **Presign**: `POST /api/storage/presign` returns a signedUrl (service_role).\n2. **PUT**: browser PUTs directly to Supabase (zero backend egress).\n3. **Public URL**: `.../object/public/portfolio-storage/{path}` is edge-cached and used in Next <Image> via remotePatterns.\n\nThe bucket is public (`bucket.policy.sql`) with RLS for public read / auth write.',
-      coverImage: `${coverBase}/blogs/supabase-storage-at-the-edge/cover-storage-a1b2c3d4.webp`,
-      tags: ['Supabase', 'Storage', 'Performance'],
-      published: true,
-      featured: true,
-      position: 1,
-      status: 'PUBLISHED' as const,
-      scheduledAt: null,
-      publishedAt: new Date().toISOString(),
-      linkedinUrl: 'https://www.linkedin.com/in/ashokabbhattaraii/',
-      linkedinPostId: null,
-      linkedinStatus: 'posted',
-    },
-    {
-      slug: 'tanstack-makes-it-instant',
-      title: 'TanStack Makes It Instant',
-      excerpt:
-        'From 123 RSC requests to 5-minute cached queries: how TanStack Query with optimistic updates keeps the whole admin CMS feeling fast and local.',
-      content:
-        '# TanStack Makes It Instant\n\nThe public site fetches **SiteContent** in one round trip (`GET /api/content`) with `Cache-Control: public, s-maxage=60` and `ETag`.\n\nIn the admin, every resource has a dedicated hook: `useAdminProjects()`, `useAdminBlogs()`, etc., with `staleTime: 5m` and optimistic mutations for reorder/delete.\n\nAfter a write, `RevalidateService` purges the Next tag (`blogs`, `projects`, …) so the next hard navigation is fresh, but the current tab stays instant.\n\n---\n\n*Try it: reorder blogs in /admin/blogs and watch the homepage update after revalidation.*',
-      coverImage: `${coverBase}/blogs/tanstack-makes-it-instant/cover-tanstack-e5f6a7b8.webp`,
-      tags: ['TanStack', 'React Query', 'UX'],
-      published: true,
-      featured: true,
-      position: 2,
-      status: 'PUBLISHED' as const,
-      scheduledAt: null,
-      publishedAt: new Date().toISOString(),
-      linkedinUrl: 'https://www.linkedin.com/in/ashokabbhattaraii/',
-      linkedinPostId: null,
-      linkedinStatus: 'posted',
-    },
-  ];
+  const { blogs } = await import('../../web/content/blogs');
 
   for (const b of blogs) {
-    const blogImages = [
-      {
-        url: b.coverImage!,
-        alt: `${b.title} cover`,
-        caption: `Cover for ${b.title}`,
-        placement: 'COVER' as const,
-        position: 0,
-      },
-      {
-        url: b.coverImage!.replace('cover-', 'inline-'),
-        alt: `${b.title} inline`,
-        caption: `Inline illustration for ${b.title}`,
-        placement: 'INLINE' as const,
-        position: 1,
-      },
-      {
-        url: b.coverImage!.replace('cover-', 'gallery-'),
-        alt: `${b.title} gallery`,
-        caption: `Gallery image for ${b.title}`,
-        placement: 'GALLERY' as const,
-        position: 2,
-      },
-    ];
+    const blogImages =
+      b.images && b.images.length > 0
+        ? b.images.map((img, idx) => ({
+            url: img.url,
+            alt: img.alt || `${b.title} illustration ${idx + 1}`,
+            caption: img.caption || null,
+            placement:
+              (img.placement as 'COVER' | 'HERO' | 'INLINE' | 'GALLERY') ||
+              'INLINE',
+            position: img.position ?? idx,
+          }))
+        : [
+            {
+              url:
+                b.coverImage ||
+                'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+              alt: `${b.title} cover`,
+              caption: `Cover image for ${b.title}`,
+              placement: 'COVER' as const,
+              position: 0,
+            },
+          ];
 
     await prisma.blog.upsert({
       where: { slug: b.slug },
@@ -340,7 +277,7 @@ async function main(): Promise<void> {
       },
     });
   }
-  console.log(`[seed] ${blogs.length} blogs with 3 images each upserted`);
+  console.log(`[seed] ${blogs.length} detailed blogs with images upserted`);
 
   console.log('[seed] Done.');
 }
