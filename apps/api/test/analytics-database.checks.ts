@@ -193,3 +193,75 @@ test('overview returns coherent daily totals and engagement rankings from Postgr
     await prisma.$disconnect();
   }
 }, 30000);
+
+test('concurrent refreshes count one reader per article and roll back failed claims', async () => {
+  const prisma = new PrismaClient();
+  const service = new AnalyticsService(prisma as never);
+  const prefix = `unique-views-${crypto.randomUUID()}`;
+  const ids: string[] = [];
+  try {
+    for (const suffix of ['a', 'b']) {
+      const blog = await prisma.blog.create({
+        data: {
+          slug: `${prefix}-${suffix}`,
+          title: 'Unique view fixture',
+          excerpt: 'Test',
+          content: 'Test',
+          tags: [],
+          status: 'PUBLISHED',
+          published: true,
+        },
+      });
+      ids.push(blog.id);
+    }
+    const visitorId = crypto.randomUUID();
+    const path = `/blog/${prefix}-a`;
+    const track = (overrides = {}) =>
+      service.track({
+        path,
+        visitorId,
+        eventId: crypto.randomUUID(),
+        userAgent: 'Mozilla/5.0',
+        ...overrides,
+      });
+    await Promise.all(Array.from({ length: 12 }, () => track()));
+    expect((await service.publicCount(path)).views).toBe(1);
+    expect(
+      (await prisma.blog.findUniqueOrThrow({ where: { id: ids[0] } }))
+        .viewCount,
+    ).toBe(1);
+    expect(await prisma.pageView.count({ where: { blogId: ids[0] } })).toBe(12);
+    const eventId = crypto.randomUUID();
+    await Promise.all([track({ eventId }), track({ eventId })]);
+    expect(await prisma.pageView.count({ where: { blogId: ids[0] } })).toBe(13);
+    await track({ visitorId: crypto.randomUUID() });
+    await track({ visitorId: undefined });
+    expect((await service.publicCount(path)).views).toBe(2);
+    await track({ path: `/blog/${prefix}-b` });
+    expect((await service.publicCount(`/blog/${prefix}-b`)).views).toBe(1);
+    // Replaying an event from another article must roll back the new reader claim.
+    await track({
+      path: `/blog/${prefix}-b`,
+      eventId,
+      visitorId: crypto.randomUUID(),
+    });
+    expect((await service.publicCount(`/blog/${prefix}-b`)).views).toBe(1);
+    await prisma.blog.update({
+      where: { id: ids[0] },
+      data: { slug: `${prefix}-renamed` },
+    });
+    await track({ path: `/blog/${prefix}-renamed` });
+    expect((await service.publicCount(`/blog/${prefix}-renamed`)).views).toBe(
+      2,
+    );
+    expect(
+      (await service.blogCounts()).find(
+        (row) => row.path === `/blog/${prefix}-renamed`,
+      )?.views,
+    ).toBe(2);
+  } finally {
+    await prisma.pageView.deleteMany({ where: { blogId: { in: ids } } });
+    await prisma.blog.deleteMany({ where: { id: { in: ids } } });
+    await prisma.$disconnect();
+  }
+}, 30000);

@@ -77,10 +77,17 @@ export class AnalyticsService {
     if (match[1] === 'blog') {
       const blog = await this.prisma.blog.findUnique({
         where: { slug },
-        select: { id: true, status: true, published: true, scheduledAt: true },
+        select: {
+          id: true,
+          status: true,
+          published: true,
+          scheduledAt: true,
+          deletedAt: true,
+        },
       });
       if (
         !blog ||
+        blog.deletedAt ||
         !(
           (blog.status === 'PUBLISHED' && blog.published) ||
           (blog.status === 'SCHEDULED' &&
@@ -119,7 +126,7 @@ export class AnalyticsService {
     // The legacy ipHash column now holds a namespaced anonymous browser hash; no IP is collected.
     const ipHash = data.visitorId ? visitorHash(data.visitorId) : null;
     try {
-      await this.prisma.$transaction(async (tx) => {
+      const views = await this.prisma.$transaction(async (tx) => {
         await tx.pageView.create({
           data: {
             id: data.eventId,
@@ -129,18 +136,33 @@ export class AnalyticsService {
             userAgent: data.userAgent?.slice(0, 500) || null,
           },
         });
-        if (target.blogId)
-          await tx.blog.update({
-            where: { id: target.blogId },
-            data: { viewCount: { increment: 1 } },
+        let views: number | undefined;
+        if (target.blogId && ipHash) {
+          // ON CONFLICT DO NOTHING is safe across tabs, retries and API instances.
+          // Keep the claim and counter in the same transaction as the raw visit.
+          const claim = await tx.blogView.createMany({
+            data: [{ blogId: target.blogId, visitorHash: ipHash }],
+            skipDuplicates: true,
           });
-        if (target.projectId)
+          if (claim.count === 1) {
+            const updated = await tx.blog.update({
+              where: { id: target.blogId },
+              data: { viewCount: { increment: 1 } },
+              select: { viewCount: true },
+            });
+            views = updated.viewCount;
+          }
+        }
+        if (target.projectId) {
           await tx.project.update({
             where: { id: target.projectId },
             data: { viewCount: { increment: 1 } },
+            select: { viewCount: true },
           });
+        }
+        return views;
       });
-      return { ok: true, recorded: true };
+      return { ok: true, recorded: true, path: target.path, views };
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -161,7 +183,9 @@ export class AnalyticsService {
         : { path: target.path };
     return {
       path: target.path,
-      views: await this.prisma.pageView.count({ where }),
+      views: target.blogId
+        ? await this.prisma.blogView.count({ where: { blogId: target.blogId } })
+        : await this.prisma.pageView.count({ where }),
       likes: target.blogId
         ? await this.prisma.blogLike.count({ where: { blogId: target.blogId } })
         : null,
@@ -202,10 +226,10 @@ export class AnalyticsService {
       { path: string; views: bigint; likes: bigint }[]
     >(Prisma.sql`
       SELECT '/blog/' || b.slug AS path,
-        (SELECT COUNT(*) FROM page_views v WHERE v."blogId" = b.id) AS views,
+        (SELECT COUNT(*) FROM blog_views v WHERE v."blogId" = b.id) AS views,
         (SELECT COUNT(*) FROM blog_likes l WHERE l."blogId" = b.id) AS likes
-      FROM blogs b WHERE (b.status = 'PUBLISHED' AND b.published = true)
-        OR (b.status = 'SCHEDULED' AND b."scheduledAt" <= NOW())`);
+      FROM blogs b WHERE b."deletedAt" IS NULL AND ((b.status = 'PUBLISHED' AND b.published = true)
+        OR (b.status = 'SCHEDULED' AND b."scheduledAt" <= NOW()))`);
     return rows.map((row) => ({
       path: row.path,
       views: Number(row.views),

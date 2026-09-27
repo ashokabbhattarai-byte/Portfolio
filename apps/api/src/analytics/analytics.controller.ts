@@ -30,6 +30,7 @@ export class AnalyticsController {
   ) {}
 
   @Public()
+  @Header('Cache-Control', 'no-store')
   @Post('track')
   async track(@Body() dto: TrackDto, @Req() req: Request) {
     if (req.get('sec-fetch-site') === 'cross-site')

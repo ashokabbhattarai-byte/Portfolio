@@ -268,11 +268,18 @@ export type TrackPageView = {
   visitorId?: string;
   referer?: string | null;
 };
+/** Blog views are lifetime distinct browsers; other paths count page visits. */
 export type PublicViewCount = {
   path: string;
   views: number | null;
   likes?: number | null;
   liked?: boolean;
+};
+/** Internal anonymous first-view record; never contains a raw device identifier. */
+export type BlogView = {
+  blogId: string;
+  visitorHash: string;
+  createdAt: string;
 };
 export type BlogLike = {
   blogId: string;

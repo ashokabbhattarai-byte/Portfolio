@@ -209,6 +209,7 @@ model Blog {
   images         BlogImage[]
   pageViews      PageView[]
   likes          BlogLike[]
+  uniqueViews    BlogView[]
   featuredImageId String?
   featuredImage MediaAsset? @relation("FeaturedMedia", fields: [featuredImageId], references: [id], onDelete: Restrict)
   ogImageId String?
@@ -284,6 +285,18 @@ model PageView {
   @@index([blogId, createdAt])
   @@index([projectId, createdAt])
   @@map("page_views")
+}
+
+// Lifetime article readership, separate from repeat page visits.
+model BlogView {
+  blogId String
+  visitorHash String
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([blogId, visitorHash])
+  @@index([createdAt])
+  @@map("blog_views")
 }
 
 model BlogLike {

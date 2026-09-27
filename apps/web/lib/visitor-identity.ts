@@ -1,5 +1,5 @@
 let memoryVisitor: string | undefined;
-export function visitorId() {
+function resolveVisitorId() {
   try {
     const key = 'portfolio-visitor-v2';
     const stored = localStorage.getItem(key);
@@ -15,5 +15,22 @@ export function visitorId() {
     return id;
   } catch {
     return (memoryVisitor ??= crypto.randomUUID());
+  }
+}
+
+/** Serialize identity creation across all engagement requests and tabs. */
+export async function visitorId(): Promise<string> {
+  if (navigator.locks)
+    return navigator.locks.request('portfolio-visitor-v2', resolveVisitorId);
+  return resolveVisitorId();
+}
+
+/** Memory-only identities must not inflate readership on every reload. */
+export async function trackingVisitorId(): Promise<string | undefined> {
+  const id = await visitorId();
+  try {
+    return localStorage.getItem('portfolio-visitor-v2') === id ? id : undefined;
+  } catch {
+    return undefined;
   }
 }

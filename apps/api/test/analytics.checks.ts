@@ -24,6 +24,7 @@ describe('analytics collection', () => {
   test('duplicate events count once and supplied content ids cannot corrupt counters', async () => {
     const events = new Map();
     let increments = 0;
+    const readers = new Set<string>();
     const prisma = {
       blog: {
         findUnique: async () => ({
@@ -44,7 +45,15 @@ describe('analytics collection', () => {
               events.set(data.id, data);
             },
           },
-          blog: { update: async () => increments++ },
+          blogView: {
+            createMany: async ({ data }: any) => {
+              const key = `${data[0].blogId}:${data[0].visitorHash}`;
+              if (readers.has(key)) return { count: 0 };
+              readers.add(key);
+              return { count: 1 };
+            },
+          },
+          blog: { update: async () => ({ viewCount: ++increments }) },
         }),
     };
     const service = new AnalyticsService(prisma as never);
@@ -63,6 +72,29 @@ describe('analytics collection', () => {
     expect(saved.path).toBe('/blog/example');
     expect(saved.referer).toBe('https://search.example');
     expect(saved.ipHash).toStartWith('v2:');
+    // New event IDs represent reloads, new tabs, and return visits.
+    await Promise.all(
+      Array.from({ length: 10 }, () =>
+        service.track({
+          ...event,
+          eventId: crypto.randomUUID(),
+        }),
+      ),
+    );
+    expect(events.size).toBe(11);
+    expect(increments).toBe(1);
+    await service.track({
+      ...event,
+      eventId: crypto.randomUUID(),
+      visitorId: crypto.randomUUID(),
+    });
+    expect(increments).toBe(2);
+    await service.track({
+      ...event,
+      eventId: crypto.randomUUID(),
+      visitorId: undefined,
+    });
+    expect(increments).toBe(2);
   });
   test('rejects bots and non-public destinations without creating events', async () => {
     let wrote = false;
@@ -119,4 +151,42 @@ test('rankings and topics use the selected window, never lifetime counter fallba
   expect(result.topBlogs[0].views).toBe(3);
   expect(result.byTag).toEqual([{ tag: 'Active', views: 3 }]);
   expect(result.topProjects).toEqual([]);
+});
+
+test('soft-deleted articles cannot collect or expose engagement', async () => {
+  const service = new AnalyticsService({
+    blog: {
+      findUnique: async () => ({
+        id: 'deleted',
+        status: 'PUBLISHED',
+        published: true,
+        deletedAt: new Date(),
+      }),
+    },
+  } as never);
+  expect(
+    await service.track({
+      path: '/blog/deleted',
+      eventId: crypto.randomUUID(),
+      visitorId: crypto.randomUUID(),
+    }),
+  ).toEqual({ ok: true, skipped: 'not-public' });
+  expect((await service.publicCount('/blog/deleted')).views).toBeNull();
+});
+
+test('public article views use unique reader records, not repeat visit totals', async () => {
+  const service = new AnalyticsService({
+    blog: {
+      findUnique: async () => ({
+        id: 'blog',
+        status: 'PUBLISHED',
+        published: true,
+      }),
+    },
+    blogView: { count: async () => 2 },
+    pageView: { count: async () => 17 },
+    blogLike: { count: async () => 0 },
+  } as never);
+  expect((await service.publicCount('/blog/example')).views).toBe(2);
+  expect((await service.publicCount('/')).views).toBe(17);
 });

@@ -3,7 +3,9 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { TrackPageView } from '@portfolio/types';
 
-import { visitorId } from '@/lib/visitor-identity';
+import { recordPageView, TrackingError } from '@/lib/track-page-view';
+import { updateEngagementCache } from '@/lib/engagement-queries';
+import { trackingVisitorId } from '@/lib/visitor-identity';
 let previousPath: string | undefined;
 export function TrackView({
   path,
@@ -27,7 +29,6 @@ export function TrackView({
     const payload: TrackPageView = {
       path: canonical,
       eventId: visit.current.eventId,
-      visitorId: visitorId(),
       referer: previousPath
         ? `${location.origin}${previousPath}`
         : document.referrer || null,
@@ -39,25 +40,24 @@ export function TrackView({
       if (stopped) return;
       if (attempt === 0) previousPath = canonical;
       try {
-        const response = await fetch('/api/analytics/track', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(payload),
-          credentials: 'include',
-          keepalive: true,
-        });
-        if (!response.ok) {
-          if (response.status >= 500 || response.status === 429)
-            throw new Error('Retry tracking');
-          return;
-        }
-        void qc.invalidateQueries({ queryKey: ['public-views', canonical] });
-        void qc.invalidateQueries({ queryKey: ['blog-counts'] });
-      } catch {
-        if (!stopped && attempt < 2)
+        payload.visitorId ??= await trackingVisitorId();
+        if (stopped) return;
+        const result = await recordPageView(payload);
+        if (result.path && typeof result.views === 'number')
+          await updateEngagementCache(qc, {
+            path: result.path,
+            views: result.views,
+          });
+      } catch (error) {
+        if (
+          !stopped &&
+          attempt < 2 &&
+          error instanceof TrackingError &&
+          error.retryable
+        )
           timer = setTimeout(
             () => void send(attempt + 1),
-            1000 * (attempt + 1),
+            2000 * 2 ** attempt + Math.random() * 1000,
           );
       }
     }

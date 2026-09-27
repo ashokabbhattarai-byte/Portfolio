@@ -2,6 +2,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { PublicViewCount, SetBlogLike } from '@portfolio/types';
 import { visitorId } from '@/lib/visitor-identity';
+import {
+  blogCountsOptions,
+  publicViewsOptions,
+  updateEngagementCache,
+} from '@/lib/engagement-queries';
 
 function Eye() {
   return (
@@ -36,16 +41,7 @@ function Heart({ filled = false }: { filled?: boolean }) {
 }
 export function BlogCounts({ path }: { path: string }) {
   // All cards share one request; counts never create tracking events.
-  const { data, isError } = useQuery<PublicViewCount[]>({
-    queryKey: ['blog-counts'],
-    queryFn: async () => {
-      const response = await fetch('/api/analytics/blog-counts');
-      if (!response.ok) throw new Error('Counts unavailable');
-      return response.json();
-    },
-    staleTime: 30000,
-    retry: 1,
-  });
+  const { data, isError } = useQuery(blogCountsOptions());
   const count = data?.find((row) => row.path === path);
   if (!count)
     return (
@@ -55,7 +51,7 @@ export function BlogCounts({ path }: { path: string }) {
     );
   return (
     <span className="blog-engagement-summary">
-      <span>
+      <span title="Unique browsers that have viewed this article. Repeat visits count once.">
         <Eye />
         {count.views?.toLocaleString()} {count.views === 1 ? 'view' : 'views'}
       </span>
@@ -70,23 +66,15 @@ export function BlogCounts({ path }: { path: string }) {
 export function BlogEngagement({ path }: { path: string }) {
   const qc = useQueryClient();
   const key = ['public-views', path];
-  const query = useQuery<PublicViewCount>({
-    queryKey: key,
-    queryFn: async ({ signal }) => {
-      const response = await fetch(
-        `/api/analytics/views?path=${encodeURIComponent(path)}`,
-        { headers: { 'x-visitor-id': visitorId() }, cache: 'no-store', signal },
-      );
-      if (!response.ok) throw new Error('Counts unavailable');
-      return response.json();
-    },
-    staleTime: 30000,
-    retry: 1,
-  });
+  const query = useQuery(publicViewsOptions(path));
   const mutation = useMutation({
     onMutate: () => qc.cancelQueries({ queryKey: key }),
     mutationFn: async (liked: boolean): Promise<PublicViewCount> => {
-      const payload: SetBlogLike = { path, liked, visitorId: visitorId() };
+      const payload: SetBlogLike = {
+        path,
+        liked,
+        visitorId: await visitorId(),
+      };
       const response = await fetch('/api/analytics/like', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -96,17 +84,16 @@ export function BlogEngagement({ path }: { path: string }) {
         throw new Error('Your like could not be saved. Please try again.');
       return response.json();
     },
-    onSuccess: (data) => {
-      qc.setQueryData(key, data);
-      void qc.invalidateQueries({ queryKey: ['blog-counts'] });
-      void qc.invalidateQueries({ queryKey: ['analytics'] });
-    },
+    onSuccess: (data) => updateEngagementCache(qc, data),
   });
   const count = query.data;
   return (
     <div className="blog-engagement" aria-label="Article readership and likes">
       {count?.views != null ? (
-        <span className="blog-engagement-views">
+        <span
+          className="blog-engagement-views"
+          title="Unique browsers that have viewed this article. Repeat visits count once."
+        >
           <Eye />
           {count.views.toLocaleString()} {count.views === 1 ? 'view' : 'views'}
         </span>
