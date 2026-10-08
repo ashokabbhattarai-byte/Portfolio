@@ -45,8 +45,5 @@
   "overrides": {
     "multer": "2.3.0",
     "deepmerge-ts": "8.0.0"
-  },
-  "dependencies": {
-    "@nestjs/schedule": "^12.0.2"
   }
 }
