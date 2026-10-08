@@ -19,55 +19,64 @@ export class ContentService {
   // mutation and re-populate Next's freshly invalidated cache with stale data.
   private pending: Promise<SiteContent> | null = null;
 
+  private async safeRetry<T>(run: () => Promise<T>, label: string): Promise<T> {
+    if (typeof this.prisma?.withRetry === 'function') {
+      return this.prisma.withRetry(run, label);
+    }
+    return run();
+  }
+
   async getAdminStats(): Promise<AdminStats> {
-    const [counts, profileRow] = await Promise.all([
-      this.prisma.$queryRawUnsafe<
-        [
-          {
-            projects: number;
-            blogs: number;
-            media: number;
-            experience: number;
-            skills: number;
-            education: number;
-            certifications: number;
-          },
-        ]
-      >(`
-        SELECT
-          (SELECT COUNT(*)::int FROM projects) AS projects,
-          (SELECT COUNT(*)::int FROM blogs WHERE "deletedAt" IS NULL) AS blogs,
-          (SELECT COUNT(*)::int FROM media_assets) AS media,
-          (SELECT COUNT(*)::int FROM experience) AS experience,
-          (SELECT COUNT(*)::int FROM skills) AS skills,
-          (SELECT COUNT(*)::int FROM education) AS education,
-          (SELECT COUNT(*)::int FROM certifications) AS certifications
-      `),
-      this.prisma.profile.findFirst({
-        select: { name: true, role: true, email: true },
-      }),
-    ]);
+    return this.safeRetry(async () => {
+      const [counts, profileRow] = await Promise.all([
+        this.prisma.$queryRawUnsafe<
+          [
+            {
+              projects: number;
+              blogs: number;
+              media: number;
+              experience: number;
+              skills: number;
+              education: number;
+              certifications: number;
+            },
+          ]
+        >(`
+          SELECT
+            (SELECT COUNT(*)::int FROM projects) AS projects,
+            (SELECT COUNT(*)::int FROM blogs WHERE "deletedAt" IS NULL) AS blogs,
+            (SELECT COUNT(*)::int FROM media_assets) AS media,
+            (SELECT COUNT(*)::int FROM experience) AS experience,
+            (SELECT COUNT(*)::int FROM skills) AS skills,
+            (SELECT COUNT(*)::int FROM education) AS education,
+            (SELECT COUNT(*)::int FROM certifications) AS certifications
+        `),
+        this.prisma.profile.findFirst({
+          select: { name: true, role: true, email: true },
+        }),
+      ]);
 
-    const stats = counts[0] ?? {
-      projects: 0,
-      blogs: 0,
-      media: 0,
-      experience: 0,
-      skills: 0,
-      education: 0,
-      certifications: 0,
-    };
+      const stats = counts[0] ?? {
+        projects: 0,
+        blogs: 0,
+        media: 0,
+        experience: 0,
+        skills: 0,
+        education: 0,
+        certifications: 0,
+      };
 
-    return {
-      projects: Number(stats.projects),
-      blogs: Number(stats.blogs),
-      media: Number(stats.media),
-      experience: Number(stats.experience),
-      skills: Number(stats.skills),
-      education: Number(stats.education),
-      certifications: Number(stats.certifications),
-      profile: profileRow,
-    };
+      return {
+        projects: Number(stats.projects),
+        blogs: Number(stats.blogs),
+        media: Number(stats.media),
+        experience: Number(stats.experience),
+        skills: Number(stats.skills),
+        education: Number(stats.education),
+        certifications: Number(stats.certifications),
+        profile: profileRow,
+      };
+    }, 'content.adminStats');
   }
 
   async getMeta(): Promise<{
@@ -122,25 +131,27 @@ export class ContentService {
   }
 
   private async fetchAll(): Promise<SiteContent> {
-    const [
-      profileRow,
-      projects,
-      blogs,
-      experience,
-      skills,
-      education,
-      certifications,
-    ] = await Promise.all([
-      this.prisma.profile.findUnique({ where: { id: 'profile' } }),
-      this.prisma.project.findMany({
-        where: { published: true },
-        orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
-      }),
-      this.prisma.blog.findMany({
-        where: publicBlogWhere,
-        orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
-        include: blogInclude,
-      }),
+    return this.safeRetry(async () => {
+      const [
+        profileRow,
+        projects,
+        blogs,
+        experience,
+        skills,
+        education,
+        certifications,
+      ] = await Promise.all([
+        this.prisma.profile.findUnique({ where: { id: 'profile' } }),
+        this.prisma.project.findMany({
+          where: { published: true },
+          orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
+        }),
+        this.prisma.blog.findMany({
+          where: publicBlogWhere,
+          orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
+          include: blogInclude,
+          relationLoadStrategy: 'join',
+        }),
       this.prisma.experience.findMany({
         orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
       }),
@@ -227,5 +238,6 @@ export class ContentService {
         position: r.position,
       })),
     };
+    }, 'content.fetchAll');
   }
 }
