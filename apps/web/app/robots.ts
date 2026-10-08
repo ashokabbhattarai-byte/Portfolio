@@ -48,6 +48,16 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
       {
+        userAgent: 'Google-Favicon',
+        allow: [
+          '/',
+          '/favicon.ico',
+          '/favicon-*.png',
+          '/apple-touch-icon.png',
+          '/assets/',
+        ],
+      },
+      {
         userAgent: 'GPTBot',
         disallow: ['/admin-252755/', '/admin/', '/api/'],
       },
