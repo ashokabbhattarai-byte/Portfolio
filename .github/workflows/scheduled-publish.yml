@@ -1,0 +1,27 @@
+name: Scheduled Blog Publisher
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Publish Due Sweep
+        env:
+          CRON_URL: ${{ secrets.CRON_PUBLISH_URL || 'https://www.ashokbhattarai1.com.np/api/cron/publish' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET || secrets.REVALIDATE_SECRET }}
+        run: |
+          if [ -n "$CRON_SECRET" ]; then
+            curl -s -f -X POST "$CRON_URL" \
+              -H "Content-Type: application/json" \
+              -H "x-cron-secret: $CRON_SECRET" \
+              -H "x-revalidate-secret: $CRON_SECRET" || echo "Sweep returned status $?"
+          else
+            echo "CRON_SECRET unset, skipping external webhook sweep."
+          fi

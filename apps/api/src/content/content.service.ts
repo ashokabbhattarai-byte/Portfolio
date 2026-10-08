@@ -1,5 +1,10 @@
-import { blogInclude, blogWire, publicBlogWhere } from '../blogs/blogs.service';
-import { Injectable } from '@nestjs/common';
+import {
+  BlogsService,
+  blogInclude,
+  blogWire,
+  publicBlogWhere,
+} from '../blogs/blogs.service';
+import { Injectable, Optional } from '@nestjs/common';
 import type { AdminStats, SiteContent } from '@portfolio/types';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -13,7 +18,10 @@ function toWireCategory(
 
 @Injectable()
 export class ContentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly blogs?: BlogsService,
+  ) {}
 
   // Share only in-flight reads. A completed result must not survive a CMS
   // mutation and re-populate Next's freshly invalidated cache with stale data.
@@ -132,6 +140,9 @@ export class ContentService {
 
   private async fetchAll(): Promise<SiteContent> {
     return this.safeRetry(async () => {
+      if (this.blogs) {
+        await this.blogs.drainDueIfNeeded();
+      }
       const [
         profileRow,
         projects,

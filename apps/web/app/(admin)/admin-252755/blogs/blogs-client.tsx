@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ListControls, usePagedList } from '@/components/admin/paged-list';
 import type { BlogSummary, PageResult } from '@portfolio/types';
@@ -27,6 +27,13 @@ export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
   const [tag, setTag] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
+
   const list = usePagedList(
     'blogs',
     initial,
@@ -46,6 +53,43 @@ export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
     ]);
     router.refresh();
   }
+  async function sweepScheduled() {
+    setBusy(true);
+    try {
+      const res = await adminApi.blogOps.publishDue();
+      await refresh();
+      if (res.published > 0) {
+        setMessage(`Published ${res.published} scheduled article(s).`);
+      } else {
+        setMessage('All scheduled articles are up to date.');
+      }
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Could not process scheduled articles.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function publishNow(post: BlogSummary) {
+    if (!confirm(`Publish “${post.title}” now immediately?`)) return;
+    setBusy(true);
+    try {
+      await adminApi.blogOps.publishNow(post.id);
+      await refresh();
+      setMessage(`Published “${post.title}”.`);
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : 'Could not publish article.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function remove(post: BlogSummary) {
     if (!confirm(`Delete “${post.title}”? This cannot be undone.`)) return;
     setBusy(true);
@@ -61,6 +105,9 @@ export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
       setBusy(false);
     }
   }
+
+  const hasScheduled = visible.some((p) => p.status === 'SCHEDULED');
+
   return (
     <div className="blog-manager">
       <div className="blog-manager-toolbar">
@@ -68,9 +115,22 @@ export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
           <h2>Your articles</h2>
           <p>Manage drafts, scheduled releases, and published articles.</p>
         </div>
-        <Link className="adm-btn primary" href="/admin-252755/blogs/new">
-          + New article
-        </Link>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {hasScheduled && (
+            <button
+              type="button"
+              className="adm-btn ghost tiny"
+              disabled={busy}
+              onClick={() => sweepScheduled()}
+              title="Check and publish any scheduled articles whose release time has arrived"
+            >
+              ⚡ Publish due
+            </button>
+          )}
+          <Link className="adm-btn primary" href="/admin-252755/blogs/new">
+            + New article
+          </Link>
+        </div>
       </div>
       <ListControls
         list={list}
@@ -105,6 +165,10 @@ export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
       </p>
       <div className="adm-rows">
         {visible.map((post) => {
+          const isOverdue =
+            post.status === 'SCHEDULED' &&
+            post.scheduledAt &&
+            new Date(post.scheduledAt).getTime() <= now;
           return (
             <div key={post.id} className="adm-row blog-manager-row">
               <div className="adm-row-main">
@@ -118,8 +182,11 @@ export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
                   {/* A scheduled post's whole point is the time it goes out, so
                       that belongs in the list, not one click inside it. */}
                   {post.status === 'SCHEDULED' && post.scheduledAt && (
-                    <span className="blog-row-when">
-                      Goes out {describeSchedule(post.scheduledAt)}
+                    <span
+                      className={`blog-row-when${isOverdue ? ' is-overdue' : ''}`}
+                    >
+                      {isOverdue ? '⚡ Due now · ' : 'Goes out '}
+                      {describeSchedule(post.scheduledAt)}
                     </span>
                   )}
                 </div>
@@ -138,6 +205,17 @@ export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
                 </span>
               </div>
               <div className="blog-row-actions">
+                {post.status === 'SCHEDULED' && (
+                  <button
+                    type="button"
+                    className="adm-btn tiny primary"
+                    disabled={busy}
+                    onClick={() => publishNow(post)}
+                    title="Publish immediately without waiting for schedule"
+                  >
+                    Publish now
+                  </button>
+                )}
                 <a
                   className="adm-btn tiny"
                   href={`/admin-252755/analytics/blogs/${post.id}`}

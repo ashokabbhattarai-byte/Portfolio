@@ -302,6 +302,16 @@ export const adminApi = {
   blogOps: {
     search: (params: BlogSearchParams = {}) =>
       request<PageResult<BlogSummary>>(`/blogs/admin/search${query(params)}`),
+    publishDue: () =>
+      request<{ ok: boolean; published: number; timestamp: string }>(
+        '/blogs/publish-due',
+        { method: 'POST' },
+      ),
+    publishNow: (id: string) =>
+      request<Blog>(`/blogs/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: { status: 'PUBLISHED', published: true, scheduledAt: null },
+      }),
     preview: (id: string) =>
       request<{ token: string; expiresAt: string; url: string }>(
         `/blogs/${encodeURIComponent(id)}/preview`,

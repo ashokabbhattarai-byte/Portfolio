@@ -86,7 +86,26 @@ export class BlogsService {
     private readonly prisma: PrismaService,
     private readonly revalidate: RevalidateService,
   ) {}
+
+  /**
+   * Fast, non-blocking just-in-time drain: guarantees due scheduled articles
+   * are published immediately on read, even if background workers sleep or crash.
+   */
+  async drainDueIfNeeded(now = new Date()): Promise<number> {
+    try {
+      return await this.publishDue(now);
+    } catch (error) {
+      this.logger.warn(
+        `On-demand scheduled publishing check failed: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+      return 0;
+    }
+  }
+
   async list(admin = false): Promise<Blog[]> {
+    await this.drainDueIfNeeded();
     const rows = await this.prisma.blog.findMany({
       where: admin ? { deletedAt: null } : publicBlogWhere,
       orderBy: [{ position: 'asc' }, { createdAt: 'desc' }],
@@ -98,6 +117,7 @@ export class BlogsService {
     return rows.map(blogWire);
   }
   async search(q: PageQuery) {
+    await this.drainDueIfNeeded();
     const where: Prisma.BlogWhereInput = {
       deletedAt: null,
       ...(q.status ? { status: q.status } : {}),
@@ -165,6 +185,7 @@ export class BlogsService {
     return { items, total, page: q.page, limit: q.limit };
   }
   async getById(id: string, includeDrafts = false) {
+    await this.drainDueIfNeeded();
     const row = await this.prisma.blog.findFirst({
       where: { id, ...(includeDrafts ? { deletedAt: null } : publicBlogWhere) },
       include: blogInclude,
@@ -174,6 +195,7 @@ export class BlogsService {
     return blogWire(row);
   }
   async getBySlug(slug: string, includeDrafts = false) {
+    await this.drainDueIfNeeded();
     const row = await this.prisma.blog.findFirst({
       where: {
         slug,

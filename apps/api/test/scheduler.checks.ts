@@ -27,6 +27,26 @@ function database(due: { id: string; status: string }[]) {
     blog: {
       findFirst: async () =>
         [...rows.values()].find((row) => row.status === 'SCHEDULED') ?? null,
+      findMany: async () =>
+        [...rows.values()].map((row) => ({
+          id: row.id,
+          slug: row.id,
+          title: 'Scheduled article',
+          excerpt: 'A summary long enough to publish.',
+          content: 'Body content long enough to publish.',
+          tags: [],
+          status: row.status,
+          version: 1,
+          published: row.status === 'PUBLISHED',
+          publishedAt: null,
+          scheduledAt: new Date(Date.now() - 1000),
+          images: [],
+          inlineMedia: [],
+          featuredImage: null,
+          ogImage: null,
+          author: null,
+          deletedAt: null,
+        })),
       findUniqueOrThrow: async ({ where }: { where: { id: string } }) => ({
         id: where.id,
         slug: where.id,
@@ -173,6 +193,35 @@ describe('scheduled publication', () => {
     } finally {
       clock.mockRestore();
     }
+  });
+
+  test('drainDueIfNeeded automatically publishes due articles on read queries', async () => {
+    const db = database([{ id: 'scheduled-post', status: 'SCHEDULED' }]);
+    const blogs = new BlogsService(
+      db.prisma as never,
+      {
+        trigger() {},
+      } as never,
+    );
+
+    const result = await blogs.list();
+    expect(db.published()).toContain('scheduled-post');
+  });
+
+  test('triggerNow immediately runs publishDue', async () => {
+    const db = database([{ id: 'post-1', status: 'SCHEDULED' }]);
+    const blogs = new BlogsService(
+      db.prisma as never,
+      { trigger() {} } as never,
+    );
+    const scheduler = new BlogScheduler(
+      blogs,
+      { get: () => undefined } as never,
+      { record: async () => undefined } as never,
+    );
+    const count = await scheduler.triggerNow();
+    expect(count).toBe(1);
+    expect(db.published()).toContain('post-1');
   });
 });
 

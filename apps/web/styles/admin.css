@@ -1203,6 +1203,10 @@
   background: #fbf2da;
   border-color: #e5d3a7;
 }
+.blog-row-when.is-overdue {
+  color: var(--danger, #dc2626);
+  font-weight: 500;
+}
 .blog-row-title {
   display: block;
   background: none;

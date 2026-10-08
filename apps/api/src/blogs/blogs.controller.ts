@@ -1,4 +1,4 @@
-import { actorFrom, type PublisherRequest } from '../publishing/common';
+import { actorFrom, fail, type PublisherRequest } from '../publishing/common';
 import { PageQuery } from '../publishing/query.dto';
 import {
   Body,
@@ -52,6 +52,27 @@ export class BlogsController {
     return !!user && !user.disabledAt;
   }
 
+  private isCronAuthorized(request: Request): boolean {
+    const secret =
+      this.config.get<string>('CRON_SECRET') ||
+      this.config.get<string>('REVALIDATE_SECRET');
+    if (!secret) return false;
+    const headerSecret =
+      request.headers['x-cron-secret'] ||
+      request.headers['x-revalidate-secret'];
+    const authHeader = request.headers['authorization'];
+    const bearer =
+      typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+        ? authHeader.slice(7).trim()
+        : null;
+    const queryKey = (request.query?.key as string | undefined) ?? null;
+    const presented =
+      (typeof headerSecret === 'string' ? headerSecret : null) ??
+      bearer ??
+      queryKey;
+    return presented === secret;
+  }
+
   @Public()
   @Get()
   async list(
@@ -76,6 +97,33 @@ export class BlogsController {
   @Roles('ADMIN', 'EDITOR')
   search(@Query() query: PageQuery) {
     return this.blogs.search(query);
+  }
+
+  @Post('publish-due')
+  @Roles('ADMIN', 'EDITOR')
+  async publishDue() {
+    const published = await this.blogs.publishDue();
+    return { ok: true, published, timestamp: new Date().toISOString() };
+  }
+
+  @Public()
+  @Get('cron/publish')
+  async cronPublishGet(@Req() req: Request) {
+    if (!this.isCronAuthorized(req) && !(await this.isAuthenticated(req))) {
+      fail('UNAUTHORIZED', 'Invalid or missing cron secret.', 401);
+    }
+    const published = await this.blogs.publishDue();
+    return { ok: true, published, timestamp: new Date().toISOString() };
+  }
+
+  @Public()
+  @Post('cron/publish')
+  async cronPublishPost(@Req() req: Request) {
+    if (!this.isCronAuthorized(req) && !(await this.isAuthenticated(req))) {
+      fail('UNAUTHORIZED', 'Invalid or missing cron secret.', 401);
+    }
+    const published = await this.blogs.publishDue();
+    return { ok: true, published, timestamp: new Date().toISOString() };
   }
 
   @Public()

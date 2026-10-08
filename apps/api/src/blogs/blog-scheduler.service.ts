@@ -5,38 +5,39 @@ import {
 import {
   Injectable,
   Logger,
-  OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Interval } from '@nestjs/schedule';
 import { BlogsService } from './blogs.service';
 import { AuditService } from '../publishing/audit.service';
 import { systemActor } from '../publishing/common';
+
 @Injectable()
-export class BlogScheduler implements OnModuleInit, OnModuleDestroy {
-  private timer?: ReturnType<typeof setInterval>;
+export class BlogScheduler implements OnModuleInit {
   private running = false;
   private nextAttemptAt = 0;
   private failures = 0;
   private readonly logger = new Logger(BlogScheduler.name);
+
   constructor(
     private readonly blogs: BlogsService,
     private readonly config: ConfigService,
     private readonly audit: AuditService,
   ) {}
+
   onModuleInit() {
     if (this.config.get('BLOG_SCHEDULER_ENABLED') === 'false') return;
-    const interval = Math.max(
-      5000,
-      Number(this.config.get('BLOG_SCHEDULER_INTERVAL_MS') || 15000),
-    );
-    this.timer = setInterval(
-      () => void this.tick(),
-      Number.isFinite(interval) ? interval : 15000,
-    );
-    this.timer.unref();
+    // Perform an immediate initial drain on boot so restarts don't leave due posts queued
     void this.tick();
   }
+
+  @Interval(15000)
+  async handleScheduledSweep() {
+    if (this.config.get('BLOG_SCHEDULER_ENABLED') === 'false') return;
+    await this.tick();
+  }
+
   async tick() {
     if (this.running || Date.now() < this.nextAttemptAt) return;
     this.running = true;
@@ -70,7 +71,10 @@ export class BlogScheduler implements OnModuleInit, OnModuleDestroy {
       this.running = false;
     }
   }
-  onModuleDestroy() {
-    if (this.timer) clearInterval(this.timer);
+
+  /** Allows manual or programmatic trigger of the sweep. */
+  async triggerNow(): Promise<number> {
+    this.nextAttemptAt = 0;
+    return this.blogs.publishDue();
   }
 }
