@@ -69,7 +69,7 @@ function service(row: ReturnType<typeof fixture>) {
     },
     tag: { upsert: async ({ create }: { create: unknown }) => create },
     mediaAsset: { findMany: async () => [] },
-    blogRevision: { create: async () => ({}) },
+    blogRevision: { create: async () => ({}), upsert: async () => ({}) },
     blogPreview: { updateMany: async () => ({ count: 0 }) },
     publishingRequest: {
       findUnique: async () => null,

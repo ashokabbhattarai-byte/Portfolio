@@ -208,7 +208,7 @@ export class BlogsService {
     );
     const matched = urls.length
       ? await tx.mediaAsset.findMany({
-          where: { url: { in: urls } },
+          where: { url: { in: urls }, deletedAt: null },
           select: { id: true },
         })
       : [];
@@ -229,21 +229,24 @@ export class BlogsService {
         [featured, og, ...inlineIds].filter((id): id is string => !!id),
       ),
     ].sort();
+
+    let validAssetIds = new Set<string>();
     if (ids.length) {
       const assets = await tx.$queryRaw<{ id: string }[]>(
         Prisma.sql`SELECT id FROM media_assets WHERE id IN (${Prisma.join(ids)}) AND "deletedAt" IS NULL ORDER BY id FOR UPDATE`,
       );
-      if (assets.length !== ids.length)
-        fail(
-          'MEDIA_NOT_FOUND',
-          'One or more selected images are unavailable.',
-          404,
-        );
+      validAssetIds = new Set(assets.map((a) => a.id));
     }
+
+    const validInlineIds = inlineIds.filter((id) => validAssetIds.has(id));
+    const validFeatured =
+      featured && validAssetIds.has(featured) ? featured : null;
+    const validOg = og && validAssetIds.has(og) ? og : null;
+
     return {
-      featuredImageId: featured || null,
-      ogImageId: og || null,
-      inlineMedia: { set: inlineIds.map((id) => ({ id })) },
+      featuredImageId: validFeatured,
+      ogImageId: validOg,
+      inlineMedia: { set: validInlineIds.map((id) => ({ id })) },
     };
   }
   private async tags(tx: Prisma.TransactionClient, names: string[]) {
@@ -275,6 +278,20 @@ export class BlogsService {
         'A blog with that slug already exists.',
         409,
       );
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2003'
+    )
+      fail(
+        'RELATION_NOT_FOUND',
+        'A referenced record (such as an image, tag, or author) is unavailable.',
+        400,
+      );
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
+    )
+      fail('BLOG_NOT_FOUND', 'Blog not found.', 404);
     throw error;
   }
   async create(
@@ -454,10 +471,18 @@ export class BlogsService {
               : null;
           this.validateTimezone(dto.timezone);
           const media = await this.media(tx, dto, existing);
-          await tx.blogRevision.create({
-            data: {
+          await tx.blogRevision.upsert({
+            where: {
+              blogId_version: { blogId: id, version: existing.version },
+            },
+            create: {
               blogId: id,
               version: existing.version,
+              snapshot: JSON.parse(JSON.stringify(blogWire(existing))),
+              actorType: actor.type,
+              actorId: actor.id,
+            },
+            update: {
               snapshot: JSON.parse(JSON.stringify(blogWire(existing))),
               actorType: actor.type,
               actorId: actor.id,
@@ -724,10 +749,18 @@ export class BlogsService {
           return 'skipped' as const;
         }
 
-        await tx.blogRevision.create({
-          data: {
+        await tx.blogRevision.upsert({
+          where: {
+            blogId_version: { blogId: row.id, version: row.version },
+          },
+          create: {
             blogId: row.id,
             version: row.version,
+            snapshot: JSON.parse(JSON.stringify(blogWire(row))),
+            actorType: 'SYSTEM',
+            actorId: 'scheduler',
+          },
+          update: {
             snapshot: JSON.parse(JSON.stringify(blogWire(row))),
             actorType: 'SYSTEM',
             actorId: 'scheduler',

@@ -58,7 +58,7 @@ function database(due: { id: string; status: string }[]) {
         return { ...row, images: [], inlineMedia: [] };
       },
     },
-    blogRevision: { create: async () => ({}) },
+    blogRevision: { create: async () => ({}), upsert: async () => ({}) },
     auditEvent: {
       create: async ({ data }: { data: { action: string } }) => {
         audits.push(data.action);
