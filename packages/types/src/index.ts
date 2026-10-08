@@ -173,22 +173,85 @@ export type PageView = {
   createdAt: string;
 };
 
+export type AnalyticsDevice = {
+  name: 'Desktop' | 'Mobile' | 'Tablet' | 'Other';
+  count: number;
+  percentage: number;
+};
+
+export type AnalyticsBrowser = {
+  name: string;
+  count: number;
+  percentage: number;
+};
+
+export type AnalyticsOS = {
+  name: string;
+  count: number;
+  percentage: number;
+};
+
+export type ReferrerCategory =
+  'search' | 'social' | 'ai' | 'direct' | 'internal' | 'referral';
+
+export type TopReferrer = {
+  referer: string;
+  count: number;
+  category: ReferrerCategory;
+  percentage?: number;
+};
+
+export type CategoryShare = {
+  category: ReferrerCategory;
+  count: number;
+  percentage: number;
+};
+
+export type RealtimeActivity = {
+  activeLast5Min: number;
+  activeLast30Min: number;
+  viewsLast30Min: number;
+};
+
+export type PeriodComparison = {
+  pageViewsDelta: number;
+  visitorsDelta: number;
+  visitsDelta: number;
+  bounceRateDelta: number;
+  viewsPerVisitDelta: number;
+  previousPageViews: number;
+  previousVisitors: number;
+  previousVisits: number;
+};
+
+export type AnalyticsBreakdown = {
+  devices: AnalyticsDevice[];
+  browsers: AnalyticsBrowser[];
+  os: AnalyticsOS[];
+  categories: CategoryShare[];
+};
+
 export type BlogAnalytics = {
   blog: Blog;
   views: number;
   uniqueViews: number;
   visits: number;
   uniquePageViews: number;
+  bounceRate?: number;
+  viewsPerVisit?: number;
   likes?: number;
   viewsLast7Days: number;
   viewsLast30Days: number;
+  comparison?: PeriodComparison | null;
+  breakdown?: AnalyticsBreakdown;
   daily: Array<{
     date: string;
     views: number;
     visitors: number;
     visits: number;
+    bounceRate?: number;
   }>;
-  topReferers: Array<{ referer: string; count: number }>;
+  topReferers: Array<TopReferrer>;
 };
 
 export type PortfolioAnalytics = {
@@ -200,10 +263,18 @@ export type PortfolioAnalytics = {
     visits: number;
     uniquePageViews: number;
     likes: number;
+    bounceRate?: number;
+    viewsPerVisit?: number;
+    newVisitors?: number;
+    returningVisitors?: number;
   };
+  comparison?: PeriodComparison | null;
+  realtime?: RealtimeActivity;
+  breakdown?: AnalyticsBreakdown;
   topBlogs: Array<{
     blog: Pick<Blog, 'id' | 'slug' | 'title' | 'coverImage' | 'viewCount'>;
     views: number;
+    likes?: number;
   }>;
   topProjects: Array<{
     project: Pick<Project, 'id' | 'slug' | 'title' | 'image' | 'viewCount'>;
@@ -214,9 +285,10 @@ export type PortfolioAnalytics = {
     views: number;
     visitors: number;
     visits: number;
+    bounceRate?: number;
   }>;
   byTag: Array<{ tag: string; views: number }>;
-  topReferers: Array<{ referer: string; count: number }>;
+  topReferers: Array<TopReferrer>;
   mostLiked: Array<{
     blog: Pick<Blog, 'id' | 'slug' | 'title'>;
     likes: number;
@@ -230,22 +302,29 @@ export type RouteAnalytics = {
   uniqueViews: number;
   visits: number;
   uniquePageViews: number;
+  bounceRate?: number;
+  viewsPerVisit?: number;
   likes?: number;
   viewsLast7Days: number;
   viewsLast30Days: number;
+  comparison?: PeriodComparison | null;
+  breakdown?: AnalyticsBreakdown;
   daily: Array<{
     date: string;
     views: number;
     visitors: number;
     visits: number;
+    bounceRate?: number;
   }>;
-  topReferers: Array<{ referer: string; count: number }>;
+  topReferers: Array<TopReferrer>;
 };
 
 export type RoutesAnalytics = Array<{
   path: string;
   views: number;
   unique: number;
+  visits?: number;
+  bounceRate?: number;
   lastViewed: string | null;
 }>;
 
@@ -426,4 +505,20 @@ export type BlogSummary = Pick<
   version: number;
   featuredImage?: { id: string; url: string; alt: string } | null;
   author?: { name: string } | null;
+};
+
+/** Summary counts and profile overview for the fast admin control dashboard */
+export type AdminStats = {
+  projects: number;
+  blogs: number;
+  media: number;
+  experience: number;
+  skills: number;
+  education: number;
+  certifications: number;
+  profile?: {
+    name: string;
+    role: string;
+    email: string;
+  } | null;
 };

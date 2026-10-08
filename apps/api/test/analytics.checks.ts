@@ -190,3 +190,61 @@ test('public article views use unique reader records, not repeat visit totals', 
   expect((await service.publicCount('/blog/example')).views).toBe(2);
   expect((await service.publicCount('/')).views).toBe(17);
 });
+
+describe('analytics helpers', () => {
+  const {
+    parseUserAgent,
+    categorizeReferrer,
+    calculateDelta,
+  } = require('../src/analytics/analytics.helpers');
+
+  test('parses devices, browsers and operating systems correctly', () => {
+    const iphone = parseUserAgent(
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    );
+    expect(iphone).toEqual({
+      device: 'Mobile',
+      browser: 'Safari',
+      os: 'iOS',
+    });
+
+    const macChrome = parseUserAgent(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    );
+    expect(macChrome).toEqual({
+      device: 'Desktop',
+      browser: 'Chrome',
+      os: 'macOS',
+    });
+
+    const ipad = parseUserAgent(
+      'Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko)',
+    );
+    expect(ipad.device).toBe('Tablet');
+  });
+
+  test('categorizes referrers accurately into search, social, ai, direct and referral', () => {
+    expect(categorizeReferrer('https://www.google.com/search?q=test')).toBe(
+      'search',
+    );
+    expect(categorizeReferrer('https://duckduckgo.com/')).toBe('search');
+    expect(categorizeReferrer('https://t.co/xyz123')).toBe('social');
+    expect(categorizeReferrer('https://www.linkedin.com/feed')).toBe('social');
+    expect(categorizeReferrer('https://chatgpt.com/')).toBe('ai');
+    expect(categorizeReferrer('https://claude.ai/chat')).toBe('ai');
+    expect(categorizeReferrer(null)).toBe('direct');
+    expect(categorizeReferrer('https://myblog.com', 'https://myblog.com')).toBe(
+      'internal',
+    );
+    expect(categorizeReferrer('https://awesome-site.org/post')).toBe(
+      'referral',
+    );
+  });
+
+  test('calculates period deltas accurately', () => {
+    expect(calculateDelta(150, 100)).toBe(50.0);
+    expect(calculateDelta(80, 100)).toBe(-20.0);
+    expect(calculateDelta(10, 0)).toBe(100.0);
+    expect(calculateDelta(0, 0)).toBe(0.0);
+  });
+});

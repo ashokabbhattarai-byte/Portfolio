@@ -28,6 +28,13 @@ export class ContentController {
     return data;
   }
 
+  /** Fast aggregated statistics and profile metadata for the admin control dashboard */
+  @Get('admin/stats')
+  @Header('Cache-Control', 'no-store')
+  async adminStats() {
+    return this.content.getAdminStats();
+  }
+
   /** Lightweight health / version for TanStack prefetch warming */
   @Public()
   @Get('meta')

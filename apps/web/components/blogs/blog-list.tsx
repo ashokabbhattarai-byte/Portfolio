@@ -4,14 +4,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { BlogCounts } from '@/components/analytics/blog-engagement';
-import Image from 'next/image';
 import { TransitionLink } from '@/components/motion/transition-link';
 import { travels, watchFlow } from '@/components/motion/flow';
+import { estimateReadingTime } from '@/lib/blog-utils';
 import type { Blog } from '@portfolio/types';
+import styles from './blog-list.module.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 8;
 
 function formatDate(value?: string | null): string {
   if (!value) return '';
@@ -29,43 +30,40 @@ function formatDate(value?: string | null): string {
 export function BlogList({ blogs }: { blogs: Blog[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState('');
-  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string>('ALL');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  /* Collect all unique tags */
   const allTags = useMemo(() => {
-    const tagSet = new Set<string>();
-    blogs.forEach((b) => b.tags.forEach((t) => tagSet.add(t)));
-    return Array.from(tagSet).sort();
+    const set = new Set<string>();
+    for (const b of blogs) {
+      for (const t of b.tags) set.add(t);
+    }
+    return Array.from(set).slice(0, 8);
   }, [blogs]);
 
-  /* Filter blogs by search + tag */
   const filtered = useMemo(() => {
-    let result = blogs;
-    if (activeTag) {
-      result = result.filter((b) => b.tags.includes(activeTag));
-    }
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (b) =>
-          b.title.toLowerCase().includes(q) ||
-          b.excerpt.toLowerCase().includes(q) ||
-          b.tags.some((t) => t.toLowerCase().includes(q)),
+    const q = search.trim().toLowerCase();
+    return blogs.filter((b) => {
+      const matchesTag =
+        selectedTag === 'ALL' ||
+        b.tags.some((t) => t.toLowerCase() === selectedTag.toLowerCase());
+      if (!matchesTag) return false;
+      if (!q) return true;
+      return (
+        b.title.toLowerCase().includes(q) ||
+        b.excerpt.toLowerCase().includes(q) ||
+        b.tags.some((t) => t.toLowerCase().includes(q))
       );
-    }
-    return result;
-  }, [blogs, search, activeTag]);
+    });
+  }, [blogs, search, selectedTag]);
 
-  /* Reset visible count when filters change */
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [search, activeTag]);
+  }, [search, selectedTag]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
 
-  /* GSAP scroll reveal */
   useEffect(() => {
     let cleanup: (() => void) | void;
     const arm = () => {
@@ -75,17 +73,17 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
         root.querySelectorAll('[data-blog-index-entry]'),
       );
       if (entries.length === 0) return;
-      gsap.set(entries, { y: 34, opacity: 0 });
+      gsap.set(entries, { y: 24, opacity: 0 });
       const triggers = ScrollTrigger.batch(entries, {
-        start: 'top 94%',
+        start: 'top 95%',
         once: true,
         onEnter: (batch) =>
           gsap.to(batch, {
             y: 0,
             opacity: 1,
-            duration: 0.85,
+            duration: 0.65,
             ease: 'power3.out',
-            stagger: 0.08,
+            stagger: 0.05,
             overwrite: 'auto',
           }),
       });
@@ -94,7 +92,7 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
           gsap.to(element, {
             y: 0,
             opacity: 1,
-            duration: 0.45,
+            duration: 0.35,
             ease: 'power3.out',
             overwrite: 'auto',
           });
@@ -122,16 +120,8 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
 
   if (blogs.length === 0) {
     return (
-      <div
-        style={{
-          marginTop: 24,
-          background: '#fff',
-          borderRadius: 22,
-          border: '1px solid var(--line)',
-          padding: 40,
-        }}
-      >
-        <p style={{ color: 'var(--muted)', fontSize: 17, margin: 0 }}>
+      <div className={styles.emptyState}>
+        <p className={styles.emptyMessage}>
           The first articles are in progress. Check back soon.
         </p>
       </div>
@@ -139,346 +129,164 @@ export function BlogList({ blogs }: { blogs: Blog[] }) {
   }
 
   return (
-    <div ref={ref} style={{ marginTop: 28 }}>
-      {/* Search + Tag Filters */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 16,
-          marginBottom: 28,
-        }}
-      >
-        {/* Search */}
-        <div style={{ position: 'relative', maxWidth: 420 }}>
+    <div ref={ref} className={styles.container}>
+      <div className={styles.toolbar}>
+        <div className={styles.searchBox}>
+          <span className={styles.searchIcon} aria-hidden="true">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </span>
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search articles…"
+            placeholder="Search articles by title, topic, or keyword…"
             aria-label="Search articles"
-            style={{
-              width: '100%',
-              padding: '12px 16px 12px 42px',
-              border: '1.5px solid var(--line)',
-              borderRadius: 12,
-              background: 'rgba(255,255,255,0.8)',
-              backdropFilter: 'blur(8px)',
-              fontSize: 15,
-              color: 'var(--ink)',
-              outline: 'none',
-              transition: 'border-color 200ms ease',
-            }}
-            onFocus={(e) =>
-              (e.currentTarget.style.borderColor = 'var(--accent)')
-            }
-            onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--line)')}
+            className={styles.searchInput}
           />
-          <span
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              left: 14,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              fontSize: 16,
-              color: 'var(--muted)',
-              pointerEvents: 'none',
-            }}
-          >
-            ⌕
-          </span>
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className={styles.clearBtn}
+              aria-label="Clear search query"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
-        {/* Tag pills */}
-        {allTags.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              gap: 8,
-              flexWrap: 'wrap',
-              alignItems: 'center',
-            }}
-          >
-            <button
-              onClick={() => setActiveTag(null)}
-              style={{
-                padding: '6px 14px',
-                borderRadius: 999,
-                border: '1.5px solid',
-                borderColor: !activeTag ? 'var(--accent)' : 'var(--line)',
-                background: !activeTag
-                  ? 'var(--accent)'
-                  : 'rgba(255,255,255,0.6)',
-                color: !activeTag ? '#fff' : 'var(--muted)',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 200ms ease',
-              }}
-            >
-              All
-            </button>
-            {allTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 999,
-                  border: '1.5px solid',
-                  borderColor:
-                    activeTag === tag ? 'var(--accent)' : 'var(--line)',
-                  background:
-                    activeTag === tag
-                      ? 'var(--accent)'
-                      : 'rgba(255,255,255,0.6)',
-                  color: activeTag === tag ? '#fff' : 'var(--muted)',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 200ms ease',
-                }}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Result count */}
-        <p
-          style={{
-            fontSize: 14,
-            color: 'var(--muted)',
-            margin: 0,
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
+        <span className={styles.countBadge}>
           {filtered.length === blogs.length
             ? `${blogs.length} articles`
             : `${filtered.length} of ${blogs.length} articles`}
-        </p>
+        </span>
       </div>
 
-      {/* Blog entries */}
-      <div className="project-collection list">
-        <div className="work-columns utility">
+      {allTags.length > 0 && (
+        <div
+          className={styles.tagFilters}
+          role="group"
+          aria-label="Filter by topic"
+        >
+          <button
+            type="button"
+            className={`${styles.filterPill} ${selectedTag === 'ALL' ? styles.isActive : ''}`}
+            onClick={() => setSelectedTag('ALL')}
+            aria-pressed={selectedTag === 'ALL'}
+          >
+            All topics
+          </button>
+          {allTags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className={`${styles.filterPill} ${
+                selectedTag.toLowerCase() === tag.toLowerCase()
+                  ? styles.isActive
+                  : ''
+              }`}
+              onClick={() =>
+                setSelectedTag((prev) =>
+                  prev.toLowerCase() === tag.toLowerCase() ? 'ALL' : tag,
+                )
+              }
+              aria-pressed={selectedTag.toLowerCase() === tag.toLowerCase()}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className={styles.articleList}>
+        <div className={styles.listHeader} aria-hidden="true">
           <span>Article</span>
           <span>Published</span>
           <span>Read</span>
         </div>
-        {visible.map((post) => (
-          <TransitionLink
-            key={post.id}
-            href={`/blog/${post.slug}`}
-            className="project-entry"
-            data-blog={post.slug}
-            data-blog-index-entry
-            data-flip-id={post.slug}
-          >
-            <div className="project-thumbnail">
-              {(() => {
-                const cover =
-                  post.images?.find(
-                    (i) =>
-                      i.placement === 'COVER' ||
-                      i.placement === 'THUMBNAIL' ||
-                      i.placement === 'HERO',
-                  )?.url ?? post.coverImage;
-                const alt =
-                  post.images?.find(
-                    (i) =>
-                      i.placement === 'COVER' || i.placement === 'THUMBNAIL',
-                  )?.alt ?? post.title;
-                return cover ? (
-                  <div
-                    style={{
-                      position: 'relative',
-                      width: '100%',
-                      height: '100%',
-                      overflow: 'hidden',
-                      borderRadius: '22px 22px 0 0',
-                      aspectRatio: '16 / 9',
-                    }}
-                  >
-                    <Image
-                      src={cover}
-                      alt={alt}
-                      fill
-                      unoptimized
-                      sizes="(max-width: 700px) 100vw, 400px"
-                      style={{ objectFit: 'cover' }}
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className="project-art"
-                    style={{
-                      background: 'var(--deep)',
-                      display: 'grid',
-                      placeItems: 'center',
-                      fontSize: 32,
-                      color: 'var(--paper)',
-                      borderRadius: '22px 22px 0 0',
-                      aspectRatio: '16 / 9',
-                    }}
-                  >
-                    ✎
-                  </div>
-                );
-              })()}
-            </div>
-            <div className="project-title">
-              <h3>{post.title}</h3>
-              <BlogCounts path={`/blog/${post.slug}`} />
-              <span
-                className="project-context"
-                style={{
-                  display: 'flex',
-                  gap: 8,
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    lineClamp: 2,
-                  }}
-                >
-                  {post.excerpt}
-                </span>
-                {post.tags.slice(0, 2).map((t) => (
-                  <span
-                    key={t}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: 'var(--accent)',
-                      background:
-                        'color-mix(in srgb, var(--highlight) 12%, transparent)',
-                      border:
-                        '1px solid color-mix(in srgb, var(--accent) 25%, transparent)',
-                      borderRadius: 999,
-                      padding: '4px 12px',
-                    }}
-                  >
-                    {t}
-                  </span>
-                ))}
-              </span>
-            </div>
-            <span
-              className="project-category"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 4,
-                fontSize: 12,
-              }}
+
+        {visible.map((post) => {
+          const dateStr = post.scheduledAt
+            ? formatDate(post.scheduledAt)
+            : formatDate(post.publishedAt);
+          const { text: readTime } = estimateReadingTime(post.content);
+
+          return (
+            <TransitionLink
+              key={post.id}
+              href={`/blog/${post.slug}`}
+              className={styles.articleRow}
+              data-blog={post.slug}
+              data-blog-index-entry
+              data-flip-id={post.slug}
             >
-              <span>
-                {post.status === 'PUBLISHED' ? (
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: 'var(--accent)',
-                      background:
-                        'color-mix(in srgb, var(--highlight) 12%, transparent)',
-                      border:
-                        '1px solid color-mix(in srgb, var(--accent) 25%, transparent)',
-                      borderRadius: 999,
-                      padding: '4px 12px',
-                    }}
-                  >
-                    Published
+              <div className={styles.articleContent}>
+                <h3 className={styles.articleTitle}>{post.title}</h3>
+                <p className={styles.articleExcerpt}>{post.excerpt}</p>
+                <div className={styles.articleMeta}>
+                  <BlogCounts path={`/blog/${post.slug}`} />
+                  <span className={styles.metaDot} aria-hidden="true">
+                    •
                   </span>
-                ) : null}
-              </span>
-              <span
-                style={{
-                  color: 'var(--muted)',
-                  fontSize: 14,
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {post.scheduledAt
-                  ? formatDate(post.scheduledAt)
-                  : formatDate(post.publishedAt)}
-              </span>
-            </span>
-            <span className="project-arrow" aria-hidden="true">
-              ↗
-            </span>
-          </TransitionLink>
-        ))}
+                  <span className={styles.readTimeText}>{readTime}</span>
+                  {post.tags.slice(0, 2).map((t) => (
+                    <span key={t} className={styles.tagPill}>
+                      {t}
+                    </span>
+                  ))}
+                  {dateStr ? (
+                    <span className={styles.mobileDate}>{dateStr}</span>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className={styles.dateCol}>{dateStr}</div>
+
+              <div className={styles.arrowCol}>
+                <span className={styles.arrowIcon} aria-hidden="true">
+                  ↗
+                </span>
+              </div>
+            </TransitionLink>
+          );
+        })}
       </div>
 
-      {/* Load More */}
       {hasMore && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: 40,
-          }}
-        >
+        <div className={styles.loadMoreWrapper}>
           <button
             onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-            className="round-button"
-            style={{
-              padding: '14px 36px',
-              borderRadius: 999,
-              border: '1.5px solid var(--line)',
-              background: 'var(--paper)',
-              color: 'var(--ink)',
-              fontSize: 15,
-              fontWeight: 500,
-              cursor: 'pointer',
-              transition: 'all 300ms var(--ease)',
-            }}
+            className={styles.loadMoreBtn}
           >
             Load more articles
           </button>
         </div>
       )}
 
-      {/* No results */}
       {filtered.length === 0 && (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '48px 24px',
-            color: 'var(--muted)',
-          }}
-        >
-          <p style={{ fontSize: 17, margin: '0 0 8px' }}>
-            No articles match your search.
+        <div className={styles.emptyState}>
+          <p className={styles.emptyMessage}>
+            No articles match{' '}
+            {search ? `“${search}”` : `selected topic “${selectedTag}”`}.
           </p>
           <button
             onClick={() => {
               setSearch('');
-              setActiveTag(null);
+              setSelectedTag('ALL');
             }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--accent)',
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              textUnderlineOffset: 3,
-            }}
+            className={styles.clearFilterBtn}
           >
             Clear filters
           </button>

@@ -99,10 +99,10 @@ export function LandingScroll() {
         if (interlude && portrait && !compact) {
           gsap.fromTo(
             portrait,
-            { rotation: -3, y: 28 },
+            { rotation: -0.5, y: 16 },
             {
-              rotation: 2,
-              y: -28,
+              rotation: 0.5,
+              y: -16,
               ease: 'none',
               scrollTrigger: {
                 trigger: interlude,

@@ -20,13 +20,14 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     lang: 'en',
     dir: 'ltr',
     categories: ['business', 'productivity'],
-    background_color: 'var(--paper)',
+    background_color: '#f4f3ee',
     theme_color: '#292a2e',
     icons: [
-      /* Served from app/icon.svg, whose route is /icon (no extension). */
-      { src: '/icon', sizes: 'any', type: 'image/svg+xml' },
+      { src: '/favicon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { src: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
       { src: '/assets/icon-192.png', sizes: '192x192', type: 'image/png' },
       { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   };
 }

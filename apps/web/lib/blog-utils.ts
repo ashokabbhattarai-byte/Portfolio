@@ -163,7 +163,7 @@ export function generateBlogJsonLd(
           '@type': 'Person',
           name: profile.name,
           logo: siteUrl
-            ? { '@type': 'ImageObject', url: `${siteUrl}/icon.svg` }
+            ? { '@type': 'ImageObject', url: `${siteUrl}/assets/icon-512.png` }
             : undefined,
         }
       : undefined,

@@ -71,8 +71,11 @@ export function ProjectsClient({
   const [creating, setCreating] = useState(false);
 
   async function invalidate() {
-    await qc.invalidateQueries({ queryKey: qk.projects() });
-    await qc.invalidateQueries({ queryKey: qk.siteContent() });
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: qk.projects() }),
+      qc.invalidateQueries({ queryKey: qk.siteContent() }),
+      list.refetch(),
+    ]);
     router.refresh();
   }
 

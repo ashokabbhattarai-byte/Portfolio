@@ -40,10 +40,10 @@ export function ProjectList({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    const root = ref.current;
     let context: gsap.Context | undefined;
     let reveal: (() => void) | undefined;
     const arm = () => {
-      const root = ref.current;
       if (root && reveal) root.removeEventListener('focusin', reveal);
       reveal = undefined;
       context?.revert();
@@ -75,7 +75,6 @@ export function ProjectList({
     const stop = watchFlow(arm);
     return () => {
       stop();
-      const root = ref.current;
       if (root && reveal) root.removeEventListener('focusin', reveal);
       context?.revert();
     };

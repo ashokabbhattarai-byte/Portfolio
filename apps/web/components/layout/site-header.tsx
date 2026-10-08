@@ -1,5 +1,6 @@
 'use client';
 import { useContext, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import gsap from 'gsap';
 import { TransitionLink } from '@/components/motion/transition-link';
@@ -103,9 +104,18 @@ export function SiteHeader({
         <TransitionLink
           href="/"
           className="wordmark"
-          aria-label={`ab. ${name}, home`}
+          aria-label={`${name}, home`}
         >
-          <span className="mark">ab.</span>
+          <span className="mark">
+            <Image
+              src="/favicon-96x96.png"
+              alt={`${name} portrait`}
+              width={36}
+              height={36}
+              priority
+              className="mark-avatar"
+            />
+          </span>
           <span>{name}</span>
         </TransitionLink>
         <nav className="desktop-nav" aria-label="Main navigation">

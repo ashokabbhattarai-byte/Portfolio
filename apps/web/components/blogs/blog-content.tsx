@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { extractHeadings, slugify } from '@/lib/blog-utils';
-import { travels, watchFlow } from '@/components/motion/flow';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -160,6 +159,10 @@ function mdToHtml(md: string, imgFallback = 'Article image'): string {
       }
       const level = hm[1].length;
       const text = hm[2].trim();
+      // Skip top-level H1 from markdown as the page hero already renders the title
+      if (level === 1) {
+        continue;
+      }
       const id =
         level === 2 || level === 3
           ? (headings[headingIndex++]?.id ?? slugify(text))
@@ -262,59 +265,7 @@ export function BlogContent({
       table.replaceWith(wrap);
       wrap.appendChild(table);
     });
-    let cleanup: (() => void) | void;
-    const arm = () => {
-      const node = ref.current;
-      if (!node || !travels()) return;
-      const children = Array.from(
-        node.querySelectorAll<HTMLElement>(
-          ':scope > p, :scope > h2, :scope > h3, :scope > h4, :scope > ul, :scope > ol, :scope > blockquote, :scope > pre, :scope > figure, :scope > hr, :scope > .blog-table-wrap',
-        ),
-      );
-      if (children.length === 0) return;
-      gsap.set(children, { y: 34, opacity: 0 });
-      const triggers = ScrollTrigger.batch(children, {
-        start: 'top 94%',
-        once: true,
-        onEnter: (batch) =>
-          gsap.to(batch, {
-            y: 0,
-            opacity: 1,
-            duration: 0.85,
-            ease: 'power3.out',
-            stagger: 0.08,
-            overwrite: 'auto',
-          }),
-      });
-      const cleanups = children.map((element) => {
-        const reveal = () =>
-          gsap.to(element, {
-            y: 0,
-            opacity: 1,
-            duration: 0.45,
-            ease: 'power3.out',
-            overwrite: 'auto',
-          });
-        element.addEventListener('focusin', reveal);
-        return () => element.removeEventListener('focusin', reveal);
-      });
-      ScrollTrigger.refresh();
-      return () => {
-        cleanups.forEach((fn) => fn());
-        triggers.forEach((trigger) => trigger.kill());
-        gsap.set(children, { clearProps: 'all' });
-      };
-    };
-    const rearm = () => {
-      if (typeof cleanup === 'function') cleanup();
-      cleanup = arm();
-    };
-    rearm();
-    const stop = watchFlow(rearm);
-    return () => {
-      stop();
-      if (typeof cleanup === 'function') cleanup();
-    };
+    // Content is kept fully visible and legible for peak readability and SEO.
   }, [html]);
   return (
     <>

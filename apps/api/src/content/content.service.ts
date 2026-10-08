@@ -1,6 +1,6 @@
 import { blogInclude, blogWire, publicBlogWhere } from '../blogs/blogs.service';
 import { Injectable } from '@nestjs/common';
-import type { SiteContent } from '@portfolio/types';
+import type { AdminStats, SiteContent } from '@portfolio/types';
 import { PrismaService } from '../prisma/prisma.service';
 
 function toWireCategory(
@@ -18,6 +18,57 @@ export class ContentService {
   // Share only in-flight reads. A completed result must not survive a CMS
   // mutation and re-populate Next's freshly invalidated cache with stale data.
   private pending: Promise<SiteContent> | null = null;
+
+  async getAdminStats(): Promise<AdminStats> {
+    const [counts, profileRow] = await Promise.all([
+      this.prisma.$queryRawUnsafe<
+        [
+          {
+            projects: number;
+            blogs: number;
+            media: number;
+            experience: number;
+            skills: number;
+            education: number;
+            certifications: number;
+          },
+        ]
+      >(`
+        SELECT
+          (SELECT COUNT(*)::int FROM projects) AS projects,
+          (SELECT COUNT(*)::int FROM blogs WHERE "deletedAt" IS NULL) AS blogs,
+          (SELECT COUNT(*)::int FROM media_assets) AS media,
+          (SELECT COUNT(*)::int FROM experience) AS experience,
+          (SELECT COUNT(*)::int FROM skills) AS skills,
+          (SELECT COUNT(*)::int FROM education) AS education,
+          (SELECT COUNT(*)::int FROM certifications) AS certifications
+      `),
+      this.prisma.profile.findFirst({
+        select: { name: true, role: true, email: true },
+      }),
+    ]);
+
+    const stats = counts[0] ?? {
+      projects: 0,
+      blogs: 0,
+      media: 0,
+      experience: 0,
+      skills: 0,
+      education: 0,
+      certifications: 0,
+    };
+
+    return {
+      projects: Number(stats.projects),
+      blogs: Number(stats.blogs),
+      media: Number(stats.media),
+      experience: Number(stats.experience),
+      skills: Number(stats.skills),
+      education: Number(stats.education),
+      certifications: Number(stats.certifications),
+      profile: profileRow,
+    };
+  }
 
   async getMeta(): Promise<{
     updatedAt: string | null;

@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { ContactFooter } from '@/components/layout/contact-footer';
 import { ResumeLinks } from '@/components/ui/resume-links';
 import { Reveal } from '@/components/motion/reveal';
@@ -7,6 +6,7 @@ import { TrackView } from '@/components/analytics/track-view';
 import { AboutExperience } from '@/components/about/about-experience';
 import { AboutSkills } from '@/components/about/about-skills';
 import { AboutEducation } from '@/components/about/about-education';
+import { PremiumPortrait } from '@/components/ui/premium-portrait';
 import {
   getCertifications,
   getEducation,
@@ -130,11 +130,13 @@ export default async function About() {
           </p>
         </div>
         <section className="about-intro" aria-labelledby="about-intro-title">
-          <div className="about-photo">
-            <Image
-              src="/assets/hero-portrait.webp"
+          <div className="about-photo-wrap">
+            <PremiumPortrait
+              src="/assets/about-portrait.webp"
               alt={`${profile.name}, ${profile.role} based in ${profile.location}`}
-              fill
+              label="ASHOK BHATTARAI"
+              idLabel={`ID: AB_BIO · ${country.toUpperCase()}`}
+              priority
               sizes="(max-width: 700px) 100vw, 45vw"
             />
           </div>

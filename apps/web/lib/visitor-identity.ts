@@ -1,5 +1,6 @@
 let memoryVisitor: string | undefined;
-function resolveVisitorId() {
+
+function resolveVisitorId(): string {
   try {
     const key = 'portfolio-visitor-v2';
     const stored = localStorage.getItem(key);
@@ -20,8 +21,9 @@ function resolveVisitorId() {
 
 /** Serialize identity creation across all engagement requests and tabs. */
 export async function visitorId(): Promise<string> {
-  if (navigator.locks)
+  if (typeof navigator !== 'undefined' && navigator.locks) {
     return navigator.locks.request('portfolio-visitor-v2', resolveVisitorId);
+  }
   return resolveVisitorId();
 }
 

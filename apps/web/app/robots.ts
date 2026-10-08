@@ -5,19 +5,47 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/about', '/projects', '/blog', '/contact'],
+        allow: [
+          '/',
+          '/about',
+          '/projects',
+          '/blog',
+          '/contact',
+          '/favicon.ico',
+          '/favicon-*.png',
+          '/apple-touch-icon.png',
+          '/assets/',
+        ],
         disallow: [
           '/admin-252755/',
           '/admin/',
           '/api/',
-          '/_next/',
           '/assets/ashok-bhattarai-resume.pdf',
         ],
       },
       {
         userAgent: 'Googlebot',
-        allow: ['/', '/about', '/projects', '/blog', '/contact'],
+        allow: [
+          '/',
+          '/about',
+          '/projects',
+          '/blog',
+          '/contact',
+          '/favicon.ico',
+          '/favicon-*.png',
+          '/apple-touch-icon.png',
+          '/assets/',
+        ],
         disallow: ['/admin-252755/', '/admin/', '/api/'],
+      },
+      {
+        userAgent: 'Googlebot-Image',
+        allow: [
+          '/favicon.ico',
+          '/favicon-*.png',
+          '/apple-touch-icon.png',
+          '/assets/',
+        ],
       },
       {
         userAgent: 'GPTBot',

@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
@@ -24,21 +25,11 @@ export const MotionContext = createContext<{
 const covered = 'M0,0 H100 V100 H0 Z';
 const lifting = 'M0,0 H100 V58 C78,104 22,104 0,58 Z';
 const arriving = 'M0,42 C22,-4 78,-4 100,42 V100 H0 Z';
-const greetings = [
-  'Hello',
-  'Bonjour',
-  'नमस्ते',
-  'Hola',
-  'Ciao',
-  'Olá',
-  'こんにちは',
-  'Hallo',
-  'Namaste',
-];
-const cadence = 190;
-const introBudget = 1500;
-const minimumHold = 570;
-const calmHold = 620;
+const greetings = ['Hello', 'नमस्ते'];
+const cadence = 420;
+const introBudget = 1400;
+const minimumHold = 840;
+const calmHold = 840;
 /* Components that animate on reveal read this to know whether the curtain is
    still up, so their entrance is never spent behind it. */
 const stage = (value: 'intro' | 'ready') => {
@@ -67,6 +58,7 @@ export function MotionProvider({
   const front = useRef<SVGPathElement>(null);
   const trail = useRef<HTMLDivElement>(null);
   const trailShape = useRef<SVGPathElement>(null);
+  const curtainBody = useRef<HTMLDivElement>(null);
   const caption = useRef<HTMLSpanElement>(null);
   const lenis = useRef<Lenis | null>(null);
   const busy = useRef(false);
@@ -171,7 +163,7 @@ export function MotionProvider({
         0.035,
       )
       .to(
-        caption.current,
+        curtainBody.current,
         { yPercent: -60, opacity: 0, duration: 0.4, ease: 'glide' },
         0,
       );
@@ -277,6 +269,7 @@ export function MotionProvider({
         yPercent: 0,
         opacity: 1,
       });
+      gsap.set(curtainBody.current, { yPercent: 0, opacity: 1 });
       watchdog.current = setTimeout(() => {
         pending.current = null;
         reveal();
@@ -326,7 +319,7 @@ export function MotionProvider({
         yPercent: 118,
         opacity: 1,
       });
-      gsap.set(caption.current, { yPercent: 0, opacity: 0 });
+      gsap.set(curtainBody.current, { yPercent: 0, opacity: 0 });
       cover
         .to(trail.current, { yPercent: 0, duration: 0.62, ease: 'curtain' }, 0)
         .to(
@@ -341,7 +334,7 @@ export function MotionProvider({
         )
         .add(() => say(destination(href), true), 0.34)
         .to(
-          caption.current,
+          curtainBody.current,
           { opacity: 1, duration: 0.25, ease: 'none' },
           0.34,
         );
@@ -364,9 +357,28 @@ export function MotionProvider({
         <svg viewBox="0 0 100 100" preserveAspectRatio="none">
           <path ref={front} d={covered} />
         </svg>
-        <span ref={caption} suppressHydrationWarning>
-          • Hello
-        </span>
+        <div ref={curtainBody} className="curtain-body">
+          <div className="curtain-loader">
+            <div className="curtain-loader-ring" aria-hidden="true" />
+            <div className="curtain-loader-avatar">
+              <Image
+                src="/favicon-96x96.png"
+                alt="Ashok Bhattarai"
+                width={56}
+                height={56}
+                priority
+                className="curtain-loader-img"
+              />
+            </div>
+          </div>
+          <span
+            ref={caption}
+            className="curtain-caption"
+            suppressHydrationWarning
+          >
+            • Hello
+          </span>
+        </div>
       </div>
     </MotionContext.Provider>
   );

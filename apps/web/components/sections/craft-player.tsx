@@ -2,7 +2,7 @@
 
 import { Player, type PlayerRef } from '@remotion/player';
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from 'remotion';
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import '@fontsource-variable/geist';
 
 type FilmProps = { variant: 'process' | 'writing' };

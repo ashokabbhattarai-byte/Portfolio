@@ -27,8 +27,7 @@ export function TableOfContents({ headings }: { headings: TocItem[] }) {
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, headings]);
 
   useEffect(() => {
     let cleanup: (() => void) | void;
@@ -38,11 +37,11 @@ export function TableOfContents({ headings }: { headings: TocItem[] }) {
       const items = node.querySelectorAll('li');
       if (items.length === 0) return;
       const tween = gsap.from(items, {
-        y: 16,
+        y: 12,
         opacity: 0,
-        duration: 0.6,
+        duration: 0.5,
         ease: 'power3.out',
-        stagger: 0.06,
+        stagger: 0.05,
       });
       return () => {
         tween.kill();
@@ -59,24 +58,113 @@ export function TableOfContents({ headings }: { headings: TocItem[] }) {
       stop();
       if (typeof cleanup === 'function') cleanup();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
+
   return (
     <nav ref={ref} aria-label="On this page" className="toc-nav">
-      <style>{`.toc-label{font-size:12px !important;letter-spacing:0.16em !important;font-weight:600 !important;color:color-mix(in srgb, var(--accent) 60%, transparent) !important;display:flex;align-items:center;gap:10px;}
-.toc-label::before{content:'';width:28px;height:2px;border-radius:999px;background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, transparent), var(--highlight));display:inline-block;}
-.article-sidebar .toc-link{min-height:44px;display:flex;align-items:center;font-size:15px;border-left:2px solid transparent;line-height:1.5;transition:color 0.3s ease, border-color 0.3s ease, background 0.3s ease;}
-.article-sidebar .toc-link:hover{color:color-mix(in srgb, var(--accent) 60%, transparent);border-left-color:var(--accent);background:linear-gradient(90deg, color-mix(in srgb, var(--highlight) calc(0.14 * 100%), transparent), transparent);}
-.article-sidebar .toc-link[aria-current='true']{color:color-mix(in srgb, var(--accent) 60%, transparent);border-left-color:color-mix(in srgb, var(--accent) 60%, transparent);background:linear-gradient(90deg, color-mix(in srgb, var(--highlight) calc(0.18 * 100%), transparent), transparent);}
-.article-sidebar li.toc-sub{padding-left:28px;}
-.article-sidebar li.toc-sub .toc-link{font-size:14px;}
-@media (max-width: 800px){
-.toc-list{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-left:0 !important;padding-bottom:8px;width:100%;max-width:100%;}
-.toc-list::-webkit-scrollbar{display:none;}
-.toc-list li{flex-shrink:0;}
-.toc-list li.toc-sub{padding-left:0;}
-.article-sidebar .toc-link{min-height:40px;border:1px solid rgba(82,119,71,0.25);border-left:1px solid rgba(82,119,71,0.25);border-radius:999px;padding:6px 14px;white-space:nowrap;font-size:13.5px;color:color-mix(in srgb, var(--accent) 60%, transparent);background:color-mix(in srgb, var(--highlight) calc(0.12 * 100%), transparent);}
-.article-sidebar .toc-link[aria-current='true']{background:color-mix(in srgb, var(--accent) 60%, transparent);color:var(--paper);border-color:color-mix(in srgb, var(--accent) 60%, transparent);}
+      <style>{`.toc-nav {
+  display: flex;
+  flex-direction: column;
+}
+.toc-label {
+  font-size: 11.5px !important;
+  letter-spacing: 0.16em !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  color: var(--accent) !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+.toc-label::before {
+  content: '';
+  width: 22px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  display: inline-block;
+}
+.toc-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-left: 1px solid var(--line);
+}
+.toc-list li {
+  list-style: none !important;
+}
+.toc-link {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  font-size: 13.5px;
+  border-left: 2px solid transparent;
+  padding: 6px 0 6px 14px;
+  margin-left: -1px;
+  line-height: 1.45;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.toc-link:hover {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent);
+}
+.toc-link[aria-current='true'] {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 550;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent);
+}
+li.toc-sub {
+  padding-left: 16px;
+}
+li.toc-sub .toc-link {
+  font-size: 12.5px;
+}
+@media (max-width: 1024px) {
+  .toc-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-left: 0 !important;
+    padding-bottom: 8px;
+    width: 100%;
+    max-width: 100%;
+  }
+  .toc-list::-webkit-scrollbar {
+    display: none;
+  }
+  .toc-list li {
+    flex-shrink: 0;
+  }
+  li.toc-sub {
+    padding-left: 0;
+  }
+  .toc-link {
+    min-height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 14px;
+    white-space: nowrap;
+    font-size: 13px;
+    margin-left: 0;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.65);
+  }
+  .toc-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .toc-link[aria-current='true'] {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+  }
 }`}</style>
       <p className="toc-label">On this page</p>
       <ol className="toc-list">
@@ -98,13 +186,6 @@ export function TableOfContents({ headings }: { headings: TocItem[] }) {
                 const target = document.getElementById(heading.id);
                 if (!target) return;
                 event.preventDefault();
-                // Lenis also listens for anchors at window level; scroll only once.
-                event.stopPropagation();
-                window.history.replaceState(
-                  window.history.state,
-                  '',
-                  `#${encodeURIComponent(heading.id)}`,
-                );
                 scrollToSection(target);
               }}
             >

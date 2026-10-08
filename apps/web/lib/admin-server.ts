@@ -16,6 +16,7 @@ import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type {
+  AdminStats,
   AuthUser,
   Blog,
   Certification,
@@ -29,7 +30,10 @@ import type {
 import { loginUrl } from './auth';
 
 const API_ORIGIN = (
-  process.env.API_URL ?? 'https://api.ashokbhattarai1.com.np'
+  process.env.API_URL ||
+  (process.env.NODE_ENV === 'development'
+    ? 'http://127.0.0.1:4000'
+    : 'https://api.ashokbhattarai1.com.np')
 ).replace(/\/+$/, '');
 
 /** The API may serialise these; the wire types do not promise them. */
@@ -112,6 +116,8 @@ export const getCertifications = () =>
   serverGet<PageResult<Certification & Timestamped>>(
     '/certifications/admin/search',
   );
+export const getAdminStats = () =>
+  serverGet<AdminStats>('/content/admin/stats');
 export const getMedia = () => serverGet<PageResult<MediaAsset>>('/media');
 
 /** A 401 here means the cookie died between the proxy's check and this fetch,

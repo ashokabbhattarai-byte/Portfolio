@@ -1,15 +1,9 @@
 import type { NextConfig } from 'next';
-const apiUrl = process.env.API_URL ?? 'https://api.ashokbhattarai1.com.np';
-const supabaseHost = (() => {
-  try {
-    const u =
-      process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-    return new URL(u).hostname || undefined;
-  } catch {
-    return undefined;
-  }
-})();
-
+const apiUrl =
+  process.env.API_URL ||
+  (process.env.NODE_ENV === 'development'
+    ? 'http://127.0.0.1:4000'
+    : 'https://api.ashokbhattarai1.com.np');
 const nextConfig: NextConfig = {
   /* Both dev overlays default to the bottom-left corner, so Next's route badge
      landed on top of the React Query devtools button — the stack read as one
@@ -17,7 +11,6 @@ const nextConfig: NextConfig = {
      get a corner each. Dev only; neither ships to production. */
   devIndicators: { position: 'bottom-right' },
   images: {
-    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: '**' },
       { protocol: 'http', hostname: '**' },

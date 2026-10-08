@@ -101,31 +101,64 @@ export default async function Home() {
           data-interlude
           aria-labelledby="personal-title"
         >
-          <div className={styles.portraitStrip} data-portrait-window>
-            <Image
-              src="/assets/secondary-wide.webp"
-              alt={`${profile.name} outdoors in Lalitpur, Nepal`}
-              fill
-              sizes="(max-width: 760px) 90vw, 50vw"
-            />
-            <span className={styles.portraitCaption}>
-              ASHOK BHATTARAI <span>LALITPUR, NEPAL ↗</span>
-            </span>
-          </div>
           <div className={styles.personalCopy} data-landing-reveal>
-            <p>A person behind every project.</p>
+            <div className={styles.eyebrowBadge}>
+              <span className={styles.eyebrowDot} aria-hidden="true" />
+              <span>A PERSON BEHIND EVERY PROJECT</span>
+            </div>
             <h2 id="personal-title">
               Curiosity first.
               <br />
-              Craft, always.
+              <span className={styles.highlightText}>Craft, always.</span>
             </h2>
-            <p>
+            <p className={styles.personalLead}>
               From the first question to the final detail, I care about how
-              software feels to the people who use it.
+              software feels to the people who use it. Building reliable AI
+              products and responsive full-stack web experiences from Kathmandu
+              to the world.
             </p>
-            <TransitionLink href="/about">
-              Get to know me <span aria-hidden="true">↗</span>
-            </TransitionLink>
+            <div className={styles.personalGrid}>
+              <div className={styles.personalGridItem}>
+                <span className={styles.gridTag}>01 / Impact</span>
+                <h4>Applied AI & Systems</h4>
+                <p>
+                  Architecting SuchanaAI to make public notice information
+                  instantly searchable across Nepal.
+                </p>
+              </div>
+              <div className={styles.personalGridItem}>
+                <span className={styles.gridTag}>02 / Discipline</span>
+                <h4>Full-Stack & QA</h4>
+                <p>
+                  Engineered with end-to-end type safety, fluid 60fps motion,
+                  and accessible responsive interfaces.
+                </p>
+              </div>
+            </div>
+            <div className={styles.personalActions}>
+              <TransitionLink href="/about" className={styles.ctaPrimary}>
+                Get to know me <span aria-hidden="true">↗</span>
+              </TransitionLink>
+              <TransitionLink href="/projects" className={styles.ctaSecondary}>
+                View selected work <span aria-hidden="true">→</span>
+              </TransitionLink>
+            </div>
+          </div>
+          <div className={styles.portraitStrip} data-portrait-window>
+            <Image
+              src="/assets/interlude-portrait.webp"
+              alt={`${profile.name} presenting SuchanaAI research at Lord Buddha Education Foundation`}
+              fill
+              sizes="(max-width: 760px) 92vw, (max-width: 1200px) 45vw, 460px"
+              className={styles.interludePhoto}
+            />
+            <div className={styles.portraitOverlay} aria-hidden="true" />
+            <span className={styles.portraitCaption}>
+              <span className={styles.captionName}>ASHOK BHATTARAI</span>
+              <span className={styles.captionMeta}>
+                RESEARCH & ENGINEERING ↗
+              </span>
+            </span>
           </div>
         </section>
         <FeaturedBlogs />

@@ -9,15 +9,23 @@ import { TextAreaField, TextField } from '@/components/admin/fields';
 import { useAdminForm } from '@/components/admin/use-admin-form';
 type Row = Skill & { updatedAt?: string };
 const empty: Omit<Skill, 'id'> = { name: '', items: '', position: 0 };
+import { useQueryClient } from '@tanstack/react-query';
+import { qk } from '@/lib/query/keys';
+
 export function SkillsClient({ initial }: { initial: PageResult<Row> }) {
   const router = useRouter();
+  const qc = useQueryClient();
   const list = usePagedList('skills', initial, adminApi.skills.search);
   const rows = list.rows;
   const [actionError, setActionError] = useState('');
   const [editing, setEditing] = useState<Row | null>(null);
   const [creating, setCreating] = useState(false);
   async function reload() {
-    await list.refetch();
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: qk.skills() }),
+      qc.invalidateQueries({ queryKey: qk.siteContent() }),
+      list.refetch(),
+    ]);
     router.refresh();
   }
   async function remove(id: string) {

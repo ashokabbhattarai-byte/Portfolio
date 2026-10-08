@@ -42,6 +42,7 @@ export function BlogsClient({ initial }: { initial: PageResult<BlogSummary> }) {
     await Promise.all([
       qc.invalidateQueries({ queryKey: qk.blogs() }),
       qc.invalidateQueries({ queryKey: qk.siteContent() }),
+      list.refetch(),
     ]);
     router.refresh();
   }

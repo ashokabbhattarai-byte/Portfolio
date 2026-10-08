@@ -1,6 +1,5 @@
-import { notFound, redirect } from 'next/navigation';
-import { getSignedInUser, getBlog } from '@/lib/admin-server';
-import { loginUrl } from '@/lib/auth';
+import { notFound } from 'next/navigation';
+import { getBlog, loadAdminPage } from '@/lib/admin-server';
 import { AdminShell } from '../../../admin-shell';
 import { BlogAnalyticsClient } from './blog-analytics-client';
 
@@ -10,13 +9,14 @@ export default async function BlogAnalyticsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const me = await getSignedInUser();
-  if (!me.ok) redirect(loginUrl(`/admin-252755/analytics/blogs/${id}`));
-  const blog = await getBlog(id);
+  const { user: me, data: blog } = await loadAdminPage(
+    `/admin-252755/analytics/blogs/${id}`,
+    () => getBlog(id),
+  );
   if (!blog.ok) notFound();
 
   return (
-    <AdminShell user={me.data} current="/admin-252755/analytics">
+    <AdminShell user={me} current="/admin-252755/analytics">
       <div className="adm-head">
         <div>
           <span className="adm-eyebrow">Analytics · blog</span>

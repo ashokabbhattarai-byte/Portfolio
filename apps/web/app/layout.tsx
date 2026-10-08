@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import localFont from 'next/font/local';
 import { getProfile } from '@/lib/content';
 import { siteUrl } from '@/lib/seo';
 import '@/styles/globals.css';
@@ -22,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
     'Ashok Bhattarai Rumsan',
     'ashokabbhattarai',
     'ashokabbhattaraii',
+    'ashokbhattarai1',
     profile.name,
     `${profile.name} developer`,
     `${profile.name} portfolio`,
@@ -92,6 +92,26 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: '@ashokabbhattarai',
       site: '@ashokabbhattarai',
       images: [`${siteUrl}/opengraph-image`],
+    },
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: '48x48 32x32 16x16' },
+        { url: '/favicon-48x48.png', sizes: '48x48', type: 'image/png' },
+        { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+        { url: '/assets/icon-192.png', sizes: '192x192', type: 'image/png' },
+      ],
+      shortcut: '/favicon.ico',
+      apple: [
+        { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      ],
+      other: [
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '512x512',
+          url: '/assets/icon-512.png',
+        },
+      ],
     },
   };
 }

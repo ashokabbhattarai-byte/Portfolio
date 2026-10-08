@@ -7,8 +7,12 @@ import { FileUploadField } from '@/components/admin/file-upload';
 import { useAdminForm } from '@/components/admin/use-admin-form';
 import { useRouter } from 'next/navigation';
 
+import { useQueryClient } from '@tanstack/react-query';
+import { qk } from '@/lib/query/keys';
+
 export function ProfileClient({ initial }: { initial: Profile }) {
   const router = useRouter();
+  const qc = useQueryClient();
   const form = useAdminForm<Profile>({
     initial,
     validate: (v) => {
@@ -21,6 +25,10 @@ export function ProfileClient({ initial }: { initial: Profile }) {
     },
     submit: async (values) => {
       await adminApi.profile.update(values);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: qk.profile() }),
+        qc.invalidateQueries({ queryKey: qk.siteContent() }),
+      ]);
       router.refresh();
     },
   });

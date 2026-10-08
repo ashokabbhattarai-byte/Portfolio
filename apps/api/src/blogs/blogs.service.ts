@@ -141,6 +141,7 @@ export class BlogsService {
         orderBy: [orderBy, { id: 'asc' }],
         skip: (q.page - 1) * q.limit,
         take: q.limit,
+        relationLoadStrategy: 'join',
         select: {
           id: true,
           title: true,

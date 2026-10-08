@@ -1,89 +1,65 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import {
-  getBlogs,
-  getCertifications,
-  getEducation,
-  getExperience,
-  getMedia,
-  getProfile,
-  getProjects,
-  getSignedInUser,
-  getSkills,
-} from '@/lib/admin-server';
+import { getAdminStats, getSignedInUser } from '@/lib/admin-server';
 import { loginUrl } from '@/lib/auth';
 import { AdminShell } from './admin-shell';
 
 export default async function AdminDashboard() {
-  const me = await getSignedInUser();
+  const [me, statsRes] = await Promise.all([
+    getSignedInUser(),
+    getAdminStats(),
+  ]);
+
   if (!me.ok) redirect(loginUrl('/admin-252755'));
 
-  const [
-    projects,
-    blogs,
-    media,
-    experience,
-    skills,
-    education,
-    certifications,
-    profile,
-  ] = await Promise.all([
-    getProjects(),
-    getBlogs(),
-    getMedia(),
-    getExperience(),
-    getSkills(),
-    getEducation(),
-    getCertifications(),
-    getProfile(),
-  ]);
+  const data = statsRes.ok ? statsRes.data : null;
 
   const stats = [
     {
       label: 'Projects',
-      count: projects.ok ? projects.data.total : '—',
+      count: data ? data.projects : '—',
       href: '/admin-252755/projects',
       icon: '💼',
       hint: 'Case studies & works',
     },
     {
       label: 'Blogs',
-      count: blogs.ok ? blogs.data.total : '—',
+      count: data ? data.blogs : '—',
       href: '/admin-252755/blogs',
       icon: '✍️',
       hint: 'Articles & notes',
     },
     {
       label: 'Media Library',
-      count: media.ok ? media.data.total : '—',
+      count: data ? data.media : '—',
       href: '/admin-252755/media',
       icon: '🖼️',
       hint: 'Optimized CDN assets',
     },
     {
       label: 'Experience',
-      count: experience.ok ? experience.data.total : '—',
+      count: data ? data.experience : '—',
       href: '/admin-252755/experience',
       icon: '🏢',
       hint: 'Career positions',
     },
     {
       label: 'Skills',
-      count: skills.ok ? skills.data.total : '—',
+      count: data ? data.skills : '—',
       href: '/admin-252755/skills',
       icon: '⚡',
       hint: 'Tech & domain stack',
     },
     {
       label: 'Education',
-      count: education.ok ? education.data.total : '—',
+      count: data ? data.education : '—',
       href: '/admin-252755/education',
       icon: '🎓',
       hint: 'Degrees & institutions',
     },
     {
       label: 'Certifications',
-      count: certifications.ok ? certifications.data.total : '—',
+      count: data ? data.certifications : '—',
       href: '/admin-252755/certifications',
       icon: '📜',
       hint: 'Credentials & awards',
@@ -208,15 +184,6 @@ export default async function AdminDashboard() {
                 Auto-refreshed)
               </span>
             </div>
-
-            {profile.ok ? (
-              <div className="adm-session-detail-row">
-                <span className="adm-detail-label">Public Portfolio</span>
-                <span className="adm-detail-value">
-                  {profile.data.name} · {profile.data.role}
-                </span>
-              </div>
-            ) : null}
           </div>
 
           <div
@@ -233,28 +200,14 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      {/* Outage notice if any fetch failed */}
-      {(!projects.ok || !blogs.ok || !experience.ok) && (
+      {/* Outage notice if stats fetch failed */}
+      {!statsRes.ok && (
         <div
           className="adm-panel"
           style={{ borderColor: 'var(--danger)', marginTop: 24 }}
         >
           <h2 style={{ color: 'var(--danger)' }}>API connectivity notice</h2>
-          <p>
-            {[
-              projects,
-              blogs,
-              media,
-              experience,
-              skills,
-              education,
-              certifications,
-              profile,
-            ]
-              .filter((r) => !r.ok)
-              .map((r) => (r as { message: string }).message)
-              .join(' · ')}
-          </p>
+          <p>{statsRes.message}</p>
           <p className="adm-hint">
             The CMS lists will retry automatically. Check that the API backend
             is running on :4000.

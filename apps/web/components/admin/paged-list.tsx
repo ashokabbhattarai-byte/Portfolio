@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { PageResult } from '@portfolio/types';
 import type { BlogSearchParams } from '@/lib/admin-api';
 
+const EMPTY_ROWS: never[] = [];
+
 export function usePagedList<T>(
   key: string,
   initial: PageResult<T> | undefined,
@@ -44,7 +46,7 @@ export function usePagedList<T>(
   }, [query.data, page, pages]);
   return {
     ...query,
-    rows: query.data?.items ?? [],
+    rows: query.data?.items ?? EMPTY_ROWS,
     total,
     pages,
     page,

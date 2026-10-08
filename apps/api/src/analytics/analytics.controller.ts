@@ -72,8 +72,10 @@ export class AnalyticsController {
   @Public()
   @Header('Cache-Control', 'no-store')
   @Get('blog-counts')
-  blogCounts() {
-    return this.analytics.blogCounts();
+  blogCounts(@Headers('x-visitor-id') visitorId?: string) {
+    return this.analytics.blogCounts(
+      visitorId && isUUID(visitorId, '4') ? visitorId : undefined,
+    );
   }
 
   @Public()

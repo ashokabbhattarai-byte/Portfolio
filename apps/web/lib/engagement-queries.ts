@@ -3,13 +3,12 @@ import type { PublicViewCount } from '@portfolio/types';
 import { visitorId } from './visitor-identity';
 
 const policy = {
-  staleTime: 60_000,
+  staleTime: 5_000,
   gcTime: 10 * 60_000,
-  refetchOnWindowFocus: false,
-  refetchOnReconnect: false,
-  // A failed counter should not trigger retries from every card/remount.
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
+  refetchOnMount: true,
   retry: false,
-  retryOnMount: false,
 } as const;
 
 export const blogCountsOptions = () =>
@@ -18,6 +17,8 @@ export const blogCountsOptions = () =>
     queryKey: ['blog-counts'],
     queryFn: async (): Promise<PublicViewCount[]> => {
       const response = await fetch('/api/analytics/blog-counts', {
+        headers: { 'x-visitor-id': await visitorId() },
+        cache: 'no-store',
         signal: AbortSignal.timeout(8000),
       });
       if (!response.ok) throw new Error('Counts unavailable');
@@ -35,7 +36,6 @@ export const publicViewsOptions = (path: string) =>
         {
           headers: { 'x-visitor-id': await visitorId() },
           cache: 'no-store',
-          // Let a brief unmount finish and populate the shared client cache.
           signal: AbortSignal.timeout(8000),
         },
       );

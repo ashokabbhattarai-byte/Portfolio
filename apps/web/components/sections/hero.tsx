@@ -768,7 +768,7 @@ export function Hero({
     <section ref={ref} className={styles.hero} aria-labelledby="hero-title">
       <HeroAtmosphere heroRef={ref} />
       <span className={styles.backdropWord} aria-hidden="true">
-        Engineer.
+        Developer.
       </span>
       <span className={styles.heroOrb} data-hero-orb aria-hidden="true" />
       <span className={styles.heroGrid} data-hero-grid aria-hidden="true" />

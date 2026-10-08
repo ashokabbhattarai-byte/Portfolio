@@ -1,10 +1,5 @@
-import { notFound, redirect } from 'next/navigation';
-import {
-  getBlog,
-  getSignedInUser,
-  redirectIfSignedOut,
-} from '@/lib/admin-server';
-import { loginUrl } from '@/lib/auth';
+import { notFound } from 'next/navigation';
+import { getBlog, loadAdminPage } from '@/lib/admin-server';
 import { AdminShell } from '../../../admin-shell';
 import { BlogEditor } from '@/components/admin/blog-editor';
 
@@ -14,15 +9,15 @@ export default async function EditBlogPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const me = await getSignedInUser();
-  if (!me.ok) redirect(loginUrl(`/admin-252755/blogs/${id}/edit`));
+  const { user: me, data: blog } = await loadAdminPage(
+    `/admin-252755/blogs/${id}/edit`,
+    () => getBlog(id),
+  );
 
-  const blog = await getBlog(id);
-  redirectIfSignedOut(blog, `/admin-252755/blogs/${id}/edit`);
   if (!blog.ok) {
     if (blog.status === 404) notFound();
     return (
-      <AdminShell user={me.data} current="/admin-252755/blogs">
+      <AdminShell user={me} current="/admin-252755/blogs">
         <div className="adm-panel">
           <p style={{ color: 'var(--danger)' }}>{blog.message}</p>
         </div>
@@ -31,7 +26,7 @@ export default async function EditBlogPage({
   }
 
   return (
-    <AdminShell user={me.data} current="/admin-252755/blogs">
+    <AdminShell user={me} current="/admin-252755/blogs">
       <div className="adm-head">
         <div>
           <span className="adm-eyebrow">CMS · blogs</span>

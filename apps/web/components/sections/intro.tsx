@@ -74,10 +74,10 @@ export function Intro({ profile }: { profile: Profile }) {
       <aside className={styles.profile} aria-label={`About ${profile.name}`}>
         <div className={styles.photoWindow}>
           <Image
-            src="/assets/secondary-portrait.webp"
-            alt={`${profile.name} outdoors in Lalitpur, Nepal`}
+            src="/assets/hero-portrait.webp"
+            alt={`${profile.name} — ${profile.role} in ${profile.location}`}
             fill
-            sizes="144px"
+            sizes="76px"
           />
           <span className={styles.statusDot} title="Available for projects" />
         </div>

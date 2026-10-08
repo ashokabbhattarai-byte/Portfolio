@@ -17,15 +17,23 @@ const empty: Omit<Experience, 'id'> = {
   position: 0,
 };
 
+import { useQueryClient } from '@tanstack/react-query';
+import { qk } from '@/lib/query/keys';
+
 export function ExperienceClient({ initial }: { initial: PageResult<Row> }) {
   const router = useRouter();
+  const qc = useQueryClient();
   const list = usePagedList('experience', initial, adminApi.experience.search);
   const rows = list.rows;
   const [actionError, setActionError] = useState('');
   const [editing, setEditing] = useState<Row | null>(null);
   const [creating, setCreating] = useState(false);
   async function reload() {
-    await list.refetch();
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: qk.experience() }),
+      qc.invalidateQueries({ queryKey: qk.siteContent() }),
+      list.refetch(),
+    ]);
     router.refresh();
   }
   async function remove(id: string) {

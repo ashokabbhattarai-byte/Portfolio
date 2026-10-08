@@ -1,0 +1,480 @@
+.articlePage {
+  padding-top: clamp(100px, 11vh, 124px);
+  padding-bottom: clamp(56px, 6vw, 96px);
+  width: 100%;
+}
+
+.shell {
+  width: 100%;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: var(--accent);
+}
+
+.breadcrumbSep {
+  color: var(--line);
+  font-size: 13px;
+}
+
+.breadcrumbCurrent {
+  color: var(--ink);
+  font-weight: 500;
+  max-width: 50ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.heroHeader {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+  width: 100%;
+}
+
+.tagsRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 550;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--highlight) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 999px;
+  padding: 4px 12px;
+  letter-spacing: 0.01em;
+}
+
+.title {
+  font-size: clamp(34px, 4.4vw, 58px);
+  font-weight: 450;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin: 0 0 18px;
+  max-width: 1100px;
+  text-wrap: balance;
+}
+
+.deck {
+  font-size: clamp(17px, 1.25vw, 20.5px);
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 28px;
+  max-width: 78ch;
+}
+
+.metaStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 36px;
+  width: 100%;
+}
+
+.byline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--deep);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  font-size: 13.5px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.bylineInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.authorName {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.authorRole {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.metaRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.metaDot {
+  color: var(--line);
+  font-size: 12px;
+}
+
+.linkedinBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 14px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.linkedinBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #ffffff;
+}
+
+.coverFigure {
+  margin: 0 0 48px;
+  width: 100%;
+}
+
+.coverWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  min-height: 340px;
+  max-height: 580px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: 0 20px 48px rgba(12, 33, 60, 0.12);
+  background: var(--deep);
+}
+
+.coverCaption {
+  font-size: 13.5px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+.bodyGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: clamp(36px, 4.5vw, 68px);
+  align-items: start;
+  width: 100%;
+}
+
+.sidebar {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--muted);
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.backLink:hover {
+  color: var(--accent);
+  transform: translateX(-3px);
+}
+
+.readingColumn {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.readingColumn :global(.blog-prose) {
+  max-width: 100%;
+  width: 100%;
+}
+
+.readingColumn :global(.blog-prose p) {
+  max-width: 82ch;
+  line-height: 1.82;
+  font-size: clamp(17.5px, 1.1vw, 19px);
+  color: var(--ink);
+}
+
+.readingColumn :global(.blog-prose h1),
+.readingColumn :global(.blog-prose h2),
+.readingColumn :global(.blog-prose h3),
+.readingColumn :global(.blog-prose h4) {
+  max-width: 100%;
+}
+
+.readingColumn :global(.blog-prose pre) {
+  max-width: 100%;
+  width: 100%;
+}
+
+.readingColumn :global(.blog-prose .blog-inline-figure),
+.readingColumn :global(.blog-prose img) {
+  max-width: 100%;
+  width: 100%;
+}
+
+.authorCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 28px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  margin-top: 8px;
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.authorCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 30px rgba(12, 33, 60, 0.08);
+}
+
+.authorAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--deep);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.authorContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.authorEyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+}
+
+.authorTitle {
+  font-size: 20px;
+  font-weight: 550;
+  color: var(--ink);
+  margin: 0;
+}
+
+.authorBio {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+}
+
+.authorLink {
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.nextCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 32px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.nextCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 16px 36px rgba(12, 33, 60, 0.08);
+}
+
+.nextEyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+}
+
+.nextTitle {
+  font-size: clamp(20px, 2.4vw, 28px);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: color 0.2s ease;
+}
+
+.nextCard:hover .nextTitle {
+  color: var(--accent);
+}
+
+.nextArrow {
+  font-size: 24px;
+  color: var(--muted);
+  transition:
+    transform 0.25s var(--ease),
+    color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.nextCard:hover .nextArrow {
+  transform: translate(3px, -3px);
+  color: var(--accent);
+}
+
+@media (max-width: 1024px) {
+  .bodyGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .sidebar {
+    order: -1;
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .readingColumn {
+    max-width: 100%;
+  }
+
+  .coverWrapper {
+    aspect-ratio: 16 / 9;
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 768px) {
+  .articlePage {
+    padding-top: clamp(88px, 10vh, 104px);
+  }
+
+  .title {
+    font-size: clamp(28px, 7vw, 38px);
+  }
+
+  .deck {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .metaStrip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+  }
+
+  .metaRight {
+    gap: 12px;
+    font-size: 12.5px;
+  }
+
+  .coverWrapper {
+    aspect-ratio: 16 / 10;
+    min-height: auto;
+    max-height: 280px;
+    border-radius: 16px;
+  }
+
+  .authorCard,
+  .nextCard {
+    padding: 22px 18px;
+    border-radius: 16px;
+  }
+}

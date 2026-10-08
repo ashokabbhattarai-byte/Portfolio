@@ -64,10 +64,10 @@ export function ProjectExplorer({
   /* Mount stagger for the toolbar controls (entries reveal in ProjectList):
      landing entrance language with a focusin fallback for keyboard users. */
   useEffect(() => {
+    const toolbar = toolbarRef.current;
     let context: gsap.Context | undefined;
     let reveal: (() => void) | undefined;
     const arm = () => {
-      const toolbar = toolbarRef.current;
       if (toolbar && reveal) toolbar.removeEventListener('focusin', reveal);
       reveal = undefined;
       context?.revert();
@@ -97,7 +97,6 @@ export function ProjectExplorer({
     const stop = watchFlow(arm);
     return () => {
       stop();
-      const toolbar = toolbarRef.current;
       if (toolbar && reveal) toolbar.removeEventListener('focusin', reveal);
       context?.revert();
     };

@@ -1,0 +1,62 @@
+.blogShell {
+  padding-top: clamp(100px, 11vh, 124px);
+  padding-bottom: clamp(56px, 6vw, 96px);
+}
+
+.pageHeader {
+  margin-bottom: clamp(20px, 2.4vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.labelDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.title {
+  font-size: clamp(34px, 4.2vw, 54px);
+  line-height: 1.08;
+  font-weight: 450;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.lead {
+  font-size: clamp(14.5px, 1.05vw, 16px);
+  line-height: 1.58;
+  color: var(--muted);
+  max-width: 58ch;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .blogShell {
+    padding-top: clamp(88px, 10vh, 104px);
+  }
+
+  .title {
+    font-size: clamp(30px, 7vw, 42px);
+  }
+}

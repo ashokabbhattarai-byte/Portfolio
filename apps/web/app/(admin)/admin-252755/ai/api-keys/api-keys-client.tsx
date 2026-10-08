@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type {
   IssuedPublisherKey,
   PublisherKey,
@@ -37,48 +37,53 @@ function formatDate(value: string | null): string {
 }
 
 export function ApiKeysClient() {
-  const [keys, setKeys] = useState<PublisherKey[]>([]);
   const [scopes, setScopes] = useState<PublisherScopeInfo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [scopesLoading, setScopesLoading] = useState(true);
+  const [actionError, setActionError] = useState('');
   const [issued, setIssued] = useState<IssuedPublisherKey | null>(null);
   const [creating, setCreating] = useState(false);
   const list = usePagedList(
     'publisher-keys',
     undefined,
     adminApi.publisherKeys.search,
-    {},
+    undefined,
     'newest',
   );
-  const refetchKeys = list.refetch;
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [available] = await Promise.all([
-        adminApi.publisherKeys.scopes(),
-        refetchKeys(),
-      ]);
-      setScopes(available);
-      setError('');
-    } catch (caught) {
-      setError(
-        caught instanceof ApiError
-          ? caught.message
-          : 'Keys could not be loaded.',
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [refetchKeys]);
+  const keys = list.rows;
+  const loading = list.isLoading || (scopesLoading && scopes.length === 0);
+  const error =
+    actionError || (list.error instanceof Error ? list.error.message : '');
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    let active = true;
+    adminApi.publisherKeys
+      .scopes()
+      .then((available) => {
+        if (active) {
+          setScopes(available);
+          setScopesLoading(false);
+        }
+      })
+      .catch((caught) => {
+        if (active) {
+          setActionError(
+            caught instanceof ApiError
+              ? caught.message
+              : 'Scopes could not be loaded.',
+          );
+          setScopesLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-  useEffect(() => {
-    setKeys(list.rows);
-  }, [list.rows]);
+  async function refresh() {
+    setActionError('');
+    await list.refetch();
+  }
 
   async function revoke(key: PublisherKey) {
     if (
@@ -92,7 +97,7 @@ export function ApiKeysClient() {
       await adminApi.publisherKeys.revoke(key.id);
       await refresh();
     } catch (caught) {
-      setError(
+      setActionError(
         caught instanceof ApiError
           ? caught.message
           : 'The key could not be revoked.',
@@ -112,7 +117,7 @@ export function ApiKeysClient() {
       setIssued(await adminApi.publisherKeys.rotate(key.id));
       await refresh();
     } catch (caught) {
-      setError(
+      setActionError(
         caught instanceof ApiError
           ? caught.message
           : 'The key could not be rotated.',
